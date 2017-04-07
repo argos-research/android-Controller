@@ -29,6 +29,7 @@ public class SensorModel implements SensorListener, SensorEventListener {
 
     private SensorModel(Context co){
         this.mContext = co.getApplicationContext();
+        //make sure you call this class only from the main activity! TODO fix this
         this.mEventListener = (EventListener) co;
     }
 

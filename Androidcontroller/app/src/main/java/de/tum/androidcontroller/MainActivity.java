@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         //prevent from auto lock
         keepOnScreen();
+        //set max brightness
+        setBrightness(0.8f);
     }
 
     @Override
@@ -105,7 +107,22 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         tv.setText(Float.toString(value));
     }
 
+    /**
+     * Keeps the screen always awake
+     */
     private void keepOnScreen(){
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    /**
+     * Change the phone brightness pragmatically
+     * @param brightness the new brightness. True values are in [0,1]
+     */
+    private void setBrightness(float brightness){
+        if(brightness>1.0f || brightness <= 0.0f)
+            return;
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.screenBrightness = brightness;
+        getWindow().setAttributes(layout);
     }
 }
