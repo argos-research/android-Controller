@@ -1,18 +1,34 @@
 package de.tum.androidcontroller;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import de.tum.androidcontroller.data.SensorData;
+import de.tum.androidcontroller.sensors.EventListener;
+import de.tum.androidcontroller.sensors.SensorListener;
+import de.tum.androidcontroller.sensors.SensorModel;
 
+public class MainActivity extends AppCompatActivity implements EventListener{
+
+    private static final String TAG = "android_controller_tag";
+    private static final boolean logging = true;
+
+    private SensorManager mSensorManager;
+    private SensorListener mSensorListener;
+    //private SensorModel mSensorModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,6 +36,31 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mSensorListener = SensorModel.getInstance(this);
+
+        //get the instance of the sensor manager
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        if(logging)
+            Log.e(TAG, "onCreate");
+
+        //prevent from auto lock
+        keepOnScreen();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mSensorListener.onStart(mSensorManager);
+        if(logging)
+            Log.e(TAG, "onStart");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSensorListener.onDestroy(mSensorManager);
+        if(logging)
+            Log.e(TAG, "onDestroy");
     }
 
     @Override
@@ -42,5 +83,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onAccelerometerChanged(SensorData data) {
+        setTextValue(R.id.accelerometer_value_x,data.getX());
+        setTextValue(R.id.accelerometer_value_y,data.getY());
+        setTextValue(R.id.accelerometer_value_z,data.getZ());
+    }
+
+    @Override
+    public void onGyroChanged(SensorData data) {
+        setTextValue(R.id.gyro_value_x,data.getX());
+        setTextValue(R.id.gyro_value_y,data.getY());
+        setTextValue(R.id.gyro_value_z,data.getZ());
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void setTextValue(int id, float value){
+        TextView tv = (TextView) findViewById(id);
+        tv.setText(Float.toString(value));
+    }
+
+    private void keepOnScreen(){
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 }
