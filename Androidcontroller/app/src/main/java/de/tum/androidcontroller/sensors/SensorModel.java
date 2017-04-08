@@ -5,8 +5,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import de.tum.androidcontroller.data.SensorData;
+
 
 /**
  * Created by konstantin on 07/04/17.
@@ -46,7 +48,7 @@ public class SensorModel implements SensorListener, SensorEventListener {
     }
 
     @Override
-    public void onStart(SensorManager sm) {
+    public void onResume(SensorManager sm) {
         initSensors(sm);
         /*
         * It is not necessary to get accelerometer events at a very high
@@ -63,7 +65,7 @@ public class SensorModel implements SensorListener, SensorEventListener {
     }
 
     @Override
-    public void onDestroy(SensorManager sm) {
+    public void onPause(SensorManager sm) {
         sm.unregisterListener(this);
     }
 

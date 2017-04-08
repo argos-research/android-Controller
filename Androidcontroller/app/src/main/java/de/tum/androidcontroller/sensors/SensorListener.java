@@ -7,6 +7,6 @@ import android.hardware.SensorManager;
  */
 
 public interface SensorListener {
-    public void onStart(SensorManager sm);
-    public void onDestroy(SensorManager sm);
+    public void onResume(SensorManager sm);
+    public void onPause(SensorManager sm);
 }

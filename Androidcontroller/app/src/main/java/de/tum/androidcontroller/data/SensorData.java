@@ -14,6 +14,12 @@ public class SensorData {
     private float y;
     private float z;
 
+    public SensorData(float x, float y, float z){
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
     public SensorData(float x, float y, float z, int decimalDigits){
     //Optional
 //        this.x = MathUtils.toDigitsClean(x,decimalDigits);
