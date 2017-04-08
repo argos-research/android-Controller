@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Android controller</string>
     <string name="action_settings">Settings</string>
+    <string name="headline_accelerometer">Accelerometer</string>
+    <string name="headline_gyro">Gyro</string>
+    <string name="headline_lin_accel">Linear Accelerometer</string>
+    <string name="headline_magnetic">Magnetic field</string>
+    <string name="headline_rot_vector">Rotation Vector</string>
 </resources>

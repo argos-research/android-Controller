@@ -15,128 +15,63 @@
     android:orientation="vertical"
     >
 
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Accelerometer"
-        android:textSize="@dimen/global_headline_text_size"
-        android:gravity="center"/>
+        android:layout_height="match_parent"
+        android:fadingEdge="none"
+        android:fadingEdgeLength="0dp"
+        android:fillViewport="true"
+        android:overScrollMode="never"> <!-- disables the stupid effect on the bottom and on top -->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/fragment_main_default_elements_padding">
+        <!-- Parent linear layout-->
+       <LinearLayout
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="X: "
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="0"/>
-        <TextView
-            android:layout_width="@dimen/fragment_main_value_default_width"
-            android:layout_height="wrap_content"
-            android:id="@+id/accelerometer_value_x"
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="1"/>
 
-        <Space
-            android:layout_width="@dimen/fragment_main_default_space_separator"
-            android:layout_height="match_parent" />
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="horizontal"
+               android:padding="@dimen/fragment_main_default_elements_padding">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Y: "
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="0"/>
-        <TextView
-            android:layout_width="@dimen/fragment_main_value_default_width"
-            android:layout_height="wrap_content"
-            android:id="@+id/accelerometer_value_y"
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="1"/>
+               <include layout="@layout/fragment_sensor_data"
+                   android:id="@+id/content_main_accelerometer"/>
 
-        <Space
-            android:layout_width="@dimen/fragment_main_default_space_separator"
-            android:layout_height="match_parent" />
+               <include layout="@layout/fragment_sensor_data"
+                   android:id="@+id/content_main_gyro"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Z: "
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="0"/>
-        <TextView
-            android:layout_width="@dimen/fragment_main_value_default_width"
-            android:layout_height="wrap_content"
-            android:id="@+id/accelerometer_value_z"
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="1"/>
+           </LinearLayout>
 
-    </LinearLayout>
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="horizontal"
+               android:padding="@dimen/fragment_main_default_elements_padding">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Gyro"
-        android:textSize="@dimen/global_headline_text_size"
-        android:gravity="center"/>
+               <include layout="@layout/fragment_sensor_data"
+                   android:id="@+id/content_main_linear_accelerometer"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/fragment_main_default_elements_padding">
+               <include layout="@layout/fragment_sensor_data"
+                   android:id="@+id/content_main_magnetic_field"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="X: "
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="0"/>
-        <TextView
-            android:layout_width="@dimen/fragment_main_value_default_width"
-            android:layout_height="wrap_content"
-            android:id="@+id/gyro_value_x"
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="1"/>
+           </LinearLayout>
 
-        <Space
-            android:layout_width="@dimen/fragment_main_default_space_separator"
-            android:layout_height="match_parent" />
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="horizontal"
+               android:padding="@dimen/fragment_main_default_elements_padding">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Y: "
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="0"/>
-        <TextView
-            android:layout_width="@dimen/fragment_main_value_default_width"
-            android:layout_height="wrap_content"
-            android:id="@+id/gyro_value_y"
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="1"/>
+               <include layout="@layout/fragment_sensor_data"
+                   android:id="@+id/content_main_rotation_vector"/>
 
-        <Space
-            android:layout_width="@dimen/fragment_main_default_space_separator"
-            android:layout_height="match_parent" />
+           </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Z: "
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="0"/>
-        <TextView
-            android:layout_width="@dimen/fragment_main_value_default_width"
-            android:layout_height="wrap_content"
-            android:id="@+id/gyro_value_z"
-            android:textSize="@dimen/global_normal_text_size"
-            android:layout_weight="1"/>
+       </LinearLayout>
 
-    </LinearLayout>
+    </ScrollView>
+
 
 </LinearLayout>
