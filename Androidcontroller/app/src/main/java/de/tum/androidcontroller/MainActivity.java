@@ -1,24 +1,17 @@
 package de.tum.androidcontroller;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import de.tum.androidcontroller.data.SensorData;
 import de.tum.androidcontroller.sensors.EventListener;
@@ -30,8 +23,14 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     private static final String TAG = "android_controller_tag";
     private static final boolean logging = true;
 
+    //will be assign to true when reset min max is pressed for reseting the values
+    private static boolean shouldReset = false;
+
     private SensorManager mSensorManager;
     private SensorListener mSensorListener;
+
+    //the parent linear layout in the scrollView
+    private LinearLayout mParentLayout;
 
     //Used for holder each included sensor layouts
     private LinearLayout layout_accelerometer;
@@ -71,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     }
 
     private void initLayoutsAndHeadlines(){
+        //init the parent layout
+        mParentLayout                   = (LinearLayout) findViewById(R.id.main_fragment_parent_linear_layout);
+
         //init the included layouts
         layout_accelerometer            = (LinearLayout) findViewById(R.id.content_main_accelerometer);
         layout_gyro                     = (LinearLayout) findViewById(R.id.content_main_gyro);
@@ -132,64 +134,35 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Used for setting custom string format on the screen for each sensor
-     * @param sensorValue the value from the SensorData
-     * @return equal format for each sensor
-     */
-    private String getFormatedValue(float sensorValue){
-        return String.format("%.3f",sensorValue);
-    }
-
     @Override
     public void onAccelerometerChanged(SensorData data) {
-        mAccelerometerValueHolder = (TextView) layout_accelerometer.findViewById(R.id.value_x);
-        mAccelerometerValueHolder.setText(getFormatedValue(data.getX()));
-        mAccelerometerValueHolder = (TextView) layout_accelerometer.findViewById(R.id.value_y);
-        mAccelerometerValueHolder.setText(getFormatedValue(data.getY()));
-        mAccelerometerValueHolder = (TextView) layout_accelerometer.findViewById(R.id.value_z);
-        mAccelerometerValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder);
 
     }
 
+    /**
+     * Because the data is in rad/s I will transform it to degree
+     * in seconds for easier understanding of the output data
+     * @param data the data provided from the sensors listener in rad/s
+     */
     @Override
     public void onGyroChanged(SensorData data) {
-        mGyroValueHolder = (TextView) layout_gyro.findViewById(R.id.value_x);
-        mGyroValueHolder.setText(getFormatedValue(data.getX()));
-        mGyroValueHolder = (TextView) layout_gyro.findViewById(R.id.value_y);
-        mGyroValueHolder.setText(getFormatedValue(data.getY()));
-        mGyroValueHolder = (TextView) layout_gyro.findViewById(R.id.value_z);
-        mGyroValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_gyro,mGyroValueHolder);
     }
 
     @Override
     public void onLinearAccelerometerChanged(SensorData data) {
-        mLinearAccelerometerValueHolder = (TextView) layout_linear_accelerometer.findViewById(R.id.value_x);
-        mLinearAccelerometerValueHolder.setText(getFormatedValue(data.getX()));
-        mLinearAccelerometerValueHolder = (TextView) layout_linear_accelerometer.findViewById(R.id.value_y);
-        mLinearAccelerometerValueHolder.setText(getFormatedValue(data.getY()));
-        mLinearAccelerometerValueHolder = (TextView) layout_linear_accelerometer.findViewById(R.id.value_z);
-        mLinearAccelerometerValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_linear_accelerometer,mLinearAccelerometerValueHolder);
     }
 
     @Override
     public void onMagneticFieldChanged(SensorData data) {
-        mMagneticFieldValueHolder = (TextView) layout_magnetic_field.findViewById(R.id.value_x);
-        mMagneticFieldValueHolder.setText(getFormatedValue(data.getX()));
-        mMagneticFieldValueHolder = (TextView) layout_magnetic_field.findViewById(R.id.value_y);
-        mMagneticFieldValueHolder.setText(getFormatedValue(data.getY()));
-        mMagneticFieldValueHolder = (TextView) layout_magnetic_field.findViewById(R.id.value_z);
-        mMagneticFieldValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_magnetic_field,mMagneticFieldValueHolder);
     }
 
     @Override
     public void onRotationVectorChanged(SensorData data) {
-        mRotationVectorValueHolder = (TextView) layout_rotation_vector.findViewById(R.id.value_x);
-        mRotationVectorValueHolder.setText(getFormatedValue(data.getX()));
-        mRotationVectorValueHolder = (TextView) layout_rotation_vector.findViewById(R.id.value_y);
-        mRotationVectorValueHolder.setText(getFormatedValue(data.getY()));
-        mRotationVectorValueHolder = (TextView) layout_rotation_vector.findViewById(R.id.value_z);
-        mRotationVectorValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_rotation_vector,mRotationVectorValueHolder);
     }
 
     /**
@@ -209,5 +182,99 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         WindowManager.LayoutParams layout = getWindow().getAttributes();
         layout.screenBrightness = brightness;
         getWindow().setAttributes(layout);
+    }
+
+
+    /**
+     * Used for setting custom string format on the screen for each sensor
+     * @param sensorValue the value from the SensorData
+     * @return equal format for each sensor
+     */
+    private String getFormattedValue(float sensorValue){
+        return String.format("%.1f",sensorValue);
+    }
+
+    /**
+     * Instead of doing it for each interface.
+     * @param data the data provided from the callback interface
+     * @param layout the according layout where the data should be provided
+     * @param textView the textView holder of the element
+     */
+    private void setSensorDataToLayout(SensorData data, LinearLayout layout, TextView textView){
+        textView = (TextView) layout.findViewById(R.id.value_x);
+        textView.setText(getFormattedValue(data.getX()));
+        textView = (TextView) layout.findViewById(R.id.value_y);
+        textView.setText(getFormattedValue(data.getY()));
+        textView = (TextView) layout.findViewById(R.id.value_z);
+        textView.setText(getFormattedValue(data.getZ()));
+
+        //set the max and min values
+        setMinMaxValues(data.getX(), layout, textView, R.id.value_min_x, R.id.value_max_x);
+        setMinMaxValues(data.getY(), layout, textView, R.id.value_min_y, R.id.value_max_y);
+        setMinMaxValues(data.getZ(), layout, textView, R.id.value_min_z, R.id.value_max_z);
+    }
+
+    /**
+     * This function sets the min and max of every sensor and every axis
+     * @param in the new value from the sensor data
+     * @param layout the layout of the sensor
+     * @param textView the textview holder of that layout
+     * @param R_id_min the R.id location of the min component
+     * @param R_id_max the R.id location of the max component
+     */
+    private void setMinMaxValues(float in,LinearLayout layout,TextView textView, int R_id_min, int R_id_max){
+        float minValue,maxValue;
+        textView = (TextView) layout.findViewById(R_id_min);
+        minValue = Float.valueOf(textView.getText().toString().equals("") ? "0" : textView.getText().toString());
+        if(in < minValue)
+            textView.setText(getFormattedValue(in));
+
+        textView = (TextView) layout.findViewById(R_id_max);
+        maxValue = Float.valueOf(textView.getText().toString().equals("") ? "0" : textView.getText().toString());
+        if(in > maxValue)
+            textView.setText(getFormattedValue(in));
+    }
+
+    /**
+     * On reset button click
+     * @param view
+     */
+    public void resetMaxMinValues(View view) {
+        LinearLayout subIncludedLayout; //the included layout
+        LinearLayout linearLayoutLevel1; //the included layout
+        TextView keepMemoryLow = null;
+
+        //for more details on the level-ing thing see the comments in content_main.xml
+        for(int level1 = 0; level1 < mParentLayout.getChildCount(); level1++){
+            if(mParentLayout.getChildAt(level1) instanceof LinearLayout){
+                linearLayoutLevel1 = (LinearLayout) mParentLayout.getChildAt(level1);
+                for(int level2 = 0 ; level2 < linearLayoutLevel1.getChildCount() ; level2++){
+                    if(linearLayoutLevel1.getChildAt(level2) instanceof LinearLayout){
+                        //the included layout in the content main
+                        subIncludedLayout = (LinearLayout) linearLayoutLevel1.getChildAt(level2);
+                        resetMaxMinOnLayout(subIncludedLayout, keepMemoryLow);
+                    }
+                }
+            }
+
+        }
+    }
+
+    private void resetMaxMinOnLayout(LinearLayout subIncludedLayout, TextView memoryHelper){
+        //first the min values
+        memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_min_x);
+        memoryHelper.setText(R.string.default_empty_text_view_value);
+        memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_min_y);
+        memoryHelper.setText(R.string.default_empty_text_view_value);
+        memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_min_z);
+        memoryHelper.setText(R.string.default_empty_text_view_value);
+
+        //after that the max values
+        memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_max_x);
+        memoryHelper.setText(R.string.default_empty_text_view_value);
+        memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_max_y);
+        memoryHelper.setText(R.string.default_empty_text_view_value);
+        memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_max_z);
+        memoryHelper.setText(R.string.default_empty_text_view_value);
     }
 }
