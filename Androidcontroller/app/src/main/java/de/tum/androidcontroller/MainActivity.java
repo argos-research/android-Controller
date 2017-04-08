@@ -1,24 +1,15 @@
 package de.tum.androidcontroller;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import de.tum.androidcontroller.data.SensorData;
 import de.tum.androidcontroller.sensors.EventListener;
@@ -137,59 +128,39 @@ public class MainActivity extends AppCompatActivity implements EventListener{
      * @param sensorValue the value from the SensorData
      * @return equal format for each sensor
      */
-    private String getFormatedValue(float sensorValue){
+    private String getFormattedValue(float sensorValue){
         return String.format("%.3f",sensorValue);
     }
 
     @Override
     public void onAccelerometerChanged(SensorData data) {
-        mAccelerometerValueHolder = (TextView) layout_accelerometer.findViewById(R.id.value_x);
-        mAccelerometerValueHolder.setText(getFormatedValue(data.getX()));
-        mAccelerometerValueHolder = (TextView) layout_accelerometer.findViewById(R.id.value_y);
-        mAccelerometerValueHolder.setText(getFormatedValue(data.getY()));
-        mAccelerometerValueHolder = (TextView) layout_accelerometer.findViewById(R.id.value_z);
-        mAccelerometerValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder);
 
     }
 
+    /**
+     * Because the data is in rad/s I will transform it to degree
+     * in seconds for easier understanding of the output data
+     * @param data the data provided from the sensors listener in rad/s
+     */
     @Override
     public void onGyroChanged(SensorData data) {
-        mGyroValueHolder = (TextView) layout_gyro.findViewById(R.id.value_x);
-        mGyroValueHolder.setText(getFormatedValue(data.getX()));
-        mGyroValueHolder = (TextView) layout_gyro.findViewById(R.id.value_y);
-        mGyroValueHolder.setText(getFormatedValue(data.getY()));
-        mGyroValueHolder = (TextView) layout_gyro.findViewById(R.id.value_z);
-        mGyroValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_gyro,mGyroValueHolder);
     }
 
     @Override
     public void onLinearAccelerometerChanged(SensorData data) {
-        mLinearAccelerometerValueHolder = (TextView) layout_linear_accelerometer.findViewById(R.id.value_x);
-        mLinearAccelerometerValueHolder.setText(getFormatedValue(data.getX()));
-        mLinearAccelerometerValueHolder = (TextView) layout_linear_accelerometer.findViewById(R.id.value_y);
-        mLinearAccelerometerValueHolder.setText(getFormatedValue(data.getY()));
-        mLinearAccelerometerValueHolder = (TextView) layout_linear_accelerometer.findViewById(R.id.value_z);
-        mLinearAccelerometerValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_linear_accelerometer,mLinearAccelerometerValueHolder);
     }
 
     @Override
     public void onMagneticFieldChanged(SensorData data) {
-        mMagneticFieldValueHolder = (TextView) layout_magnetic_field.findViewById(R.id.value_x);
-        mMagneticFieldValueHolder.setText(getFormatedValue(data.getX()));
-        mMagneticFieldValueHolder = (TextView) layout_magnetic_field.findViewById(R.id.value_y);
-        mMagneticFieldValueHolder.setText(getFormatedValue(data.getY()));
-        mMagneticFieldValueHolder = (TextView) layout_magnetic_field.findViewById(R.id.value_z);
-        mMagneticFieldValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_magnetic_field,mMagneticFieldValueHolder);
     }
 
     @Override
     public void onRotationVectorChanged(SensorData data) {
-        mRotationVectorValueHolder = (TextView) layout_rotation_vector.findViewById(R.id.value_x);
-        mRotationVectorValueHolder.setText(getFormatedValue(data.getX()));
-        mRotationVectorValueHolder = (TextView) layout_rotation_vector.findViewById(R.id.value_y);
-        mRotationVectorValueHolder.setText(getFormatedValue(data.getY()));
-        mRotationVectorValueHolder = (TextView) layout_rotation_vector.findViewById(R.id.value_z);
-        mRotationVectorValueHolder.setText(getFormatedValue(data.getZ()));
+        setSensorDataToLayout(data,layout_rotation_vector,mRotationVectorValueHolder);
     }
 
     /**
@@ -209,5 +180,20 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         WindowManager.LayoutParams layout = getWindow().getAttributes();
         layout.screenBrightness = brightness;
         getWindow().setAttributes(layout);
+    }
+
+    /**
+     * Instead of doing it for each interface.
+     * @param data the data provided from the callback interface
+     * @param layout the according layout where the data should be provided
+     * @param textView the textView holder of the element
+     */
+    private void setSensorDataToLayout(SensorData data, LinearLayout layout, TextView textView){
+        textView = (TextView) layout.findViewById(R.id.value_x);
+        textView.setText(getFormattedValue(data.getX()));
+        textView = (TextView) layout.findViewById(R.id.value_y);
+        textView.setText(getFormattedValue(data.getY()));
+        textView = (TextView) layout.findViewById(R.id.value_z);
+        textView.setText(getFormattedValue(data.getZ()));
     }
 }
