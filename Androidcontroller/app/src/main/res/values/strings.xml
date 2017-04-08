@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android controller</string>
+    <string name="app_name">Mother of sensors</string>
     <string name="action_settings">Settings</string>
     <string name="headline_accelerometer">Accelerometer</string>
     <string name="headline_gyro">Gyro</string>
