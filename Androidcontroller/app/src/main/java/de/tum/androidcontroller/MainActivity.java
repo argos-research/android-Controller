@@ -240,7 +240,6 @@ public class MainActivity extends AppCompatActivity implements EventListener{
      * @param view
      */
     public void resetMaxMinValues(View view) {
-        StringBuilder sb = new StringBuilder();
         LinearLayout subIncludedLayout; //the included layout
         LinearLayout linearLayoutLevel1; //the included layout
         TextView keepMemoryLow = null;
@@ -259,7 +258,6 @@ public class MainActivity extends AppCompatActivity implements EventListener{
             }
 
         }
-        Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
     }
 
     private void resetMaxMinOnLayout(LinearLayout subIncludedLayout, TextView memoryHelper){
