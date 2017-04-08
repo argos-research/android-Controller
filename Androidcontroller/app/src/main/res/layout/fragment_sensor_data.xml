@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    >
 
     <TextView
         android:layout_width="match_parent"
@@ -30,6 +32,7 @@
             android:layout_width="@dimen/fragment_main_value_default_width"
             android:layout_height="wrap_content"
             android:id="@+id/value_x"
+            android:text="@string/default_empty_text_view_value"
             android:textSize="@dimen/global_normal_text_size"
             android:layout_weight="1"/>
 
@@ -44,6 +47,7 @@
             android:layout_width="@dimen/fragment_main_value_default_width"
             android:layout_height="wrap_content"
             android:id="@+id/value_y"
+            android:text="@string/default_empty_text_view_value"
             android:textSize="@dimen/global_normal_text_size"
             android:layout_weight="1"/>
 
@@ -57,6 +61,111 @@
             android:layout_width="@dimen/fragment_main_value_default_width"
             android:layout_height="wrap_content"
             android:id="@+id/value_z"
+            android:text="@string/default_empty_text_view_value"
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="5dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="min X: "
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="0"/>
+        <TextView
+            android:layout_width="@dimen/fragment_main_value_default_width"
+            android:layout_height="wrap_content"
+            android:id="@+id/value_min_x"
+            android:text="@string/default_empty_text_view_value"
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="1"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="min Y: "
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="0"/>
+        <TextView
+            android:layout_width="@dimen/fragment_main_value_default_width"
+            android:layout_height="wrap_content"
+            android:id="@+id/value_min_y"
+            android:text="@string/default_empty_text_view_value"
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="min Z: "
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="0"/>
+        <TextView
+            android:layout_width="@dimen/fragment_main_value_default_width"
+            android:layout_height="wrap_content"
+            android:id="@+id/value_min_z"
+            android:text="@string/default_empty_text_view_value"
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="2dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="max X: "
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="0"/>
+        <TextView
+            android:layout_width="@dimen/fragment_main_value_default_width"
+            android:layout_height="wrap_content"
+            android:id="@+id/value_max_x"
+            android:text="@string/default_empty_text_view_value"
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="1"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="max Y: "
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="0"/>
+        <TextView
+            android:layout_width="@dimen/fragment_main_value_default_width"
+            android:layout_height="wrap_content"
+            android:id="@+id/value_max_y"
+            android:text="@string/default_empty_text_view_value"
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="max Z: "
+            android:textSize="@dimen/global_normal_text_size"
+            android:layout_weight="0"/>
+        <TextView
+            android:layout_width="@dimen/fragment_main_value_default_width"
+            android:layout_height="wrap_content"
+            android:id="@+id/value_max_z"
+            android:text="@string/default_empty_text_view_value"
             android:textSize="@dimen/global_normal_text_size"
             android:layout_weight="1"/>
 

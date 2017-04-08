@@ -27,46 +27,62 @@
        <LinearLayout
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
-           android:orientation="vertical">
+           android:orientation="vertical"
+           android:id="@+id/main_fragment_parent_linear_layout">
 
-
+           <!-- Linear layout at level 1-->
            <LinearLayout
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                android:orientation="horizontal"
-               android:padding="@dimen/fragment_main_default_elements_padding">
-
+               android:paddingTop="@dimen/fragment_main_default_elements_padding"
+               >
+               <!-- Linear layout inside (level 2) -->
                <include layout="@layout/fragment_sensor_data"
                    android:id="@+id/content_main_accelerometer"/>
-
+               <!-- Linear layout inside (level 2) -->
                <include layout="@layout/fragment_sensor_data"
                    android:id="@+id/content_main_gyro"/>
 
            </LinearLayout>
 
+           <!-- Linear layout at level 1-->
            <LinearLayout
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                android:orientation="horizontal"
-               android:padding="@dimen/fragment_main_default_elements_padding">
+               android:paddingTop="@dimen/fragment_main_default_elements_padding">
 
+               <!-- Linear layout inside (level 2) -->
                <include layout="@layout/fragment_sensor_data"
                    android:id="@+id/content_main_linear_accelerometer"/>
-
+               <!-- Linear layout inside (level 2) -->
                <include layout="@layout/fragment_sensor_data"
                    android:id="@+id/content_main_magnetic_field"/>
 
            </LinearLayout>
 
+           <!-- Linear layout at level 1-->
            <LinearLayout
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                android:orientation="horizontal"
-               android:padding="@dimen/fragment_main_default_elements_padding">
+               android:paddingTop="@dimen/fragment_main_default_elements_padding"
+               android:paddingBottom="@dimen/fragment_main_default_elements_padding">
 
+               <!-- Linear layout inside (level 2) -->
                <include layout="@layout/fragment_sensor_data"
-                   android:id="@+id/content_main_rotation_vector"/>
+                   android:id="@+id/content_main_rotation_vector"
+                   />
 
+               <Button
+                   android:layout_width="wrap_content"
+                   android:paddingTop="@dimen/fragment_main_default_elements_padding"
+                   android:layout_height="match_parent"
+                   android:text="@string/main_content_reset_button"
+                   android:textAllCaps="false"
+                   android:textSize="@dimen/global_normal_text_size"
+                   android:onClick="resetMaxMinValues"/>
            </LinearLayout>
 
        </LinearLayout>
