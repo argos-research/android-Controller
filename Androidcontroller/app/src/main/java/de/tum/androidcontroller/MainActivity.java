@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.codemonkeylabs.fpslibrary.TinyDancer;
+
 import de.tum.androidcontroller.data.SensorData;
 import de.tum.androidcontroller.sensors.EventListener;
 import de.tum.androidcontroller.sensors.SensorListener;
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     private LinearLayout layout_magnetic_field;
     private LinearLayout layout_rotation_vector;
 
-    //Used for holding and presenting each
+    //Used for holding and presenting each and for less memory usage
     private volatile TextView mAccelerometerValueHolder;
     private volatile TextView mGyroValueHolder;
     private volatile TextView mLinearAccelerometerValueHolder;
@@ -53,20 +55,38 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         initLayoutsAndHeadlines();
 
-        mSensorListener = SensorModel.getInstance(this);
+        if(mSensorListener == null){
+            mSensorListener = SensorModel.getInstance(this);
+            Log.e(TAG, "mSensorListener null");
+        }
+
 
         //get the instance of the sensor manager
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        if(mSensorManager == null){
+            Log.e(TAG, "mSensorManager null");
+            mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        }
         if(logging)
             Log.e(TAG, "onCreate");
 
         //prevent from auto lock
         keepOnScreen();
         //set max brightness
-        setBrightness(0.8f);
+        //setBrightness(0.8f);
+
+        //load the FPS widget
+        loadFPSwidget();
+    }
+
+    // Loads the FPS widget https://github.com/friendlyrobotnyc/TinyDancer
+    private void loadFPSwidget(){
+        TinyDancer.create()
+                .redFlagPercentage(.1f) // set red indicator for 10%....different from default
+                .startingXPosition(800)
+                .startingYPosition(0)
+                .show(this);
     }
 
     private void initLayoutsAndHeadlines(){
@@ -97,19 +117,19 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
     }
     @Override
-    protected void onStart() {
-        super.onStart();
-        mSensorListener.onStart(mSensorManager);
+    protected void onResume() {
+        super.onResume();
+        mSensorListener.onResume(mSensorManager);
         if(logging)
             Log.e(TAG, "onStart");
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mSensorListener.onDestroy(mSensorManager);
+    protected void onPause() {
+        super.onPause();
+        mSensorListener.onPause(mSensorManager);
         if(logging)
-            Log.e(TAG, "onDestroy");
+            Log.e(TAG, "onPause");
     }
 
     @Override
@@ -136,33 +156,28 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
     @Override
     public void onAccelerometerChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder);
+        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,1);
 
     }
 
-    /**
-     * Because the data is in rad/s I will transform it to degree
-     * in seconds for easier understanding of the output data
-     * @param data the data provided from the sensors listener in rad/s
-     */
     @Override
     public void onGyroChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_gyro,mGyroValueHolder);
+        setSensorDataToLayout(data,layout_gyro,mGyroValueHolder,1);
     }
 
     @Override
     public void onLinearAccelerometerChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_linear_accelerometer,mLinearAccelerometerValueHolder);
+        setSensorDataToLayout(data,layout_linear_accelerometer,mLinearAccelerometerValueHolder,1);
     }
 
     @Override
     public void onMagneticFieldChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_magnetic_field,mMagneticFieldValueHolder);
+        setSensorDataToLayout(data,layout_magnetic_field,mMagneticFieldValueHolder,1);
     }
 
     @Override
     public void onRotationVectorChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_rotation_vector,mRotationVectorValueHolder);
+        setSensorDataToLayout(data,layout_rotation_vector,mRotationVectorValueHolder,3);
     }
 
     /**
@@ -188,10 +203,18 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     /**
      * Used for setting custom string format on the screen for each sensor
      * @param sensorValue the value from the SensorData
+     * @param decimalDigits the maximal digits to be shown on the screen. They should be in [0,5]
      * @return equal format for each sensor
      */
-    private String getFormattedValue(float sensorValue){
-        return String.format("%.1f",sensorValue);
+    private String getFormattedValue(float sensorValue, int decimalDigits){
+        switch (decimalDigits){
+            case 0: return String.format("%.0f",sensorValue);
+            case 1: return String.format("%.1f",sensorValue);
+            case 2: return String.format("%.2f",sensorValue);
+            case 3: return String.format("%.3f",sensorValue);
+            case 4: return String.format("%.3f",sensorValue);
+            default: return String.format("%.5f",sensorValue);
+        }
     }
 
     /**
@@ -199,19 +222,20 @@ public class MainActivity extends AppCompatActivity implements EventListener{
      * @param data the data provided from the callback interface
      * @param layout the according layout where the data should be provided
      * @param textView the textView holder of the element
+     * @param decimalDigits the maximal digits to be shown on the screen. They should be in [0,5]
      */
-    private void setSensorDataToLayout(SensorData data, LinearLayout layout, TextView textView){
+    private void setSensorDataToLayout(SensorData data, LinearLayout layout, TextView textView, int decimalDigits){
         textView = (TextView) layout.findViewById(R.id.value_x);
-        textView.setText(getFormattedValue(data.getX()));
+        textView.setText(getFormattedValue(data.getX(),decimalDigits));
         textView = (TextView) layout.findViewById(R.id.value_y);
-        textView.setText(getFormattedValue(data.getY()));
+        textView.setText(getFormattedValue(data.getY(),decimalDigits));
         textView = (TextView) layout.findViewById(R.id.value_z);
-        textView.setText(getFormattedValue(data.getZ()));
+        textView.setText(getFormattedValue(data.getZ(),decimalDigits));
 
         //set the max and min values
-        setMinMaxValues(data.getX(), layout, textView, R.id.value_min_x, R.id.value_max_x);
-        setMinMaxValues(data.getY(), layout, textView, R.id.value_min_y, R.id.value_max_y);
-        setMinMaxValues(data.getZ(), layout, textView, R.id.value_min_z, R.id.value_max_z);
+        setMinMaxValues(data.getX(), layout, textView, decimalDigits, R.id.value_min_x, R.id.value_max_x);
+        setMinMaxValues(data.getY(), layout, textView, decimalDigits, R.id.value_min_y, R.id.value_max_y);
+        setMinMaxValues(data.getZ(), layout, textView, decimalDigits, R.id.value_min_z, R.id.value_max_z);
     }
 
     /**
@@ -219,20 +243,21 @@ public class MainActivity extends AppCompatActivity implements EventListener{
      * @param in the new value from the sensor data
      * @param layout the layout of the sensor
      * @param textView the textview holder of that layout
+     * @param decimalDigits the maximal digits to be shown on the screen. They should be in [0,5]
      * @param R_id_min the R.id location of the min component
      * @param R_id_max the R.id location of the max component
      */
-    private void setMinMaxValues(float in,LinearLayout layout,TextView textView, int R_id_min, int R_id_max){
+    private void setMinMaxValues(float in,LinearLayout layout,TextView textView, int decimalDigits, int R_id_min, int R_id_max){
         float minValue,maxValue;
         textView = (TextView) layout.findViewById(R_id_min);
         minValue = Float.valueOf(textView.getText().toString().equals("") ? "0" : textView.getText().toString());
         if(in < minValue)
-            textView.setText(getFormattedValue(in));
+            textView.setText(getFormattedValue(in,decimalDigits));
 
         textView = (TextView) layout.findViewById(R_id_max);
         maxValue = Float.valueOf(textView.getText().toString().equals("") ? "0" : textView.getText().toString());
         if(in > maxValue)
-            textView.setText(getFormattedValue(in));
+            textView.setText(getFormattedValue(in,decimalDigits));
     }
 
     /**
