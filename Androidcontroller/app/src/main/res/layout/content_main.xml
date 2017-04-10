@@ -24,52 +24,88 @@
         android:overScrollMode="never"> <!-- disables the stupid effect on the bottom and on top -->
 
         <!-- Parent linear layout-->
-       <LinearLayout
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/main_fragment_parent_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/fragment_main_default_elements_padding"
+                android:baselineAligned="false">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Speed in km/h: "
+                    android:textSize="@dimen/global_normal_text_size" />
+
+                <TextView
+                    android:id="@+id/content_main_speed"
+                    android:text="100"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:textSize="@dimen/global_normal_text_size" />
+
+                <de.tum.androidcontroller.views.SteeringWheelView
+                    android:id="@+id/steering_wheel_forward"
+                    android:layout_width="25dp"
+                    android:layout_height="200dp"
+                    android:background="@drawable/standard_border"
+                    android:rotation="0" />
+
+                <de.tum.androidcontroller.views.SteeringWheelView
+                    android:id="@+id/steering_wheel_sideways"
+                    android:background="@drawable/standard_border"
+                    android:layout_width="25dp"
+                    android:layout_height="200dp"
+                    android:layout_marginStart="-25dp"
+                    android:rotation="90" />
 
 
-           <LinearLayout
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:orientation="horizontal"
-               android:padding="@dimen/fragment_main_default_elements_padding">
+            </LinearLayout>
 
-               <include layout="@layout/fragment_sensor_data"
-                   android:id="@+id/content_main_accelerometer"/>
+            <!-- Linear layout at level 1-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/fragment_main_default_elements_padding">
+                <!-- Linear layout inside (level 2) -->
+                <include
+                    android:id="@+id/content_main_gyro"
+                    layout="@layout/fragment_sensor_data" />
 
-               <include layout="@layout/fragment_sensor_data"
-                   android:id="@+id/content_main_gyro"/>
+            </LinearLayout>
 
-           </LinearLayout>
+            <!-- Linear layout at level 1-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="@dimen/fragment_main_default_elements_padding"
+                android:paddingTop="@dimen/fragment_main_default_elements_padding">
 
-           <LinearLayout
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:orientation="horizontal"
-               android:padding="@dimen/fragment_main_default_elements_padding">
+                <!-- Linear layout inside (level 2) -->
+                <include
+                    android:id="@+id/content_main_acceleration"
+                    layout="@layout/fragment_sensor_data" />
 
-               <include layout="@layout/fragment_sensor_data"
-                   android:id="@+id/content_main_linear_accelerometer"/>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:onClick="resetMaxMinValues"
+                    android:paddingTop="@dimen/fragment_main_default_elements_padding"
+                    android:text="@string/main_content_reset_button"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/global_normal_text_size" />
+            </LinearLayout>
 
-               <include layout="@layout/fragment_sensor_data"
-                   android:id="@+id/content_main_magnetic_field"/>
 
-           </LinearLayout>
+        </LinearLayout>
 
-           <LinearLayout
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:orientation="horizontal"
-               android:padding="@dimen/fragment_main_default_elements_padding">
-
-               <include layout="@layout/fragment_sensor_data"
-                   android:id="@+id/content_main_rotation_vector"/>
-
-           </LinearLayout>
-
-       </LinearLayout>
 
     </ScrollView>
 
