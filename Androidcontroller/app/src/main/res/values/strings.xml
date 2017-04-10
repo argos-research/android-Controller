@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name">Mother of sensors</string>
     <string name="action_settings">Settings</string>
+
+    <!-- main content -->
     <string name="headline_accelerometer">Accelerometer</string>
     <string name="headline_gyro">Gyro</string>
     <string name="headline_lin_accel">Linear Accelerometer</string>
     <string name="headline_magnetic">Magnetic field</string>
     <string name="headline_rot_vector">Rotation Vector</string>
+    <string name="main_content_reset_button">Reset max/min</string>
+    <string name="default_empty_text_view_value">0.0</string>
 </resources>

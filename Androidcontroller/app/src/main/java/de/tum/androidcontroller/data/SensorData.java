@@ -6,13 +6,20 @@ import android.icu.text.DecimalFormat;
 import de.tum.androidcontroller.utils.MathUtils;
 
 /**
- * Created by konstantin on 07/04/17.
+ * This class will be used for saving the sonsor data
  */
 
 public class SensorData {
+
     private float x;
     private float y;
     private float z;
+
+    public SensorData(float x, float y, float z){
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 
     public SensorData(float x, float y, float z, int decimalDigits){
     //Optional
