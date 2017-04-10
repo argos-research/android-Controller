@@ -13,6 +13,8 @@ public interface EventListener {
      * The accelerometer measures the acceleration force in m/s2 that
      * is applied to a device on all three physical axes (x, y, and z),
      * including the force of gravity.
+     * Here the X axis will be used for acceleration(on forward rotation
+     * the value decreases) and braking(keep decreasing) and the Y axis for steering.
      * @param data the data provided from the sensors listener in m/s2
      */
     void onAccelerometerChanged(SensorData data);
@@ -20,6 +22,10 @@ public interface EventListener {
     /**
      * Measures a device's rate of rotation in rad/s around each of
      * the three physical axes (x, y, and z).
+     * For the app are only the X and Y axis important, where Y measures forward and
+     * backward fast movements ( negative values for backward and positive for forward)
+     * and the X axis measures the left/right fast movements (negative means left and
+     * positive means right).
      * @param data the data provided from the sensors listener in rad/s
      */
     void onGyroChanged(SensorData data);
@@ -30,20 +36,20 @@ public interface EventListener {
      * excluding the force of gravity.
      * @param data the data provided from the sensors listener in m/s2
      */
-    void onLinearAccelerometerChanged(SensorData data);
+    //void onLinearAccelerometerChanged(SensorData data);
 
     /**
      * Measures the ambient geomagnetic field for all
      * three physical axes (x, y, z) in μT.
      * @param data the data provided from the sensors listener in μT
      */
-    void onMagneticFieldChanged(SensorData data);
+    //void onMagneticFieldChanged(SensorData data);
 
     /**
      * Measures the orientation of a device by providing the
      * three elements of the device's rotation vector.
      * @param data the data provided from the sensors listener as a number
      */
-    void onRotationVectorChanged(SensorData data);
+    //void onRotationVectorChanged(SensorData data);
 
 }

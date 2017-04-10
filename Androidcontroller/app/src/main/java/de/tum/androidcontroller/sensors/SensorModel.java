@@ -11,7 +11,7 @@ import de.tum.androidcontroller.data.SensorData;
 
 
 /**
- * Created by konstantin on 07/04/17.
+ * This class is used for taking the sensor data
  */
 
 public class SensorModel implements SensorListener, SensorEventListener {
@@ -42,9 +42,9 @@ public class SensorModel implements SensorListener, SensorEventListener {
     private void initSensors(SensorManager sm){
         mAccelerometer                  =  sm.getDefaultSensor(SensorTypes.accelerometer);
         mGyro                           =  sm.getDefaultSensor(SensorTypes.gyroscope);
-        mLinearAccelerometer            =  sm.getDefaultSensor(SensorTypes.linearAccelerometer);
-        mMagneticField                  =  sm.getDefaultSensor(SensorTypes.magneticField);
-        mRotationVector                 =  sm.getDefaultSensor(SensorTypes.rotationVector);
+        //mLinearAccelerometer            =  sm.getDefaultSensor(SensorTypes.linearAccelerometer);
+        //mMagneticField                  =  sm.getDefaultSensor(SensorTypes.magneticField);
+        //mRotationVector                 =  sm.getDefaultSensor(SensorTypes.rotationVector);
     }
 
     @Override
@@ -59,9 +59,9 @@ public class SensorModel implements SensorListener, SensorEventListener {
         */
         sm.registerListener(this,mAccelerometer,SensorManager.SENSOR_DELAY_GAME);
         sm.registerListener(this,mGyro,SensorManager.SENSOR_DELAY_GAME);
-        sm.registerListener(this,mLinearAccelerometer,SensorManager.SENSOR_DELAY_GAME);
-        sm.registerListener(this,mMagneticField,SensorManager.SENSOR_DELAY_GAME);
-        sm.registerListener(this,mRotationVector,SensorManager.SENSOR_DELAY_GAME);
+        //sm.registerListener(this,mLinearAccelerometer,SensorManager.SENSOR_DELAY_GAME);
+        //sm.registerListener(this,mMagneticField,SensorManager.SENSOR_DELAY_GAME);
+        //sm.registerListener(this,mRotationVector,SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -72,20 +72,11 @@ public class SensorModel implements SensorListener, SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         Sensor sensor = event.sensor;
-        if(sensor.getType() == SensorTypes.accelerometer){
-            mEventListener.onAccelerometerChanged(SensorData.toSensorData(event,DATA_DECIMAL_DIGITS));
-        }
-        else if(sensor.getType() == SensorTypes.gyroscope){
+        if(sensor.getType() == SensorTypes.gyroscope){
             mEventListener.onGyroChanged(SensorData.toSensorData(event,DATA_DECIMAL_DIGITS));
         }
-        else if(sensor.getType() == SensorTypes.linearAccelerometer){
-            mEventListener.onLinearAccelerometerChanged(SensorData.toSensorData(event,DATA_DECIMAL_DIGITS));
-        }
-        else if(sensor.getType() == SensorTypes.magneticField){
-            mEventListener.onMagneticFieldChanged(SensorData.toSensorData(event,DATA_DECIMAL_DIGITS));
-        }
-        else if(sensor.getType() == SensorTypes.rotationVector){
-            mEventListener.onRotationVectorChanged(SensorData.toSensorData(event,DATA_DECIMAL_DIGITS));
+        else if(sensor.getType() == SensorTypes.accelerometer){
+            mEventListener.onAccelerometerChanged(SensorData.toSensorData(event,DATA_DECIMAL_DIGITS));
         }
 
     }

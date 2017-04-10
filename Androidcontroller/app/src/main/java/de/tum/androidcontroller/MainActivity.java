@@ -17,16 +17,15 @@ import com.codemonkeylabs.fpslibrary.TinyDancer;
 
 import de.tum.androidcontroller.data.SensorData;
 import de.tum.androidcontroller.sensors.EventListener;
+import de.tum.androidcontroller.sensors.SensorDataSettings;
 import de.tum.androidcontroller.sensors.SensorListener;
 import de.tum.androidcontroller.sensors.SensorModel;
+import de.tum.androidcontroller.views.SteeringWheelView;
 
 public class MainActivity extends AppCompatActivity implements EventListener{
 
     private static final String TAG = "android_controller_tag";
-    private static final boolean logging = true;
-
-    //will be assign to true when reset min max is pressed for reseting the values
-    private static boolean shouldReset = false;
+    private static final boolean logging = false;
 
     private SensorManager mSensorManager;
     private SensorListener mSensorListener;
@@ -48,6 +47,14 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     private volatile TextView mMagneticFieldValueHolder;
     private volatile TextView mRotationVectorValueHolder;
 
+    private SteeringWheelView steeringWheelForwardView;
+    private SteeringWheelView steeringWheelSidewaysView;
+
+    private SensorData mLocalAccelerationHolder;
+    private SensorData mLocalGyroHolder;
+
+    private Toast mGyroToast;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,17 +64,18 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         initLayoutsAndHeadlines();
 
+        mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
+
         if(mSensorListener == null){
             mSensorListener = SensorModel.getInstance(this);
-            Log.e(TAG, "mSensorListener null");
         }
 
 
         //get the instance of the sensor manager
         if(mSensorManager == null){
-            Log.e(TAG, "mSensorManager null");
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         }
+
         if(logging)
             Log.e(TAG, "onCreate");
 
@@ -89,31 +97,33 @@ public class MainActivity extends AppCompatActivity implements EventListener{
                 .show(this);
     }
 
+    /**
+     * Used for refreshing the toast message from the gyro sensor events
+     * @param message the message to be displayed
+     */
+    private void refreshToast(String message){
+        mGyroToast.setText(message);
+        mGyroToast.show();
+    }
+
     private void initLayoutsAndHeadlines(){
+        //init the steering wheels
+        steeringWheelForwardView = (SteeringWheelView) findViewById(R.id.steering_wheel_forward);
+        steeringWheelSidewaysView = (SteeringWheelView) findViewById(R.id.steering_wheel_sideways);
+
+
         //init the parent layout
         mParentLayout                   = (LinearLayout) findViewById(R.id.main_fragment_parent_linear_layout);
 
         //init the included layouts
-        layout_accelerometer            = (LinearLayout) findViewById(R.id.content_main_accelerometer);
         layout_gyro                     = (LinearLayout) findViewById(R.id.content_main_gyro);
-        layout_linear_accelerometer     = (LinearLayout) findViewById(R.id.content_main_linear_accelerometer);
-        layout_magnetic_field           = (LinearLayout) findViewById(R.id.content_main_magnetic_field);
-        layout_rotation_vector          = (LinearLayout) findViewById(R.id.content_main_rotation_vector);
+        layout_accelerometer            = (LinearLayout) findViewById(R.id.content_main_acceleration);
 
-        TextView headline = (TextView) layout_accelerometer.findViewById(R.id.fragmet_sensor_data_type_sensor);
-        headline.setText(R.string.headline_accelerometer);
-
-        headline = (TextView) layout_gyro.findViewById(R.id.fragmet_sensor_data_type_sensor);
+        TextView headline = (TextView) layout_gyro.findViewById(R.id.fragmet_sensor_data_type_sensor);
         headline.setText(R.string.headline_gyro);
 
-        headline = (TextView) layout_linear_accelerometer.findViewById(R.id.fragmet_sensor_data_type_sensor);
-        headline.setText(R.string.headline_lin_accel);
-
-        headline = (TextView) layout_magnetic_field.findViewById(R.id.fragmet_sensor_data_type_sensor);
-        headline.setText(R.string.headline_magnetic);
-
-        headline = (TextView) layout_rotation_vector.findViewById(R.id.fragmet_sensor_data_type_sensor);
-        headline.setText(R.string.headline_rot_vector);
+        headline = (TextView) layout_accelerometer.findViewById(R.id.fragmet_sensor_data_type_sensor);
+        headline.setText(R.string.headline_accelerometer);
 
     }
     @Override
@@ -154,30 +164,53 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onAccelerometerChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,1);
-
-    }
 
     @Override
     public void onGyroChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_gyro,mGyroValueHolder,1);
+        mLocalGyroHolder = data; //TODO maybe not needed
+
+        //consider it only if is a significant change
+        //fast forward rotated
+        if(data.getY() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD){
+            refreshToast("Detected fast forward rotation");
+        }
+
+        //fast backward rotated
+        if(data.getY() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD){
+            refreshToast("Detected fast backward rotation");
+        }
+
+        //fast right rotation
+        if(data.getX() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
+            refreshToast("Detected fast right rotation");
+        }
+
+        //fast left rotation
+        if(data.getX() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
+            refreshToast("Detected fast left rotation");
+        }
+
+        setSensorDataToLayout(data,layout_gyro,mGyroValueHolder,3);
     }
 
     @Override
-    public void onLinearAccelerometerChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_linear_accelerometer,mLinearAccelerometerValueHolder,1);
-    }
-
-    @Override
-    public void onMagneticFieldChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_magnetic_field,mMagneticFieldValueHolder,1);
-    }
-
-    @Override
-    public void onRotationVectorChanged(SensorData data) {
-        setSensorDataToLayout(data,layout_rotation_vector,mRotationVectorValueHolder,3);
+    public void onAccelerometerChanged(SensorData data) {
+        if(mLocalAccelerationHolder == null){
+            mLocalAccelerationHolder = data;
+        }
+        else{
+            //consider it only if is a significant change
+            //the acceleration/breaking point
+            if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK){
+                steeringWheelForwardView.drawAccelerationBrake(data.getX());
+                mLocalAccelerationHolder = data;
+            }//the steering point
+            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING){
+                steeringWheelSidewaysView.drawLeftRight(data.getY());
+                mLocalAccelerationHolder = data;
+            }
+        }
+        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,3);
     }
 
     /**
@@ -250,18 +283,18 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     private void setMinMaxValues(float in,LinearLayout layout,TextView textView, int decimalDigits, int R_id_min, int R_id_max){
         float minValue,maxValue;
         textView = (TextView) layout.findViewById(R_id_min);
-        minValue = Float.valueOf(textView.getText().toString().equals("") ? "0" : textView.getText().toString());
+        minValue = Float.valueOf(textView.getText().toString().equals("") ? "0.0" : textView.getText().toString());
         if(in < minValue)
             textView.setText(getFormattedValue(in,decimalDigits));
 
         textView = (TextView) layout.findViewById(R_id_max);
-        maxValue = Float.valueOf(textView.getText().toString().equals("") ? "0" : textView.getText().toString());
+        maxValue = Float.valueOf(textView.getText().toString().equals("") ? "0.0" : textView.getText().toString());
         if(in > maxValue)
             textView.setText(getFormattedValue(in,decimalDigits));
     }
 
     /**
-     * On reset button click
+     * This function reset the min/max values on each sensor
      * @param view
      */
     public void resetMaxMinValues(View view) {
@@ -285,6 +318,11 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         }
     }
 
+    /**
+     * This function reset the min/max values on custom sensor
+     * @param subIncludedLayout the ll of the included sensor layout
+     * @param memoryHelper prevents from many initializations
+     */
     private void resetMaxMinOnLayout(LinearLayout subIncludedLayout, TextView memoryHelper){
         //first the min values
         memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_min_x);
