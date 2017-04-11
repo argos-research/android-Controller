@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import de.tum.androidcontroller.sensors.SensorDataSettings;
+import de.tum.androidcontroller.utils.MathUtils;
 
 /**
  * Created by konstantin on 08/04/17.
@@ -180,8 +181,15 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
     /**
      *
      */
-    private float getPercentageAcceleratingSteeringLeft(float sensorValue, float itsMaxDeviation, float itsIdleState){
+    private float getPercentageAcceleratingSteeringLeft2(float sensorValue, float itsMaxDeviation, float itsIdleState){
         float absDiff = Math.abs(itsMaxDeviation - (sensorValue < 0 ? -sensorValue:sensorValue) );
+        float maxDiff = Math.abs(itsIdleState - itsMaxDeviation);
+        //Log.e(TAG, "getPercantage: sensorValue " + sensorValue + " absDiff "+ absDiff+" maxDiff " +maxDiff);
+        return absDiff/maxDiff;
+
+    }
+    private float getPercentageAcceleratingSteeringLeft(float sensorValue, float itsMaxDeviation, float itsIdleState){
+        float absDiff = MathUtils.getAbsDistance(sensorValue,itsMaxDeviation);
         float maxDiff = Math.abs(itsIdleState - itsMaxDeviation);
         //Log.e(TAG, "getPercantage: sensorValue " + sensorValue + " absDiff "+ absDiff+" maxDiff " +maxDiff);
         return absDiff/maxDiff;

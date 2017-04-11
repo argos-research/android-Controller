@@ -340,4 +340,10 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_max_z);
         memoryHelper.setText(R.string.default_empty_text_view_value);
     }
+
+    public void Test(View view) {
+        SensorDataSettings.idleAccelerationBreakState = mLocalAccelerationHolder.getX();
+        SensorDataSettings.idleLeftRightState = mLocalAccelerationHolder.getY();
+
+    }
 }

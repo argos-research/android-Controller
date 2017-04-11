@@ -40,4 +40,26 @@ public class MathUtils {
     public static int sizeInt(int some){
         return (int) Math.log10(Math.abs(some)+1);
     }
+
+
+    /**
+     * Used for getting the absolute distance between
+     * the float a and b regardless their signs
+     * @param a the first parameter
+     * @param b the second parameter
+     * @return the absolute positive distance between them
+     */
+    public static float getAbsDistance(float a, float b){
+        float distance = 0.f;
+        if((a > 0 && b > 0) || (a < 0 && b > 0))  // + + and - -
+            distance = Math.abs(a - b);
+        else if(a > 0 && b < 0) { // + -
+            distance = a - b;
+        }
+        else if(a < 0 && b > 0) { // - +
+            distance = b - a;
+        }
+
+        return distance;
+    }
 }
