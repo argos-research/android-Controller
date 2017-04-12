@@ -13,8 +13,8 @@ public interface EventListener {
      * The accelerometer measures the acceleration force in m/s2 that
      * is applied to a device on all three physical axes (x, y, and z),
      * including the force of gravity.
-     * Here the X axis will be used for acceleration(on forward rotation
-     * the value decreases) and braking(keep decreasing) and the Y axis for steering.
+     * Here the Y axis will be used for acceleration(on forward rotation
+     * the value decreases) and braking(keep decreasing) and the X axis for steering.
      * @param data the data provided from the sensors listener in m/s2
      */
     void onAccelerometerChanged(SensorData data);

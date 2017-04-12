@@ -1,6 +1,8 @@
 package de.tum.androidcontroller.utils;
 
 
+import android.util.Log;
+
 /**
  * Created by konstantin on 08/04/17.
  */
@@ -51,7 +53,12 @@ public class MathUtils {
      */
     public static float getAbsDistance(float a, float b){
         float distance = 0.f;
-        if((a > 0 && b > 0) || (a < 0 && b > 0))  // + + and - -
+
+        if(a == 0)
+            distance = Math.abs(b);
+        else if(b == 0)
+            distance = Math.abs(a);
+        else if((a > 0 && b > 0) || (a < 0 && b > 0))  // + + and - -
             distance = Math.abs(a - b);
         else if(a > 0 && b < 0) { // + -
             distance = a - b;
@@ -60,6 +67,7 @@ public class MathUtils {
             distance = b - a;
         }
 
+        Log.d("Math util", "a " + a + " b " + b + " dist " +distance);
         return distance;
     }
 }
