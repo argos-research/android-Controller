@@ -1,4 +1,4 @@
-package de.tum.androidcontroller;
+package com.example.konstantinvankov.testp2pwifi;
 
 import org.junit.Test;
 

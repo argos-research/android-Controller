@@ -1,4 +1,4 @@
-package de.tum.androidcontroller;
+package com.example.konstantinvankov.testp2pwifi;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("de.tum.androidcontroller", appContext.getPackageName());
+        assertEquals("com.example.konstantinvankov.testp2pwifi", appContext.getPackageName());
     }
 }
