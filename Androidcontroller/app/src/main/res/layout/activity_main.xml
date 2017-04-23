@@ -29,6 +29,13 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@android:drawable/ic_dialog_email" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Not closing socket"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:layout_gravity="bottom|end"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab2"
@@ -37,5 +44,13 @@
         android:layout_gravity="bottom"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@android:drawable/alert_light_frame" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Closing socket"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:layout_gravity="bottom"/>
 
 </android.support.design.widget.CoordinatorLayout>

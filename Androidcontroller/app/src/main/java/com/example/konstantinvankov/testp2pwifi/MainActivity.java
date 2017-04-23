@@ -1,5 +1,6 @@
 package com.example.konstantinvankov.testp2pwifi;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -22,16 +27,22 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
+
     private ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     private int queuedThreds,activeThreads, notCompleatedThreads;
     private String  msg = "Test\n" + "Test2\n" + "Test3\n"  + "Test4\n",
-                    mServerIP = "192.168.90.24";
+                    mServerIP = "192.168.2.122";
     private int port = 8000;
     private Socket mSocket;
     private final String TAG = "Test App";
     private DataOutputStream mOut = null;
     private DataInputStream mIn = null;
-    private int testCalls = 10;
+    private final int TEST_CALLS_COUNT = 10000;
+
+    Thread receiveThread = new Thread();
+    //if this window is bigger than the sendWindow on the server THEN MSG WILL BE LOST!
+    //in case this is smaller than the thread is getting stuck on readUTF and just waits there which is kind of good for me now.
+    private final long RECEIVE_WINDOW = 500; //the receive window in millisecond. In that much second the input stream will be read
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,18 +80,18 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     try {
                         if(closingAfterEach){
-                            for(int i = 1; i <= testCalls ; i ++){
+                            for(int i = 1; i <= TEST_CALLS_COUNT ; i ++){
                                 initSocket();
-                                sendBytesWithClosing(i+msg);
+                                sendBytesWithClosing(buildTestJSON(i).toString());
                                 readBytesWithClosing();
                                 closeSocket();
                             }
                         }else{
                             initSocket();
-                            for(int i = 1 ; i <= testCalls; i++) {
+                            for(int i = 1 ; i <= TEST_CALLS_COUNT; i++) {
 
-                                sendBytesWithoutClosing(i+msg);
-                                readBytesWithoutClosing();
+                                sendBytesWithoutClosingBluetoothVersion(buildTestJSON(i).toString());
+                                readBytesWithoutClosingBluetoothVersion();
                             }
                         }
 
@@ -114,6 +125,36 @@ public class MainActivity extends AppCompatActivity {
         mSocket.close();
     }
 
+
+    public ProgressDialog getProgressDialog(String title, String msg){
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setTitle(title);
+        dialog.setMessage(msg);
+        dialog.setIndeterminate(true);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
+    public JSONObject buildTestJSON(int i){
+        JSONObject ob = new JSONObject();
+        JSONArray accVal = new JSONArray();
+
+        try {
+            accVal.put(3.56);
+            accVal.put(-2.56);
+            accVal.put(23.56);
+
+            ob.put("Loop"               ,i);
+            ob.put("Loops count"        ,TEST_CALLS_COUNT);
+            ob.put("Accelerometer data" ,accVal);
+            ob.put("Gyro data"          ,accVal);
+            ob.put("Created time"       ,System.currentTimeMillis());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return ob;
+    }
 
     public void sendBytesWithClosing(String message)throws IOException{
 
@@ -150,7 +191,44 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private int threadCount = 1;
+    public void readBytesWithoutClosingBluetoothVersion() throws IOException
+    {
+        if(!receiveThread.isAlive()) {
 
+            //according to http://stackoverflow.com/questions/14494352/can-you-write-to-a-sockets-input-and-output-stream-at-the-same-time
+            // read should be in a separate thread
+            receiveThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Log.d(TAG, "run: running thread "+ threadCount++);
+                        if(mIn == null)
+                            mIn = new DataInputStream(mSocket.getInputStream());
+                        if(mSocket.isConnected()) //otherwise is get stuck when it return from the sleep state
+                            Log.e(TAG, "readBytes: " + mIn.readUTF());
+
+                        receiveThread.sleep(RECEIVE_WINDOW);
+                    } catch (InterruptedException | IOException e) {
+                        Log.e(TAG, "An exception has occurred during reading the input stream: " + e.toString());
+                    }
+                }
+            });
+            receiveThread.start();
+
+
+        }
+
+    }
+
+    public void sendBytesWithoutClosingBluetoothVersion(String message) throws IOException{
+        if(mOut == null){
+            OutputStream out = mSocket.getOutputStream();
+            mOut= new DataOutputStream(out);
+        }
+        mOut.writeUTF(message);
+        mOut.flush();
+    }
 
     public void readBytes() throws IOException
     {
