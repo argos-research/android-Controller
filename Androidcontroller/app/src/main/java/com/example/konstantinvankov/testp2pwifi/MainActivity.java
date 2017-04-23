@@ -37,12 +37,15 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "Test App";
     private DataOutputStream mOut = null;
     private DataInputStream mIn = null;
-    private final int TEST_CALLS_COUNT = 10000;
+    private final int TEST_CALLS_COUNT = 100000;
 
     Thread receiveThread = new Thread();
     //if this window is bigger than the sendWindow on the server THEN MSG WILL BE LOST!
     //in case this is smaller than the thread is getting stuck on readUTF and just waits there which is kind of good for me now.
-    private final long RECEIVE_WINDOW = 500; //the receive window in millisecond. In that much second the input stream will be read
+
+    //CORRECTION TO ABOVE! IF WE ARE USING THE SAME BLUETOOTH LOGIC (write to buffer instead of readLine()) then it is WORKING
+    //AS THE BLUETOOTH SERVER!
+    private final long RECEIVE_WINDOW = 1000; //the receive window in millisecond. In that much second the input stream will be read
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,8 +209,13 @@ public class MainActivity extends AppCompatActivity {
                         if(mIn == null)
                             mIn = new DataInputStream(mSocket.getInputStream());
                         if(mSocket.isConnected()) //otherwise is get stuck when it return from the sleep state
-                            Log.e(TAG, "readBytes: " + mIn.readUTF());
-
+                            //Log.e(TAG, "readBytes: " + mIn.readUTF());
+                        {
+                            byte inputBuffer[] = new byte[1024];
+                            int bytes_read = mIn.read( inputBuffer );
+                            String received = new String(inputBuffer, 0, bytes_read);
+                            Log.e(TAG, "Message received from the server: "+ received);
+                        }
                         receiveThread.sleep(RECEIVE_WINDOW);
                     } catch (InterruptedException | IOException e) {
                         Log.e(TAG, "An exception has occurred during reading the input stream: " + e.toString());
