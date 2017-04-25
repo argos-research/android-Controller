@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     //CORRECTION TO ABOVE! IF WE ARE USING THE SAME BLUETOOTH LOGIC (write to buffer instead of readLine()) then it is WORKING
     //AS THE BLUETOOTH SERVER!
     private final long RECEIVE_WINDOW = 1000; //the receive window in millisecond. In that much second the input stream will be read
+    private boolean portChanged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,27 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        initEditTexts();
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mIn = null;
+                mOut = null;
+                startThread(false);
+            }
+        });
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startThread(true);
+            }
+        });
+    }
+
+    private void initEditTexts() {
         EditText packetsToSendText = (EditText) findViewById(R.id.packets_to_send);
         packetsToSendText.setText(String.format("%d",TEST_CALLS_COUNT));
         //http://stackoverflow.com/questions/2434532/android-set-hidden-the-keybord-on-press-enter-in-a-edittext
@@ -78,25 +100,47 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 TEST_CALLS_COUNT = Integer.parseInt(v.getText().toString());
+
+
                 return false;
             }
         });
 
+        EditText portText = (EditText) findViewById(R.id.port);
+        portText.setText(String.format("%d",port));
+        //http://stackoverflow.com/questions/2434532/android-set-hidden-the-keybord-on-press-enter-in-a-edittext
+        portText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                mIn = null;
-                mOut = null;
-                startThread(false);
-            }
-        });
-        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
-        fab2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startThread(true);
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (event != null&& (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                    InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
+
+                    in.hideSoftInputFromWindow(v
+                                    .getApplicationWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+                    // Must return true here to consume event
+                    return true;
+                }
+                port = Integer.parseInt(v.getText().toString());
+
+                if (mSocket != null) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                if(mSocket.isConnected())
+                                    closeSocket();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+                }
+
+                return false;
             }
         });
     }
