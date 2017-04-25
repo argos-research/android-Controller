@@ -1,14 +1,19 @@
 package com.example.konstantinvankov.testp2pwifi;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "Test App";
     private DataOutputStream mOut = null;
     private DataInputStream mIn = null;
-    private final int TEST_CALLS_COUNT = 100000;
+    private int TEST_CALLS_COUNT = 100000;
 
     Thread receiveThread = new Thread();
     //if this window is bigger than the sendWindow on the server THEN MSG WILL BE LOST!
@@ -53,6 +58,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        EditText packetsToSendText = (EditText) findViewById(R.id.packets_to_send);
+        packetsToSendText.setText(String.format("%d",TEST_CALLS_COUNT));
+        //http://stackoverflow.com/questions/2434532/android-set-hidden-the-keybord-on-press-enter-in-a-edittext
+        packetsToSendText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (event != null&& (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                    InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
+
+                    in.hideSoftInputFromWindow(v
+                                    .getApplicationWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+                    // Must return true here to consume event
+                    return true;
+                }
+                TEST_CALLS_COUNT = Integer.parseInt(v.getText().toString());
+                return false;
+            }
+        });
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -347,5 +376,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onPacketsToSendChange(View view) {
+
     }
 }
