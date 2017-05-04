@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.konstantinvankov.testp2pwifi">
+    package="com.example.chochko.testp2pudp">
 
-
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:required="true"
+        android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -15,8 +16,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden">      <!-- hides the keyboard on startup -->
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

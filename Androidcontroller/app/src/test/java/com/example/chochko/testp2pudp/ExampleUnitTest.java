@@ -1,4 +1,4 @@
-package com.example.konstantinvankov.testp2pwifi;
+package com.example.chochko.testp2pudp;
 
 import org.junit.Test;
 

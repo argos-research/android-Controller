@@ -1,4 +1,4 @@
-package com.example.konstantinvankov.testp2pwifi;
+package com.example.chochko.testp2pudp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.konstantinvankov.testp2pwifi", appContext.getPackageName());
+        assertEquals("com.example.chochko.testp2pudp", appContext.getPackageName());
     }
 }
