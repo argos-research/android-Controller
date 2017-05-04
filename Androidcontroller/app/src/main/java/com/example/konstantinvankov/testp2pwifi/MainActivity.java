@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     private int queuedThreds,activeThreads, notCompleatedThreads;
     private String  msg = "Test\n" + "Test2\n" + "Test3\n"  + "Test4\n",
-                    mServerIP = "192.168.2.122";
-    private int port = 8000;
+                    mServerIP = "10.42.0.1";
+    private int port = 8001;
     private Socket mSocket;
     private final String TAG = "Test App";
     private DataOutputStream mOut = null;
@@ -127,17 +127,57 @@ public class MainActivity extends AppCompatActivity {
                 port = Integer.parseInt(v.getText().toString());
 
                 if (mSocket != null) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                if(mSocket.isConnected())
+                    if(mSocket.isConnected()) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
                                     closeSocket();
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                    }).start();
+                        }).start();
+                    }
+                }
+
+                return false;
+            }
+        });
+
+        EditText ipText = (EditText) findViewById(R.id.ip);
+        ipText.setText(mServerIP);
+        //http://stackoverflow.com/questions/2434532/android-set-hidden-the-keybord-on-press-enter-in-a-edittext
+        ipText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (event != null&& (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                    InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
+
+                    in.hideSoftInputFromWindow(v
+                                    .getApplicationWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+                    // Must return true here to consume event
+                    return true;
+                }
+                mServerIP = v.getText().toString();
+
+                if (mSocket != null) {
+                    if(mSocket.isConnected()) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    closeSocket();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
+                    }
                 }
 
                 return false;
@@ -155,6 +195,11 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
+                        if(mSocket != null){
+                            if(mSocket.isConnected())
+                                closeSocket();
+                        }
+
                         if(closingAfterEach){
                             for(int i = 1; i <= TEST_CALLS_COUNT ; i ++){
                                 initSocket();
@@ -169,10 +214,11 @@ public class MainActivity extends AppCompatActivity {
                                 sendBytesWithoutClosingBluetoothVersion(buildTestJSON(i).toString());
                                 readBytesWithoutClosingBluetoothVersion();
                             }
+                            //closeSocket();
                         }
 
 
-                        //closeSocket();
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
