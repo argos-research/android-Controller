@@ -1,5 +1,6 @@
 package com.example.chochko.testp2pudp;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -33,10 +34,10 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewState, textViewPrompt;
 
     static final int UdpServerPORT = 4445;
-    static final String SERVER_IP = "192.168.2.118";
+    static final String SERVER_IP = "131.159.216.62";
     UdpServerThread udpServerThread;
 
-    private int TEST_CALLS_COUNT = 10000;
+    private int TEST_CALLS_COUNT = 100000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                udpServerThread = new UdpServerThread(UdpServerPORT);
                 udpServerThread.start(); //fix http://simpledeveloper.com/network-on-main-thread-error-solution/
 
             }
@@ -61,6 +64,16 @@ public class MainActivity extends AppCompatActivity {
 
         infoIp.setText(getIpAddress());
         infoPort.setText(String.valueOf(UdpServerPORT));
+    }
+
+    public ProgressDialog getProgressDialog(String title, String msg){
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setTitle(title);
+        dialog.setMessage(msg);
+        dialog.setIndeterminate(true);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
     }
 
     public JSONObject buildTestJSON(int i){
@@ -107,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        udpServerThread = new UdpServerThread(UdpServerPORT);
+
         super.onStart();
     }
 
@@ -143,6 +156,9 @@ public class MainActivity extends AppCompatActivity {
 
         int serverPort;
         DatagramSocket socket;
+        Thread receiveThread = new Thread();
+        boolean receiving = true;
+        private final long RECEIVE_WINDOW = 1000;
 
         boolean running;
 
@@ -165,7 +181,12 @@ public class MainActivity extends AppCompatActivity {
                 socket = new DatagramSocket(serverPort);
 
                 updateState("UDP Server is running");
+                //final ProgressDialog ringProgressDialog = getProgressDialog("Sending data","Please wait...");
+                //ringProgressDialog.show();
+
                 Log.e(TAG, "UDP Server is running");
+
+                DatagramPacket packet;
 
                 for(int i = 1; i <= TEST_CALLS_COUNT ; i ++){
 
@@ -174,8 +195,7 @@ public class MainActivity extends AppCompatActivity {
                     // send the response to the client at "address" and "port"
                     InetAddress address = InetAddress.getByName(SERVER_IP);
                     int port = serverPort;
-
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
+                    packet = new DatagramPacket(buf, buf.length, address, port);
                     socket.send(packet);
 
                     updatePrompt("Request from: " + address + ":" + port + "\n");
@@ -185,13 +205,13 @@ public class MainActivity extends AppCompatActivity {
                     buf = dString.getBytes();
 
                     // receive request
-                    //packet = new DatagramPacket(buf, buf.length);
-                    //socket.receive(packet);     //this code block the program flow
+                    receivePackets(socket);
 
                     //Log.e(TAG, "received " + new String(buf));
 
                 }
 
+                //ringProgressDialog.dismiss();
                 Log.e(TAG, "UDP Server ended");
 
             } catch (SocketException e) {
@@ -202,6 +222,34 @@ public class MainActivity extends AppCompatActivity {
                 if(socket != null){
                     socket.close();
                     Log.e(TAG, "socket.close()");
+                }
+            }
+        }
+
+        private void receivePackets(final DatagramSocket socket) throws IOException {
+            if(receiving){
+                if(!receiveThread.isAlive()){
+                    Log.e(TAG, "receivePackets: here");
+                    receiveThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            byte[] buf = new byte[256];
+                            DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                            try {
+                                socket.receive(packet);     //this code block the program flow
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            Log.e(TAG, "Response " + new String(buf));
+                            try {
+                                receiveThread.sleep(RECEIVE_WINDOW);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    receiveThread.start();
+
                 }
             }
         }
