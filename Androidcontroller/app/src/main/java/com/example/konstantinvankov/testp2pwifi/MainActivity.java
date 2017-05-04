@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     private int queuedThreds,activeThreads, notCompleatedThreads;
     private String  msg = "Test\n" + "Test2\n" + "Test3\n"  + "Test4\n",
-                    mServerIP = "10.42.0.1";
+                    //mServerIP = "131.159.216.62";
+                    mServerIP = "192.168.43.232";
     private int port = 8001;
     private Socket mSocket;
     private final String TAG = "Test App";
