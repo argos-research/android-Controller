@@ -1,6 +1,7 @@
 package com.example.chochko.testp2pudp;
 
 import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -34,10 +35,12 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewState, textViewPrompt;
 
     static final int UdpServerPORT = 4445;
-    static final String SERVER_IP = "131.159.216.62";
+    static final String SERVER_IP = "192.168.2.118";
     UdpServerThread udpServerThread;
 
     private int TEST_CALLS_COUNT = 100000;
+    private final long RECEIVE_WINDOW = 500;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +53,13 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                udpServerThread = new UdpServerThread(UdpServerPORT);
-                udpServerThread.start(); //fix http://simpledeveloper.com/network-on-main-thread-error-solution/
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    udpServerThread = new UdpServerThread(UdpServerPORT);
+                    udpServerThread.start(); //fix http://simpledeveloper.com/network-on-main-thread-error-solution/
+                }
+            }).start();
 
             }
         });
@@ -158,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         DatagramSocket socket;
         Thread receiveThread = new Thread();
         boolean receiving = true;
-        private final long RECEIVE_WINDOW = 1000;
 
         boolean running;
 
@@ -240,7 +246,15 @@ public class MainActivity extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            Log.e(TAG, "Response " + new String(buf));
+                            String response = new String(buf);
+                            Log.e(TAG, "String Response " + response);
+
+                            try {
+                                JSONObject responseJSON = new JSONObject(response);
+                                Log.e(TAG, "JSON Response " + responseJSON);
+                            } catch (JSONException e) {
+                                Log.e(TAG, "JSON creation failed.");
+                            }
                             try {
                                 receiveThread.sleep(RECEIVE_WINDOW);
                             } catch (InterruptedException e) {
@@ -284,5 +298,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return ip;
+    }
+
+    private class UdpServerAsyncTask extends AsyncTask<String,Void,String>{
+
+        @Override
+        protected String doInBackground(String... params) {
+            return null;
+        }
     }
 }
