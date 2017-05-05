@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.codemonkeylabs.fpslibrary.TinyDancer;
 
 import de.tum.androidcontroller.data.SensorData;
+import de.tum.androidcontroller.network.SocketConnectionThread;
 import de.tum.androidcontroller.sensors.EventListener;
 import de.tum.androidcontroller.sensors.SensorDataSettings;
 import de.tum.androidcontroller.sensors.SensorListener;
@@ -339,5 +340,21 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         memoryHelper.setText(R.string.default_empty_text_view_value);
         memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_max_z);
         memoryHelper.setText(R.string.default_empty_text_view_value);
+    }
+
+    public void UDPSend(View view) {
+        SocketConnectionThread.getInstance().UDPSend("udp send");
+    }
+
+    public void UDPReceive(View view) {
+        SocketConnectionThread.getInstance().UDPReceive();
+    }
+
+    public void TCPSend(View view) {
+        SocketConnectionThread.getInstance().TCPSend("tcp send");
+    }
+
+    public void TCPReceive(View view) {
+        SocketConnectionThread.getInstance().TCPReceive();
     }
 }
