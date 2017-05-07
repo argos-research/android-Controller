@@ -15,6 +15,10 @@ import android.widget.Toast;
 
 import com.codemonkeylabs.fpslibrary.TinyDancer;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import de.tum.androidcontroller.data.SensorData;
 import de.tum.androidcontroller.network.SocketConnectionThread;
 import de.tum.androidcontroller.sensors.EventListener;
@@ -53,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
     private SensorData mLocalAccelerationHolder;
     private SensorData mLocalGyroHolder;
+
+    private long TEST_CALLS_COUNT = 10000; //TODO remove it
 
     private Toast mGyroToast;
 
@@ -340,6 +346,26 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         memoryHelper.setText(R.string.default_empty_text_view_value);
         memoryHelper = (TextView) subIncludedLayout.findViewById(R.id.value_max_z);
         memoryHelper.setText(R.string.default_empty_text_view_value);
+    }
+
+    public JSONObject buildTestJSON(int i){
+        JSONObject ob = new JSONObject();
+        JSONArray accVal = new JSONArray();
+
+        try {
+            accVal.put(3.56);
+            accVal.put(-2.56);
+            accVal.put(23.56);
+
+            ob.put("Loop"               ,i);
+            ob.put("Loops count"        ,TEST_CALLS_COUNT);
+            ob.put("Accelerometer data" ,accVal);
+            ob.put("Gyro data"          ,accVal);
+            ob.put("Created time"       ,System.currentTimeMillis());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return ob;
     }
 
     public void UDPSend(View view) {

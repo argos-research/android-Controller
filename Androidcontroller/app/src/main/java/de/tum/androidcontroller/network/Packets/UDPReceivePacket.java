@@ -14,6 +14,14 @@ public class UDPReceivePacket extends Packet {
 
     @Override
     public void run() {
-        Log.e("UDPReceivePacket", "run:  msg " + super.getMsg());
+        for(;;){
+            Log.e("UDPReceivePacket", "run:  msg " + super.getMsg());
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }
