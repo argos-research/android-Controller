@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.tum.androidcontroller.data.SensorData;
+import de.tum.androidcontroller.network.Models.PacketsModel;
 import de.tum.androidcontroller.network.SocketConnectionThread;
 import de.tum.androidcontroller.sensors.EventListener;
 import de.tum.androidcontroller.sensors.SensorDataSettings;
@@ -62,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
     private Toast mGyroToast;
 
+    private SocketConnectionThread mCommunicationThread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         initLayoutsAndHeadlines();
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
+
+        mCommunicationThread = new SocketConnectionThread(PacketsModel.ConnectionType.TCP);
 
         if(mSensorListener == null){
             mSensorListener = SensorModel.getInstance(this);
@@ -369,18 +374,20 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     }
 
     public void UDPSend(View view) {
-        SocketConnectionThread.getInstance().UDPSend("udp send");
+        mCommunicationThread.UDPSend("udp send");
     }
 
     public void UDPReceive(View view) {
-        SocketConnectionThread.getInstance().UDPReceive();
+        mCommunicationThread.UDPReceive();
     }
 
     public void TCPSend(View view) {
-        SocketConnectionThread.getInstance().TCPSend("tcp send");
+        for(int i = 1; i < TEST_CALLS_COUNT; i++)
+            mCommunicationThread.TCPSend(buildTestJSON(i).toString());
+        //mCommunicationThread.closeConnection();
     }
 
     public void TCPReceive(View view) {
-        SocketConnectionThread.getInstance().TCPReceive();
+
     }
 }

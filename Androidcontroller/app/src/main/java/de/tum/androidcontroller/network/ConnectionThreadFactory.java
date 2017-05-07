@@ -20,7 +20,10 @@ class ConnectionThreadFactory implements ThreadFactory {
         UDPSend,
         UDPReceive,
         TCPSend,
-        TCPReceive
+        TCPReceive,
+        InitTCPCommunication,
+        InitUDPCommunication,
+        CloseSomeCommunication
     }
 
     private final String TAG = "ConnectionThreadFactory";
@@ -45,12 +48,13 @@ class ConnectionThreadFactory implements ThreadFactory {
              setType(null);
              Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_UDP_SEND);
              return new Thread(r,PacketsModel.RUNNABLE_NAME_UDP_SEND);
+        }else if(getType() == Type.InitTCPCommunication){
+            setType(null);
+            Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_INIT);
+            return new Thread(r,PacketsModel.RUNNABLE_NAME_TCP_INIT);
         }
         else {
             throw new IllegalArgumentException("Unknown type argument!");
-//             Log.e(TAG, "newThread: idling");
-//             return new Thread(r,"idling");
-            //throw new IllegalArgumentException("Unknown type argument!");
         }
     }
 
