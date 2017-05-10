@@ -52,6 +52,9 @@ class ConnectionThreadFactory implements ThreadFactory {
             setType(null);
             Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_INIT);
             return new Thread(r,PacketsModel.RUNNABLE_NAME_TCP_INIT);
+        }else if(getType() == Type.CloseSomeCommunication){
+            setType(null);
+            return  new Thread(r, PacketsModel.RUNNABLE_NAME_TCP_CLOSE);
         }
         else {
             throw new IllegalArgumentException("Unknown type argument!");

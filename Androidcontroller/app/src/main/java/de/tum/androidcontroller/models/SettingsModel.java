@@ -13,6 +13,10 @@ public class SettingsModel {
 
     private SettingsService.ConnectionType connectionType;
 
+    private int port;
+
+    private String IP;
+
 
     public SettingsModel(){
 
@@ -29,6 +33,22 @@ public class SettingsModel {
 
     public void setConnectionType(SettingsService.ConnectionType connectionType) {
         this.connectionType = connectionType;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getIP() {
+        return IP;
+    }
+
+    public void setIP(String IP) {
+        this.IP = IP;
     }
 
 }

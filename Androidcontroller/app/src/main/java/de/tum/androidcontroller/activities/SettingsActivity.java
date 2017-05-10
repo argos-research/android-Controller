@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.activities;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -51,7 +52,7 @@ public class SettingsActivity extends AppCompatActivity {
     private void restoreUI() {
         SettingsService data = SettingsService.getInstance(getApplicationContext());
 
-        spinnerConnectionType.setSelection(getPositionFromArray(optionsConnectionTypes, data.getConenctionType()));
+        spinnerConnectionType.setSelection(getPositionFromArray(optionsConnectionTypes, data.getConnectionType()));
     }
 
 
@@ -83,6 +84,7 @@ public class SettingsActivity extends AppCompatActivity {
      * @param view the button view
      */
     public void onCancelButtonClicked(View view) {
+        setResult(Activity.RESULT_CANCELED);
         finish();
     }
 
@@ -92,6 +94,7 @@ public class SettingsActivity extends AppCompatActivity {
      */
     public void onSaveButtonClicked(View view) {
         SettingsService.getInstance(getApplicationContext()).saveSettings(getSettingsFromUI());
+        setResult(Activity.RESULT_OK);
         finish();
     }
 

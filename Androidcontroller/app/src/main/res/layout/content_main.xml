@@ -37,25 +37,11 @@
                 android:baselineAligned="false">
 
                 <Button
-                    android:layout_width="30dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"
-                    android:onClick="UDPSend"/>
-                <Button
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:text="2"
-                    android:onClick="UDPReceive"/>
-                <Button
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:text="3"
-                    android:onClick="TCPSend"/>
-                <Button
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:text="4"
-                    android:onClick="TCPReceive"/>
+                    android:text="Send"
+                    android:onClick="sendData"/>
+
 
                 <TextView
                     android:layout_width="wrap_content"

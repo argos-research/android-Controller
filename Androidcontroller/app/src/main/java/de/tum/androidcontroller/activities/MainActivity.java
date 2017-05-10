@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -23,7 +24,6 @@ import org.json.JSONObject;
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.data.SettingsService;
 import de.tum.androidcontroller.models.SensorModel;
-import de.tum.androidcontroller.network.models.PacketsModel;
 import de.tum.androidcontroller.network.SocketConnectionThread;
 import de.tum.androidcontroller.sensors.EventListener;
 import de.tum.androidcontroller.sensors.SensorDataSettings;
@@ -61,11 +61,44 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     private SensorModel mLocalAccelerationHolder;
     private SensorModel mLocalGyroHolder;
 
-    private long TEST_CALLS_COUNT = 10000; //TODO remove it
+    private long TEST_CALLS_COUNT = 100000; //TODO remove it
 
     private Toast mGyroToast;
 
     private SocketConnectionThread mCommunicationThread;
+
+
+    private final int ACTIVITY_REQUEST_CODE = 1;    //used for starting new activity for result
+
+    private volatile boolean sending = true;
+
+    private Thread workerDummy;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //if we are coming from the settings activity
+        if(requestCode == ACTIVITY_REQUEST_CODE){
+            //new settings are saved
+            if(resultCode == Activity.RESULT_OK){
+                //stop sending
+                sending = false;
+
+                //close the current communication
+                mCommunicationThread.closeConnection();
+
+                //stop the dummy thread
+
+                //wait for it to finish
+                while(mCommunicationThread.getActiveCount() + mCommunicationThread.getQueue().size() > 0);
+
+                Log.e(TAG, "onActivityResult: connection closed");
+
+                //init with the new communication method
+                mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(this).getConnectionType()),this);
+
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
 
-        //mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.TCP); //TODO change this
+        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(this).getConnectionType()),this); //TODO handle if no server is running
 
         if(mSensorListener == null){
             mSensorListener = de.tum.androidcontroller.sensors.SensorModel.getInstance(this);
@@ -172,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(this,SettingsActivity.class));
+            startActivityForResult(new Intent(this,SettingsActivity.class),ACTIVITY_REQUEST_CODE);
             return true;
         }
 
@@ -376,23 +409,29 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         return ob;
     }
 
-    public void UDPSend(View view) {
-        //mCommunicationThread.UDPSend("udp send");
-        mCommunicationThread.sendMsg("udp send");
-    }
 
-    public void UDPReceive(View view) {
-        //mCommunicationThread.UDPReceive();
-    }
-
-    public void TCPSend(View view) {
-        for(int i = 1; i < TEST_CALLS_COUNT; i++)
-            mCommunicationThread.sendMsg(buildTestJSON(i).toString());
+    public void sendData(View view) {
+        if (sending) {
+            workerDummy = new Thread(new Runnable() {     //WHY?!
+                @Override
+                public void run() {
+                    for(int i = 1; i < TEST_CALLS_COUNT; i++) {
+                        if (sending) {
+                            mCommunicationThread.sendMsg(buildTestJSON(i).toString());
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }else
+                            break;
+                    }
+                }
+            });
+            workerDummy.start();
+        }
         //mCommunicationThread.closeConnection();
     }
 
-    public void TCPReceive(View view) {
-
-    }
 
 }

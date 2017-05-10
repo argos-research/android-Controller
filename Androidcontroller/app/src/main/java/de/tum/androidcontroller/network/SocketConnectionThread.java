@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.network;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
@@ -31,16 +32,18 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     //For the TCP connection
     private Socket mSocket;
 
+    private Context context;
+
     //TODO add this to the settings activity
     private String IP   = "192.168.2.118";
-    private int port    = 8000;
+    private int port    = 8001;
 
     private SocketConnectionThread(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
         mThreadFactory = (ConnectionThreadFactory) threadFactory;
     }
 
-    public SocketConnectionThread(SettingsService.ConnectionType connectionType) {
+    public SocketConnectionThread(SettingsService.ConnectionType connectionType, Context context) {
         this(
                 Runtime.getRuntime().availableProcessors(), // if this value is 2 than we can not use this class for parallel sending and receiving :(
                 Runtime.getRuntime().availableProcessors(), // should be the some as the one above otherwise exception is thrown :<
@@ -53,21 +56,24 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
         this.connectionType = connectionType;
 
+        this.context        = context;
+
         initCommunication(); //init the given communication
     }
 
     private void initCommunication(){
+        Log.e(TAG, "initCommunication: with connectionType " + connectionType.toString());
         switch (connectionType){
             case TCP:
                 initTCPConnection();
                 break;
 
             case UDP:
-                initUDPConnection();
+                //initUDPConnection();
                 break;
 
             case Bluetooth:
-                initBluetoothConnection();
+                //initBluetoothConnection();
                 break;
             default:
                 break;
@@ -80,6 +86,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
      * @param msg The message that is going to be send.
      */
     public void sendMsg(String msg){
+        Log.e(TAG, "sendMsg with connectionType " + connectionType.toString());
         switch (connectionType){
             case TCP:
                 TCPSend(msg);
@@ -203,9 +210,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         super.afterExecute(r, t);
         String finishedThreadName = Thread.currentThread().getName();
 
-        //Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
+        Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
 
-        //the TCP init has fisnished => start immediately the TCP receiver
+        //the TCP init has finished => start immediately the TCP receiver
         if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT) ||
                 finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT) ||
                 finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)){

@@ -81,7 +81,7 @@ public class SettingsService {
     private static final  ConnectionType DEFAULT_CONNECTION_TYPE    = ConnectionType.TCP;
 
 
-    public String getConenctionType(){
+    public String getConnectionType(){
         return getPreferences().getString(KEY_CONNECTION_TYPE,DEFAULT_CONNECTION_TYPE.toString());
     }
 
