@@ -1,5 +1,6 @@
-package de.tum.androidcontroller;
+package de.tum.androidcontroller.activities;
 
+import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,13 +20,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.tum.androidcontroller.data.SensorData;
-import de.tum.androidcontroller.network.Models.PacketsModel;
+import de.tum.androidcontroller.R;
+import de.tum.androidcontroller.data.SettingsService;
+import de.tum.androidcontroller.models.SensorModel;
+import de.tum.androidcontroller.network.models.PacketsModel;
 import de.tum.androidcontroller.network.SocketConnectionThread;
 import de.tum.androidcontroller.sensors.EventListener;
 import de.tum.androidcontroller.sensors.SensorDataSettings;
 import de.tum.androidcontroller.sensors.SensorListener;
-import de.tum.androidcontroller.sensors.SensorModel;
 import de.tum.androidcontroller.views.SteeringWheelView;
 
 public class MainActivity extends AppCompatActivity implements EventListener{
@@ -56,8 +58,8 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     private SteeringWheelView steeringWheelForwardView;
     private SteeringWheelView steeringWheelSidewaysView;
 
-    private SensorData mLocalAccelerationHolder;
-    private SensorData mLocalGyroHolder;
+    private SensorModel mLocalAccelerationHolder;
+    private SensorModel mLocalGyroHolder;
 
     private long TEST_CALLS_COUNT = 10000; //TODO remove it
 
@@ -76,10 +78,10 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
 
-        mCommunicationThread = new SocketConnectionThread(PacketsModel.ConnectionType.TCP);
+        //mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.TCP); //TODO change this
 
         if(mSensorListener == null){
-            mSensorListener = SensorModel.getInstance(this);
+            mSensorListener = de.tum.androidcontroller.sensors.SensorModel.getInstance(this);
         }
 
 
@@ -170,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this,SettingsActivity.class));
             return true;
         }
 
@@ -178,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
 
     @Override
-    public void onGyroChanged(SensorData data) {
+    public void onGyroChanged(SensorModel data) {
         mLocalGyroHolder = data; //TODO maybe not needed
 
         //consider it only if is a significant change
@@ -206,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     }
 
     @Override
-    public void onAccelerometerChanged(SensorData data) {
+    public void onAccelerometerChanged(SensorModel data) {
         if(mLocalAccelerationHolder == null){
             mLocalAccelerationHolder = data;
         }
@@ -247,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
     /**
      * Used for setting custom string format on the screen for each sensor
-     * @param sensorValue the value from the SensorData
+     * @param sensorValue the value from the SensorModel
      * @param decimalDigits the maximal digits to be shown on the screen. They should be in [0,5]
      * @return equal format for each sensor
      */
@@ -269,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
      * @param textView the textView holder of the element
      * @param decimalDigits the maximal digits to be shown on the screen. They should be in [0,5]
      */
-    private void setSensorDataToLayout(SensorData data, LinearLayout layout, TextView textView, int decimalDigits){
+    private void setSensorDataToLayout(SensorModel data, LinearLayout layout, TextView textView, int decimalDigits){
         textView = (TextView) layout.findViewById(R.id.value_x);
         textView.setText(getFormattedValue(data.getX(),decimalDigits));
         textView = (TextView) layout.findViewById(R.id.value_y);
@@ -374,20 +377,22 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     }
 
     public void UDPSend(View view) {
-        mCommunicationThread.UDPSend("udp send");
+        //mCommunicationThread.UDPSend("udp send");
+        mCommunicationThread.sendMsg("udp send");
     }
 
     public void UDPReceive(View view) {
-        mCommunicationThread.UDPReceive();
+        //mCommunicationThread.UDPReceive();
     }
 
     public void TCPSend(View view) {
         for(int i = 1; i < TEST_CALLS_COUNT; i++)
-            mCommunicationThread.TCPSend(buildTestJSON(i).toString());
+            mCommunicationThread.sendMsg(buildTestJSON(i).toString());
         //mCommunicationThread.closeConnection();
     }
 
     public void TCPReceive(View view) {
 
     }
+
 }

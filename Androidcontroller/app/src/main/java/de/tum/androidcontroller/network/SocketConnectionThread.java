@@ -10,11 +10,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import de.tum.androidcontroller.network.Models.PacketsModel;
-import de.tum.androidcontroller.network.Packets.TCPReceivePacket;
-import de.tum.androidcontroller.network.Packets.TCPSendPacket;
-import de.tum.androidcontroller.network.Packets.UDPReceivePacket;
-import de.tum.androidcontroller.network.Packets.UDPSendPacket;
+import de.tum.androidcontroller.data.SettingsService;
+import de.tum.androidcontroller.network.models.PacketsModel;
+import de.tum.androidcontroller.network.packets.TCPReceivePacket;
+import de.tum.androidcontroller.network.packets.TCPSendPacket;
+import de.tum.androidcontroller.network.packets.UDPReceivePacket;
+import de.tum.androidcontroller.network.packets.UDPSendPacket;
 
 
 
@@ -25,7 +26,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private static final String TAG = "SocketConnectionThread";
 
-    private PacketsModel.ConnectionType connectionType = null;
+    private SettingsService.ConnectionType connectionType = null;
 
     //For the TCP connection
     private Socket mSocket;
@@ -39,7 +40,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         mThreadFactory = (ConnectionThreadFactory) threadFactory;
     }
 
-    public SocketConnectionThread(PacketsModel.ConnectionType connectionType) {
+    public SocketConnectionThread(SettingsService.ConnectionType connectionType) {
         this(
                 Runtime.getRuntime().availableProcessors(), // if this value is 2 than we can not use this class for parallel sending and receiving :(
                 Runtime.getRuntime().availableProcessors(), // should be the some as the one above otherwise exception is thrown :<
@@ -67,6 +68,47 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
             case Bluetooth:
                 initBluetoothConnection();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * The methos is sending the <b>msg</b> with the
+     * corresponding communication technology.
+     * @param msg The message that is going to be send.
+     */
+    public void sendMsg(String msg){
+        switch (connectionType){
+            case TCP:
+                TCPSend(msg);
+                break;
+
+            case UDP:
+                UDPSend(msg);
+                break;
+
+            case Bluetooth:
+                //TODO add
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void startReceiving(){
+        switch (connectionType){
+            case TCP:
+                TCPReceive();
+                break;
+
+            case UDP:
+                TCPReceive();
+                break;
+
+            case Bluetooth:
+                //TODO add
                 break;
             default:
                 break;
@@ -164,51 +206,47 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         //Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
 
         //the TCP init has fisnished => start immediately the TCP receiver
-        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT)){
-            this.TCPReceive();
+        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT) ||
+                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT) ||
+                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)){
+            this.startReceiving();  //start receiving depending on the connectionType
         }
     }
 
-    public void UDPSend(String msg){
+    private void UDPSend(String msg){
         try {
             mThreadFactory.setType(ConnectionThreadFactory.Type.UDPSend);
-            Log.e(TAG, "Before Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
-            this.execute(new UDPSendPacket(msg));
+            int alive = this.getActiveCount();
+            int queued = this.getQueue().size();
+            if(queued + alive < this.getMaximumPoolSize())
+                this.execute(new UDPSendPacket(msg));
+            else
+                Log.e(TAG, "Too much processes... Skipping thread!");
 
-            Log.e(TAG, "After Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
 
-    public void UDPReceive(){
+    private void UDPReceive(){
         try {
             mThreadFactory.setType(ConnectionThreadFactory.Type.UDPReceive);
-
-            Log.e(TAG, "Before Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
             this.execute(new UDPReceivePacket(""));
 
-            Log.e(TAG, "After Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
-        } catch (IllegalArgumentException e) {
+       } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
 
-    public void TCPSend(String msg){
+    private void TCPSend(String msg){
         try {
             mThreadFactory.setType(ConnectionThreadFactory.Type.TCPSend);
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
-            if(queued > 0)
-                Log.e(TAG, "TCPSend: QEUED is not 0! It is " +queued);
-            if(this.getMaximumPoolSize() - alive > 0)
+            if(queued + alive < this.getMaximumPoolSize())
                 this.execute(new TCPSendPacket(msg,mSocket));
             else
-                Log.e(TAG, "Skipping thread!");
-            //Log.e(TAG, "Before Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
-
-
-           // Log.e(TAG, "After Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
+                Log.e(TAG, "Too much processes... Skipping thread!");
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -216,12 +254,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private void TCPReceive(){
         try {
-            mThreadFactory.setType(ConnectionThreadFactory.Type.TCPReceive);
+           mThreadFactory.setType(ConnectionThreadFactory.Type.TCPReceive);
+           this.execute(new TCPReceivePacket("",mSocket));
 
-            //Log.e(TAG, "Before Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
-            this.execute(new TCPReceivePacket("",mSocket));
-
-           // Log.e(TAG, "After Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }

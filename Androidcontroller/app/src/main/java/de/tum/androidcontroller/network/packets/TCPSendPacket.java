@@ -1,4 +1,4 @@
-package de.tum.androidcontroller.network.Packets;
+package de.tum.androidcontroller.network.packets;
 
 import android.util.Log;
 

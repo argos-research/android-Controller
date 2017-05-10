@@ -12,4 +12,5 @@
     <dimen name="fragment_main_default_space_separator">140dp</dimen>
     <dimen name="fragment_main_default_elements_padding">15dp</dimen>
     <dimen name="border_width">1dp</dimen>
+    <dimen name="settings_margin">16dp</dimen>
 </resources>

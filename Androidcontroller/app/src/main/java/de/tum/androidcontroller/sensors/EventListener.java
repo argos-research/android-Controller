@@ -1,6 +1,6 @@
 package de.tum.androidcontroller.sensors;
 
-import de.tum.androidcontroller.data.SensorData;
+import de.tum.androidcontroller.models.SensorModel;
 
 /**
  * Drives the changes from the sensors. For more info
@@ -17,7 +17,7 @@ public interface EventListener {
      * the value decreases) and braking(keep decreasing) and the Y axis for steering.
      * @param data the data provided from the sensors listener in m/s2
      */
-    void onAccelerometerChanged(SensorData data);
+    void onAccelerometerChanged(SensorModel data);
 
     /**
      * Measures a device's rate of rotation in rad/s around each of
@@ -28,7 +28,7 @@ public interface EventListener {
      * positive means right).
      * @param data the data provided from the sensors listener in rad/s
      */
-    void onGyroChanged(SensorData data);
+    void onGyroChanged(de.tum.androidcontroller.models.SensorModel data);
 
     /**
      * Measures the acceleration force in m/s2 that is applied to a
@@ -36,20 +36,20 @@ public interface EventListener {
      * excluding the force of gravity.
      * @param data the data provided from the sensors listener in m/s2
      */
-    //void onLinearAccelerometerChanged(SensorData data);
+    //void onLinearAccelerometerChanged(SensorModel data);
 
     /**
      * Measures the ambient geomagnetic field for all
      * three physical axes (x, y, z) in μT.
      * @param data the data provided from the sensors listener in μT
      */
-    //void onMagneticFieldChanged(SensorData data);
+    //void onMagneticFieldChanged(SensorModel data);
 
     /**
      * Measures the orientation of a device by providing the
      * three elements of the device's rotation vector.
      * @param data the data provided from the sensors listener as a number
      */
-    //void onRotationVectorChanged(SensorData data);
+    //void onRotationVectorChanged(SensorModel data);
 
 }

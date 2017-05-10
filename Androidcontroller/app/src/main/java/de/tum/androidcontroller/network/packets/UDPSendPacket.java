@@ -1,8 +1,6 @@
-package de.tum.androidcontroller.network.Packets;
+package de.tum.androidcontroller.network.packets;
 
 import android.util.Log;
-
-import java.util.concurrent.Callable;
 
 /**
  * Created by chochko on 05/05/17.

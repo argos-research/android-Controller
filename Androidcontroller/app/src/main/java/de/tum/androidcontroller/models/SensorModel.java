@@ -1,27 +1,24 @@
-package de.tum.androidcontroller.data;
+package de.tum.androidcontroller.models;
 
 import android.hardware.SensorEvent;
-import android.icu.text.DecimalFormat;
-
-import de.tum.androidcontroller.utils.MathUtils;
 
 /**
  * This class will be used for saving the sonsor data
  */
 
-public class SensorData {
+public class SensorModel {
 
     private float x;
     private float y;
     private float z;
 
-    public SensorData(float x, float y, float z){
+    public SensorModel(float x, float y, float z){
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public SensorData(float x, float y, float z, int decimalDigits){
+    public SensorModel(float x, float y, float z, int decimalDigits){
     //Optional
 //        this.x = MathUtils.toDigitsClean(x,decimalDigits);
 //        this.y = MathUtils.toDigitsClean(y,decimalDigits);
@@ -46,7 +43,7 @@ public class SensorData {
     }
 
 
-    public static SensorData toSensorData(SensorEvent event, int decimalDigits){
-        return new SensorData(event.values[0],event.values[1],event.values[2],decimalDigits);
+    public static SensorModel toSensorData(SensorEvent event, int decimalDigits){
+        return new SensorModel(event.values[0],event.values[1],event.values[2],decimalDigits);
     }
 }

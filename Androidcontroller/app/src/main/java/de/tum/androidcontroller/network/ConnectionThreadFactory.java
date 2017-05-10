@@ -5,7 +5,7 @@ import android.util.Log;
 
 import java.util.concurrent.ThreadFactory;
 
-import de.tum.androidcontroller.network.Models.PacketsModel;
+import de.tum.androidcontroller.network.models.PacketsModel;
 
 /**
  * Created by chochko on 05/05/17.

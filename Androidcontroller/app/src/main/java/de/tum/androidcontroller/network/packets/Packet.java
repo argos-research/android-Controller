@@ -1,6 +1,5 @@
-package de.tum.androidcontroller.network.Packets;
+package de.tum.androidcontroller.network.packets;
 
-import java.io.IOException;
 import java.net.Socket;
 
 /**
