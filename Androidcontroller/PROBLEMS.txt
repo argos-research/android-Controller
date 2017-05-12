@@ -1,0 +1,4 @@
+ThreadPoolExecutor is working on the main UI thread although it shouldn't. The socket initialization is possible and no "android.os.NetworkOnMainThreadException" is being triggered. But the rest of the communication makes the app to skip frames. This happens here:
+
+for(int i = 1; i < TEST_CALLS_COUNT; i++) 
+    mCommunicationThread.sendMsg(buildTestJSON(i).toString());
