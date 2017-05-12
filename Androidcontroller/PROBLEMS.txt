@@ -1,0 +1,18 @@
+This logic was created because of the ThreadPoolExecutor problems.
+
+
+From "http://stackoverflow.com/questions/18303891/best-practice-for-android-client-to-communicate-with-a-server-using-threads": <------- VERY USEFUL LINK WITH A LOT OF INFO!
+You need to consider some things, when you're developing a mobile application:
+    1. A smartphone doesn't have endless amount of battery.
+    2. A smartphone's Internet connection is somewhat volatile and you will lose Internet connection at different times.
+
+
+From another stackoverflow (http://stackoverflow.com/questions/35571290/android-best-practice-to-read-data-from-socket) question:
+Question:   First one was written as AsyncTask while second one was intended to run as separate thread. Which one is correct approach?
+
+Answer: 	AsyncTask is a wrapper of Thread, using AsyncTask can do network operation in the background thread and publish result int the ui thread.AsyncTask also manages the Thread pool, in some cases, you need not create a new thread every time. It is recommended to use AsyncTask in Android.
+
+
+From android.developers:
+https://developer.android.com/training/basics/network-ops/index.html
+Performing network operations 
