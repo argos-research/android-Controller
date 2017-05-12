@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,9 +35,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private Context context;
 
-    //TODO add this to the settings activity
-    private String IP   = "192.168.2.118";
-    private int port    = 8001;
+
+//    private String IP   = "192.168.2.118";
+//    private int port    = 8001;
 
     private SocketConnectionThread(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
@@ -142,11 +143,16 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
         mThreadFactory.setType(ConnectionThreadFactory.Type.InitTCPCommunication);
 
+        final String IP             = getSettingsData().getServerIP();
+        final int port              = getSettingsData().getServerPort();
+        final int socketTimeOut     = getSettingsData().getSocketTimeout();
+
         this.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mSocket = new Socket(IP, port); //TODO check docu for the other constructors
+                    mSocket = new Socket(IP,port); //TODO check docu for the other constructors
+                    //mSocket.connect(new InetSocketAddress(IP, port),socketTimeOut);
                 } catch (IOException e) {
                     Log.e(TAG, String.format("initTCPConnection: unable to initialize the socket. Is the server is really running on %s:%d?",IP,port));
                     e.printStackTrace();
@@ -164,6 +170,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     public void closeConnection(){
+        Log.e(TAG, "closeConnection: contype " + connectionType.toString());
         switch (connectionType){
             case TCP:
                 closeTCPConnection();
@@ -182,19 +189,24 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void closeTCPConnection() {
-        mThreadFactory.setType(ConnectionThreadFactory.Type.CloseSomeCommunication);
 
-        this.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mSocket.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "Unable to close the TCP communication...");
-                    e.printStackTrace();
-                }
+        if (mSocket != null) {
+            if (mSocket.isConnected()) {
+                mThreadFactory.setType(ConnectionThreadFactory.Type.CloseSomeCommunication);
+
+                this.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mSocket.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Unable to close the TCP communication...");
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
-        });
+        }
     }
 
     private void closeUDPConnection() {
@@ -262,11 +274,26 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void TCPReceive(){
         try {
            mThreadFactory.setType(ConnectionThreadFactory.Type.TCPReceive);
-           this.execute(new TCPReceivePacket("",mSocket));
+            if(mSocket != null){
+                if(mSocket.isConnected())
+                    this.execute(new TCPReceivePacket("",mSocket));
+                else
+                    Log.e(TAG, "TCPReceive: The server's socket is not connected! TCPReceive will not be called..");
+            }else{
+                Log.e(TAG, "TCPReceive: The server's socket is not initialized! TCPReceive will not be called...");
+            }
 
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Obtaining the singleton instane of the <b>SettingsService</b>
+     * @return {@link SettingsService}
+     */
+    private SettingsService getSettingsData(){
+        return SettingsService.getInstance(context);
     }
 
 }

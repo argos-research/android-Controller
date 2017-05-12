@@ -418,11 +418,11 @@ public class MainActivity extends AppCompatActivity implements EventListener{
                     for(int i = 1; i < TEST_CALLS_COUNT; i++) {
                         if (sending) {
                             mCommunicationThread.sendMsg(buildTestJSON(i).toString());
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+//                            try {
+//                                Thread.sleep(500);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
                         }else
                             break;
                     }
@@ -430,7 +430,9 @@ public class MainActivity extends AppCompatActivity implements EventListener{
             });
             workerDummy.start();
         }
-        //mCommunicationThread.closeConnection();
+
+//        for(int i = 1; i < TEST_CALLS_COUNT; i++)
+//            mCommunicationThread.sendMsg(buildTestJSON(i).toString());
     }
 
 

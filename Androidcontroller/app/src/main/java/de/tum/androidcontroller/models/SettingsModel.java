@@ -13,17 +13,24 @@ public class SettingsModel {
 
     private SettingsService.ConnectionType connectionType;
 
-    private int port;
-
     private String IP;
 
+    private int port;
+
+    private int socketTimeoutMilis;
 
     public SettingsModel(){
 
     }
 
-    public SettingsModel(SettingsService.ConnectionType connectionType){
-        this.connectionType = connectionType;
+    public SettingsModel(SettingsService.ConnectionType connectionType,
+                         String IP,
+                         int port,
+                         int socketTimeoutMilis){
+        this.connectionType     = connectionType;
+        this.IP                 = IP;
+        this.port               = port;
+        this.socketTimeoutMilis = socketTimeoutMilis;
     }
 
 
@@ -49,6 +56,14 @@ public class SettingsModel {
 
     public void setIP(String IP) {
         this.IP = IP;
+    }
+
+    public int getSocketTimeoutMilis(){
+        return socketTimeoutMilis;
+    }
+
+    public void setSocketTimeoutMilis(int socketTimeoutMilis){
+        this.socketTimeoutMilis = socketTimeoutMilis;
     }
 
 }

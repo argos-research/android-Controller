@@ -74,29 +74,86 @@ public class SettingsService {
      */
     private static final String KEY_CONNECTION_TYPE                 = "KeyConnectionType";
 
+    /**
+     * Key for the server's IP.
+     */
+    private static final String KEY_SERVER_IP                       = "KeyServerIP";
+
+    /**
+     * Key for the server's port.
+     */
+    private static final String KEY_SERVER_PORT                     = "KeyServerPort";
+
+    /**
+     * Key for the server's port.
+     */
+    private static final String KEY_SOCKET_TIMEOUT                  = "KeySocketTimeout";
+
 
     /**
      * Default value for the connection type.
      */
-    private static final  ConnectionType DEFAULT_CONNECTION_TYPE    = ConnectionType.TCP;
+    private static final ConnectionType DEFAULT_CONNECTION_TYPE     = ConnectionType.TCP;
+
+    /**
+     * Default value for the server's IP
+     */
+    private static final String DEFAULT_SERVER_IP                   = "192.168.0.0";
+
+    /**
+     * Default value for the server's port
+     */
+    private static final int DEFAULT_SERVER_PORT                    = 8000;
+
+    /**
+     * Default value for the TCP socket timeout in milis
+     */
+    private static final int DEFAULT_SOCKET_TIMEOUT                 = 5000;
 
 
     public String getConnectionType(){
         return getPreferences().getString(KEY_CONNECTION_TYPE,DEFAULT_CONNECTION_TYPE.toString());
     }
 
+    public String getServerIP(){
+        return getPreferences().getString(KEY_SERVER_IP,DEFAULT_SERVER_IP);
+    }
+
+    public int getServerPort(){
+        return getPreferences().getInt(KEY_SERVER_PORT,DEFAULT_SERVER_PORT);
+    }
+
+    public int getSocketTimeout(){
+        return getPreferences().getInt(KEY_SOCKET_TIMEOUT,DEFAULT_SOCKET_TIMEOUT);
+    }
+
+    /**
+     * Save the settings from the provided <b>settingsData</b> to the shared preferences of this app.
+     * @param settingsData the new settingsData model
+     */
     public void saveSettings(SettingsModel settingsData) {
         SharedPreferences.Editor editor = getEditor();
 
         editor.putString(KEY_CONNECTION_TYPE, settingsData.getConnectionType().toString());
+        editor.putString(KEY_SERVER_IP, settingsData.getIP());
+
+        editor.putInt(KEY_SERVER_PORT, settingsData.getPort());
+        editor.putInt(KEY_SOCKET_TIMEOUT, settingsData.getSocketTimeoutMilis());
 
         editor.apply();
     }
 
+    /**
+     * Reset the settings to the default values from above.
+     */
     public void resetSettings() {
         SharedPreferences.Editor editor = getEditor();
 
         editor.putString(KEY_CONNECTION_TYPE, DEFAULT_CONNECTION_TYPE.toString());
+        editor.putString(KEY_SERVER_IP, DEFAULT_SERVER_IP);
+
+        editor.putInt(KEY_SERVER_PORT, DEFAULT_SERVER_PORT);
+        editor.putInt(KEY_SOCKET_TIMEOUT, DEFAULT_SOCKET_TIMEOUT);
 
         editor.apply();
     }
@@ -146,42 +203,6 @@ public class SettingsService {
      */
     private SharedPreferences.Editor getEditor() {
         return getPreferences().edit();
-    }
-
-    /**
-     * Save value to sharedPreferences
-     */
-    private void saveValue(String key, boolean value) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putBoolean(key, value);
-        editor.apply();
-    }
-
-    /**
-     * Save value to sharedPreferences
-     */
-    private void saveValue(String key, String value){
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(key, value);
-        editor.apply();
-    }
-
-    /**
-     * Save value to sharedPreferences
-     */
-    private void saveValue(String key, int value) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putInt(key, value);
-        editor.apply();
-    }
-
-    /**
-     * Save value to sharedPreferences
-     */
-    private void saveValue(String key, float value) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putFloat(key, value);
-        editor.apply();
     }
 
 

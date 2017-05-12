@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import de.tum.androidcontroller.R;
@@ -32,6 +33,23 @@ public class SettingsActivity extends AppCompatActivity {
      */
     private Spinner spinnerConnectionType;
 
+    /**
+     * According to {@link de.tum.androidcontroller.models.SettingsModel} model,
+     * this EditText holds the IP of the server.
+     */
+    private EditText editTextServerIP;
+
+    /**
+     * According to {@link de.tum.androidcontroller.models.SettingsModel} model,
+     * this EditText holds the port of the server.
+     */
+    private EditText editTextServerPort;
+
+    private EditText editTextSocketTimeout;
+
+
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +59,12 @@ public class SettingsActivity extends AppCompatActivity {
         ArrayAdapter<String> adapterConnectionTypes = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,optionsConnectionTypes);
         spinnerConnectionType.setAdapter(adapterConnectionTypes);
         adapterConnectionTypes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        editTextServerIP = (EditText) findViewById(R.id.ip_edit_text);
+
+        editTextServerPort = (EditText) findViewById(R.id.port_edit_text);
+
+        editTextSocketTimeout = (EditText) findViewById(R.id.timeout_edit_text);
 
         restoreUI();
 
@@ -53,6 +77,12 @@ public class SettingsActivity extends AppCompatActivity {
         SettingsService data = SettingsService.getInstance(getApplicationContext());
 
         spinnerConnectionType.setSelection(getPositionFromArray(optionsConnectionTypes, data.getConnectionType()));
+
+        editTextServerIP.setText(String.valueOf(data.getServerIP()));
+
+        editTextServerPort.setText(String.valueOf(data.getServerPort()));
+
+        editTextSocketTimeout.setText(String.valueOf(data.getSocketTimeout()));
     }
 
 
@@ -60,6 +90,12 @@ public class SettingsActivity extends AppCompatActivity {
         SettingsModel settingsData = new SettingsModel();
 
         settingsData.setConnectionType(SettingsService.ConnectionType.fromPosition(spinnerConnectionType.getSelectedItemPosition()));
+
+        settingsData.setIP(editTextServerIP.getText().toString());
+
+        settingsData.setPort(Integer.valueOf(editTextServerPort.getText().toString()));
+
+        settingsData.setSocketTimeoutMilis(Integer.valueOf(editTextSocketTimeout.getText().toString()));
 
         return settingsData;
     }

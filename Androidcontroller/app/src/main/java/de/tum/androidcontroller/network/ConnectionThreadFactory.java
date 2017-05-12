@@ -54,6 +54,7 @@ class ConnectionThreadFactory implements ThreadFactory {
             return new Thread(r,PacketsModel.RUNNABLE_NAME_TCP_INIT);
         }else if(getType() == Type.CloseSomeCommunication){
             setType(null);
+            Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_CLOSE);
             return  new Thread(r, PacketsModel.RUNNABLE_NAME_TCP_CLOSE);
         }
         else {
