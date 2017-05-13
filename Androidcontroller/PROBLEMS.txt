@@ -17,3 +17,5 @@ From android.developers:
 https://developer.android.com/training/basics/network-ops/index.html
 Performing network operations 
 In google example AsyncTask is being used
+
+The ThreadPoolExecutor in the AsyncTask class with detailed information "http://stackoverflow.com/questions/4068984/running-multiple-asynctasks-at-the-same-time-not-possible"

@@ -6,13 +6,13 @@ import java.net.Socket;
  * Created by chochko on 05/05/17.
  */
 
-abstract class Packet implements Runnable {
+public abstract class Packet {
     private String msg = ""; //the msg that should be send
 
     private Socket socket; //used for the TCP communication
 
 
-    Packet(String msg){
+    public Packet(String msg){
         this.msg = msg;
     }
 
@@ -28,5 +28,7 @@ abstract class Packet implements Runnable {
     String getMsg(){
         return msg;
     }
+
+    public abstract void run();
 
 }
