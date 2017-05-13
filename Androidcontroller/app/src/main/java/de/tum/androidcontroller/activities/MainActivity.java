@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
 
-        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(this).getConnectionType()),this); //TODO handle if no server is running
+        //mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(this).getConnectionType()),this); //TODO handle if no server is running
 
         if(mSensorListener == null){
             mSensorListener = de.tum.androidcontroller.sensors.SensorModel.getInstance(this);

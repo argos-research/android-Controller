@@ -16,3 +16,4 @@ Answer: 	AsyncTask is a wrapper of Thread, using AsyncTask can do network operat
 From android.developers:
 https://developer.android.com/training/basics/network-ops/index.html
 Performing network operations 
+In google example AsyncTask is being used
