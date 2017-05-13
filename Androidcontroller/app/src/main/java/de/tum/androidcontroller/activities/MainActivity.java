@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
     private volatile boolean sending = true;
 
-    private Thread workerDummy;
+    private boolean significantAccChange = false;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
         setSensorDataToLayout(data,layout_gyro,mGyroValueHolder,3);
     }
-
+    int i = 1;
     @Override
     public void onAccelerometerChanged(SensorModel data) {
         if(mLocalAccelerationHolder == null){
@@ -250,12 +250,19 @@ public class MainActivity extends AppCompatActivity implements EventListener{
             //consider it only if is a significant change
             //the acceleration/breaking point
             if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK){
+                significantAccChange = true;
                 steeringWheelForwardView.drawAccelerationBrake(data.getX());
                 mLocalAccelerationHolder = data;
             }//the steering point
             else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING){
+                significantAccChange = true;
                 steeringWheelSidewaysView.drawLeftRight(data.getY());
                 mLocalAccelerationHolder = data;
+            }
+
+            if(significantAccChange) {
+                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
+                significantAccChange = false;
             }
         }
         setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,3);
@@ -411,28 +418,35 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
 
     public void sendData(View view) {
-        if (sending) {
-            workerDummy = new Thread(new Runnable() {     //WHY?!
-                @Override
-                public void run() {
-                    for(int i = 1; i < TEST_CALLS_COUNT; i++) {
-                        if (sending) {
-                            mCommunicationThread.sendMsg(buildTestJSON(i).toString());
-//                            try {
-//                                Thread.sleep(500);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-                        }else
-                            break;
-                    }
-                }
-            });
-            workerDummy.start();
-        }
+//        if (sending) {
+//            workerDummy = new Thread(new Runnable() {     //WHY?!
+//                @Override
+//                public void run() {
+//                    for(int i = 1; i < TEST_CALLS_COUNT; i++) {
+//                        if (sending) {
+//                            mCommunicationThread.sendMsg(buildTestJSON(i).toString());
+////                            try {
+////                                Thread.sleep(500);
+////                            } catch (InterruptedException e) {
+////                                e.printStackTrace();
+////                            }
+//                        }else
+//                            break;
+//                    }
+//                }
+//            });
+//            workerDummy.start();
+//        }
 
-//        for(int i = 1; i < TEST_CALLS_COUNT; i++)
-//            mCommunicationThread.sendMsg(buildTestJSON(i).toString());
+//        for(int i = 1; i < TEST_CALLS_COUNT; i++) {
+//            final String msg = buildTestJSON(i).toString();
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    mCommunicationThread.sendMsg(msg);
+//                }
+//            }).start();
+//        }
     }
 
 

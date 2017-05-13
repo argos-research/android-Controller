@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
@@ -31,9 +32,14 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private SettingsService.ConnectionType connectionType = null;
 
     //For the TCP connection
-    private Socket mSocket;
+    private Socket          mSocketTCP;
+
+    //for the UDP connection
+    private DatagramSocket  mSocketUDP;
 
     private Context context;
+
+    private final boolean LOGGING = false;
 
 
 //    private String IP   = "192.168.2.118";
@@ -46,8 +52,10 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     public SocketConnectionThread(SettingsService.ConnectionType connectionType, Context context) {
         this(
-                Runtime.getRuntime().availableProcessors(), // if this value is 2 than we can not use this class for parallel sending and receiving :(
-                Runtime.getRuntime().availableProcessors(), // should be the some as the one above otherwise exception is thrown :<
+                //Runtime.getRuntime().availableProcessors(), // if this value is 2 than we can not use this class for parallel sending and receiving :(
+                //Runtime.getRuntime().availableProcessors(), // should be the some as the one above otherwise exception is thrown :<
+                4, // if this value is 2 than we can not use this class for parallel sending and receiving :(
+                4, // should be the some as the one above otherwise exception is thrown :<
                 1000,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(),
@@ -63,14 +71,15 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void initCommunication(){
-        Log.e(TAG, "initCommunication: with connectionType " + connectionType.toString());
+        if(LOGGING)
+            Log.e(TAG, "initCommunication: with connectionType " + connectionType.toString());
         switch (connectionType){
             case TCP:
                 initTCPConnection();
                 break;
 
             case UDP:
-                //initUDPConnection();
+                initUDPConnection();
                 break;
 
             case Bluetooth:
@@ -87,7 +96,8 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
      * @param msg The message that is going to be send.
      */
     public void sendMsg(String msg){
-        Log.e(TAG, "sendMsg with connectionType " + connectionType.toString());
+        if(LOGGING)
+            Log.e(TAG, "sendMsg with connectionType " + connectionType.toString());
         switch (connectionType){
             case TCP:
                 TCPSend(msg);
@@ -141,8 +151,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private void initTCPConnection(){
 
-        mThreadFactory.setType(ConnectionThreadFactory.Type.InitTCPCommunication);
-
         final String IP             = getSettingsData().getServerIP();
         final int port              = getSettingsData().getServerPort();
         final int socketTimeOut     = getSettingsData().getSocketTimeout();
@@ -151,8 +159,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             @Override
             public void run() {
                 try {
-                    mSocket = new Socket(IP,port); //TODO check docu for the other constructors
-                    //mSocket.connect(new InetSocketAddress(IP, port),socketTimeOut);
+
+                    mThreadFactory.setType(ConnectionThreadFactory.Type.InitTCPCommunication);
+
+                    //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
+                    mSocketTCP = new Socket();
+                    mSocketTCP.connect(new InetSocketAddress(IP.trim(), port),socketTimeOut);
                 } catch (IOException e) {
                     Log.e(TAG, String.format("initTCPConnection: unable to initialize the socket. Is the server is really running on %s:%d?",IP,port));
                     e.printStackTrace();
@@ -162,7 +174,26 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void initUDPConnection(){
+        final String IP             = getSettingsData().getServerIP();
+        final int port              = getSettingsData().getServerPort();
+        final int socketTimeOut     = getSettingsData().getSocketTimeout();
 
+        this.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    mThreadFactory.setType(ConnectionThreadFactory.Type.InitUDPCommunication);
+
+                    //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
+                    mSocketTCP = new Socket();
+                    mSocketTCP.connect(new InetSocketAddress(IP.trim(), port),socketTimeOut);
+                } catch (IOException e) {
+                    Log.e(TAG, String.format("initTCPConnection: unable to initialize the socket. Is the server is really running on %s:%d?",IP,port));
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void initBluetoothConnection(){
@@ -170,7 +201,8 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     public void closeConnection(){
-        Log.e(TAG, "closeConnection: contype " + connectionType.toString());
+        if(LOGGING)
+            Log.e(TAG, "closeConnection: contype " + connectionType.toString());
         switch (connectionType){
             case TCP:
                 closeTCPConnection();
@@ -190,15 +222,15 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private void closeTCPConnection() {
 
-        if (mSocket != null) {
-            if (mSocket.isConnected()) {
+        if (mSocketTCP != null) {
+            if (mSocketTCP.isConnected()) {
                 mThreadFactory.setType(ConnectionThreadFactory.Type.CloseSomeCommunication);
 
                 this.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            mSocket.close();
+                            mSocketTCP.close();
                         } catch (IOException e) {
                             Log.e(TAG, "Unable to close the TCP communication...");
                             e.printStackTrace();
@@ -222,13 +254,15 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         super.afterExecute(r, t);
         String finishedThreadName = Thread.currentThread().getName();
 
-        Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
+        if(LOGGING)
+            Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
 
         //the TCP init has finished => start immediately the TCP receiver
         if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT) ||
                 finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT) ||
                 finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)){
-            this.startReceiving();  //start receiving depending on the connectionType
+            if(mSocketTCP.isConnected())
+                this.startReceiving();  //start receiving depending on the connectionType
         }
     }
 
@@ -259,13 +293,14 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private void TCPSend(String msg){
         try {
-            mThreadFactory.setType(ConnectionThreadFactory.Type.TCPSend);
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
-            if(queued + alive < this.getMaximumPoolSize())
-                this.execute(new TCPSendPacket(msg,mSocket));
-            else
-                Log.e(TAG, "Too much processes... Skipping thread!");
+            if(queued + alive < this.getMaximumPoolSize()) {
+                mThreadFactory.setType(ConnectionThreadFactory.Type.TCPSend);
+                this.execute(new TCPSendPacket(msg, mSocketTCP));
+            } else
+                if(LOGGING)
+                    Log.e(TAG, "Too much processes... Skipping thread!");
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -273,11 +308,11 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private void TCPReceive(){
         try {
-           mThreadFactory.setType(ConnectionThreadFactory.Type.TCPReceive);
-            if(mSocket != null){
-                if(mSocket.isConnected())
-                    this.execute(new TCPReceivePacket("",mSocket));
-                else
+            if(mSocketTCP != null){
+                if(mSocketTCP.isConnected()) {
+                    mThreadFactory.setType(ConnectionThreadFactory.Type.TCPReceive);
+                    this.execute(new TCPReceivePacket("", mSocketTCP));
+                } else
                     Log.e(TAG, "TCPReceive: The server's socket is not connected! TCPReceive will not be called..");
             }else{
                 Log.e(TAG, "TCPReceive: The server's socket is not initialized! TCPReceive will not be called...");

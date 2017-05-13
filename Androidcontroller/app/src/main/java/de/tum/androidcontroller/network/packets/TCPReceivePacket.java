@@ -27,16 +27,18 @@ public class TCPReceivePacket extends Packet{
 
     @Override
     public void run() {
-        Log.e(TAG, String.format("Listening for data on port %d...",super.getSocket().getPort()));
-        try{
-            byte inputBuffer[] = new byte[1024];
-            int bytes_read = mIn.read( inputBuffer );
-            String received = new String(inputBuffer, 0, bytes_read);
-            Log.e(TAG, "Message received from the server: "+ received);
+        while(getSocket().isConnected()) {
+            Log.e(TAG, String.format("Listening for data on port %d...", super.getSocket().getPort()));
+            try {
+                byte inputBuffer[] = new byte[1024];
+                int bytes_read = mIn.read(inputBuffer);
+                String received = new String(inputBuffer, 0, bytes_read);
+                Log.e(TAG, "Message received from the server: " + received);
 
-        }catch (IOException e){
-            Log.e(TAG, "Unable to write on the output stream!");
-            e.printStackTrace();
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to write on the output stream or the connection its closed!");
+                e.printStackTrace();
+            }
         }
     }
 }
