@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
@@ -32,10 +33,10 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private SettingsService.ConnectionType connectionType = null;
 
     //For the TCP connection
-    private Socket          mSocketTCP;
+    private Socket          mSocketTCP = null;
 
     //for the UDP connection
-    private DatagramSocket  mSocketUDP;
+    private DatagramSocket  mSocketUDP = null;
 
     private Context context;
 
@@ -122,7 +123,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 break;
 
             case UDP:
-                TCPReceive();
+                UDPReceive();
                 break;
 
             case Bluetooth:
@@ -155,12 +156,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         final int port              = getSettingsData().getServerPort();
         final int socketTimeOut     = getSettingsData().getSocketTimeout();
 
+        mThreadFactory.setType(ConnectionThreadFactory.Type.InitTCPCommunication);
+
         this.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-
-                    mThreadFactory.setType(ConnectionThreadFactory.Type.InitTCPCommunication);
 
                     //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
                     mSocketTCP = new Socket();
@@ -178,16 +179,19 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         final int port              = getSettingsData().getServerPort();
         final int socketTimeOut     = getSettingsData().getSocketTimeout();
 
+        mThreadFactory.setType(ConnectionThreadFactory.Type.InitUDPCommunication);
+
         this.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-
-                    mThreadFactory.setType(ConnectionThreadFactory.Type.InitUDPCommunication);
-
                     //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
-                    mSocketTCP = new Socket();
-                    mSocketTCP.connect(new InetSocketAddress(IP.trim(), port),socketTimeOut);
+                    //mSocketUDP = new DatagramSocket(port); //standard
+
+                    mSocketUDP = new DatagramSocket();
+                    mSocketUDP.connect(InetAddress.getByName(IP.trim()),port);
+                    mSocketUDP.setSoTimeout(socketTimeOut); //TODO use this for the TCP as well?
+
                 } catch (IOException e) {
                     Log.e(TAG, String.format("initTCPConnection: unable to initialize the socket. Is the server is really running on %s:%d?",IP,port));
                     e.printStackTrace();
@@ -242,6 +246,17 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void closeUDPConnection() {
+        if(mSocketUDP != null){
+            if(mSocketUDP.isConnected()){
+                mThreadFactory.setType(ConnectionThreadFactory.Type.CloseSomeCommunication);
+                this.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSocketUDP.close();
+                    }
+                });
+            }
+        }
 
     }
 
@@ -258,22 +273,28 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
 
         //the TCP init has finished => start immediately the TCP receiver
-        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT) ||
-                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT) ||
-                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)){
-            if(mSocketTCP.isConnected())
-                this.startReceiving();  //start receiving depending on the connectionType
+        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT)){
+            if(mSocketTCP.isConnected())    // only if its connected
+                this.startReceiving();
+        }
+        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT)){
+             if(mSocketUDP.isConnected())    // only if its connected
+                 this.startReceiving();
+        }
+
+        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)){
+            //TODO
         }
     }
 
     private void UDPSend(String msg){
         try {
-            mThreadFactory.setType(ConnectionThreadFactory.Type.UDPSend);
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
-            if(queued + alive < this.getMaximumPoolSize())
-                this.execute(new UDPSendPacket(msg));
-            else
+            if(queued + alive < this.getMaximumPoolSize()) {
+                mThreadFactory.setType(ConnectionThreadFactory.Type.UDPSend);
+                this.execute(new UDPSendPacket(msg,mSocketUDP));
+            } else
                 Log.e(TAG, "Too much processes... Skipping thread!");
 
         } catch (IllegalArgumentException e) {
@@ -284,7 +305,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void UDPReceive(){
         try {
             mThreadFactory.setType(ConnectionThreadFactory.Type.UDPReceive);
-            this.execute(new UDPReceivePacket(""));
+            this.execute(new UDPReceivePacket());
 
        } catch (IllegalArgumentException e) {
             e.printStackTrace();

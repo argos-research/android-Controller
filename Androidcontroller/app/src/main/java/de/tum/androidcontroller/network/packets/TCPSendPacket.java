@@ -22,7 +22,7 @@ public class TCPSendPacket extends Packet{
     public TCPSendPacket(String msg, Socket socket) {
         super(msg, socket);
         try{
-            mOut = super.getSocket().getOutputStream();
+            mOut = super.getSocketTCP().getOutputStream();
         }catch (IOException e){
             Log.e(TAG, "Unable to get the output stream!");
             e.printStackTrace();
@@ -38,6 +38,8 @@ public class TCPSendPacket extends Packet{
         }catch (IOException e){
             Log.e(TAG, "Unable to write on the output stream!");
             e.printStackTrace();
+        }catch (NullPointerException np){
+            Log.e(TAG, "The connection with the TCP server is closed so skipping the send of " + super.getMsg());
         }
     }
 }

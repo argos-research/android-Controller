@@ -1,6 +1,7 @@
 package de.tum.androidcontroller.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -80,21 +81,37 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         if(requestCode == ACTIVITY_REQUEST_CODE){
             //new settings are saved
             if(resultCode == Activity.RESULT_OK){
-                //stop sending
-                sending = false;
 
-                //close the current communication
-                mCommunicationThread.closeConnection();
+                final Context myInstance = this;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e(TAG, "run: in the main thread");
+                        //stop sending
+                        sending = false;
 
-                //stop the dummy thread
+                        //close the current communication
+                        mCommunicationThread.closeConnection();
 
-                //wait for it to finish
-                while(mCommunicationThread.getActiveCount() + mCommunicationThread.getQueue().size() > 0);
+                        //stop the dummy thread
 
-                Log.e(TAG, "onActivityResult: connection closed");
+                        //wait for it to finish
+                        while(mCommunicationThread.getActiveCount() + mCommunicationThread.getQueue().size() > 0);
 
-                //init with the new communication method
-                mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(this).getConnectionType()),this);
+                        Log.e(TAG, "onActivityResult: connection closed");
+
+                        //init with the new communication method
+                        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(myInstance).getConnectionType()),myInstance);
+
+
+                        //resume sending
+                        sending = true;
+
+
+                        Log.e(TAG, "run: in the main thread READY");
+
+                    }
+                }).start();
 
             }
         }
