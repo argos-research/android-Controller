@@ -273,8 +273,8 @@ public class MainActivity   extends AppCompatActivity
      *              communication technology was successful or not.
      */
     @Override
-    public void onConnectionInitResponse(boolean state) {
-        Log.e(TAG, "onConnectionInitResponse: ");
+    public void onConnectionInitResponse(boolean state, String additionInformation) {
+        //TODO add the addinfo to the displayed msg
         mProgressDialog.dismiss();
         final Context myInstance = this;
 

@@ -1,13 +1,19 @@
 package de.tum.androidcontroller.network;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -27,7 +33,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
 
     public interface ConnectionCallback{
-        public void onConnectionInitResponse(boolean state);
+        public void onConnectionInitResponse(boolean state, String additionInformation);
     }
 
     private ConnectionCallback mCallback;
@@ -38,20 +44,31 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private SettingsService.ConnectionType connectionType = null;
 
-    //For the TCP connection
-    private Socket          mSocketTCP = null;
-
-    //for the UDP connection
-    private DatagramSocket  mSocketUDP = null;
-
-    private Context context;
-
     private final boolean LOGGING = false;
 
     private volatile boolean once = true; //TODO fix it!
 
-//    private String IP   = "192.168.2.118";
-//    private int port    = 8001;
+
+    //For the TCP connection
+    private Socket          mSocketTCP  = null;
+
+    //for the UDP connection
+    private DatagramSocket  mSocketUDP  = null;
+
+    private Context context;
+
+    //for the bluetooth part
+    private BluetoothSocket mSockerBt   = null;
+    private OutputStream btOutStream    = null;
+    private InputStream btInStream      = null;
+
+    // Well known SPP UUID
+    private final UUID MY_UUID =
+            //UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+            UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");    //TODO check if with this configuration it will work every time and the problem with "socket null" won't happend
+
+
+    private String initializationMsg = ""; //used for additional info from the init.
 
     private SocketConnectionThread(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
@@ -94,7 +111,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 break;
 
             case Bluetooth:
-                //initBluetoothConnection();
+                initBluetoothConnection();
                 break;
             default:
                 break;
@@ -173,7 +190,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             @Override
             public void run() {
                 try {
-                    //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
+
                     //mSocketUDP = new DatagramSocket(port); //standard
 
                     mSocketUDP = new DatagramSocket();
@@ -189,9 +206,57 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void initBluetoothConnection(){
+        final String serverMac      = "30:3A:64:D2:3E:93"; //Add this to the settings
 
+        mThreadFactory.setType(ConnectionThreadFactory.Type.InitBluetoothCommunication);
+
+        this.execute(new Runnable() {
+            @Override
+            public void run() {
+                BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter(); //TODO move this to the constructor?
+
+                BluetoothDevice device = btAdapter.getRemoteDevice(serverMac);
+
+                // Two things are needed to make a connection:
+                //   A MAC address, which we got above.
+                //   A Service ID or UUID.  In this case we are using the
+                //     UUID for SPP.
+                try {
+                    //for other options and diff between them see here: (Also here more info for what is happening!)
+                    //http://stackoverflow.com/questions/16457693/the-differences-between-createrfcommsockettoservicerecord-and-createrfcommsocket
+                    //the official documentation can be found here:
+                    //https://developer.android.com/reference/android/bluetooth/BluetoothDevice.html
+                    mSockerBt = device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
+
+                    //btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
+                } catch (IOException e) {
+                    initializationMsg += "Fatal Error: Bluetooth socket creation failed: " + e.getMessage() + ".\n";
+                }
+
+                // Discovery is resource intensive.  Make sure it isn't going on
+                // when you attempt to connect and pass your message.
+                btAdapter.cancelDiscovery();
+
+                // Establish the connection.  This will block until it connects.
+                try {
+                    mSockerBt.connect();
+                    initializationMsg += "Connection established and data link opened...\n";
+                } catch (IOException e) {
+                    try {
+                        mSockerBt.close();
+                    } catch (IOException e2) {
+                        initializationMsg += "Fatal Error:  Unable to close the bluetooth socket during the connection failure" + e2.getMessage() + ".\n";
+                    }
+                }
+
+            }
+        });
     }
 
+    /**
+     * Standard method for closing the current connection
+     * depending on the chosen {@link SettingsService.ConnectionType}.
+     */
     public void closeConnection(){
         if(LOGGING)
             Log.e(TAG, "closeConnection: contype " + connectionType.toString());
@@ -268,12 +333,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             if (once) {
                 if(isConnectionEstablished()) {   // only if its connected
                     mThreadFactory.setType(ConnectionThreadFactory.Type.CallbackThread);
-                    mCallback.onConnectionInitResponse(true);   //this is started on thread as well so a type initialization is required
+                    mCallback.onConnectionInitResponse(true, initializationMsg);   //this is started on thread as well so a type initialization is required
 
                     this.startReceiving();
                 }else{
                     mThreadFactory.setType(ConnectionThreadFactory.Type.CallbackThread);
-                    mCallback.onConnectionInitResponse(false);  //this is started on thread as well so a type initialization is required
+                    mCallback.onConnectionInitResponse(false, initializationMsg);  //this is started on thread as well so a type initialization is required
                 }
                 once = false;
             }
