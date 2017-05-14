@@ -1,10 +1,13 @@
 package de.tum.androidcontroller.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -31,7 +34,9 @@ import de.tum.androidcontroller.sensors.SensorDataSettings;
 import de.tum.androidcontroller.sensors.SensorListener;
 import de.tum.androidcontroller.views.SteeringWheelView;
 
-public class MainActivity extends AppCompatActivity implements EventListener{
+public class MainActivity   extends AppCompatActivity
+                            implements EventListener,
+                            SocketConnectionThread.ConnectionCallback{
 
     private static final String TAG = "android_controller_tag";
     private static final boolean logging = false;
@@ -75,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 
     private boolean significantAccChange = false;
 
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //if we are coming from the settings activity
@@ -83,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
             if(resultCode == Activity.RESULT_OK){
 
                 final Context myInstance = this;
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -90,18 +98,13 @@ public class MainActivity extends AppCompatActivity implements EventListener{
                         //stop sending
                         sending = false;
 
-                        //close the current communication
-                        mCommunicationThread.closeConnection();
-
-                        //stop the dummy thread
-
                         //wait for it to finish
                         while(mCommunicationThread.getActiveCount() + mCommunicationThread.getQueue().size() > 0);
 
                         Log.e(TAG, "onActivityResult: connection closed");
 
                         //init with the new communication method
-                        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(myInstance).getConnectionType()),myInstance);
+                        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),myInstance);
 
 
                         //resume sending
@@ -127,8 +130,6 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         initLayoutsAndHeadlines();
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
-
-        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(SettingsService.getInstance(this).getConnectionType()),this); //TODO handle if no server is running
 
         if(mSensorListener == null){
             mSensorListener = de.tum.androidcontroller.sensors.SensorModel.getInstance(this);
@@ -193,6 +194,13 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     @Override
     protected void onResume() {
         super.onResume();
+
+
+        mProgressDialog = getProgressDialog("Initialization","Waiting for a response from the server...");
+        mProgressDialog.show();
+
+        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this); //TODO handle if no server is running
+
         mSensorListener.onResume(mSensorManager);
         if(logging)
             Log.e(TAG, "onStart");
@@ -202,6 +210,9 @@ public class MainActivity extends AppCompatActivity implements EventListener{
     protected void onPause() {
         super.onPause();
         mSensorListener.onPause(mSensorManager);
+
+        //close the current communication
+        mCommunicationThread.closeConnection();
         if(logging)
             Log.e(TAG, "onPause");
     }
@@ -229,6 +240,80 @@ public class MainActivity extends AppCompatActivity implements EventListener{
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * An instance of {@link AlertDialog} for displaying additional
+     * information on the screen while initializing information in the background
+     * or showing if the connection was successful or not.
+     * @param title the title of it
+     * @param msg the message that will be shown
+     * @return a custom instance of {@link AlertDialog}
+     */
+    public AlertDialog getAlertDialog(String title, String msg){
+        AlertDialog dialog = new AlertDialog.Builder(this).create();
+        dialog.setTitle(title);
+        dialog.setMessage(msg);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
+    public ProgressDialog getProgressDialog(String title, String msg){
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setTitle(title);
+        dialog.setMessage(msg);
+        dialog.setIndeterminate(true);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
+    /**
+     * Helper method for displaying additional information from the
+     * communication with the server from {@link SocketConnectionThread}.
+     * @param state whether the initialization of the the given
+     *              communication technology was successful or not.
+     */
+    @Override
+    public void onConnectionInitResponse(boolean state) {
+        Log.e(TAG, "onConnectionInitResponse: ");
+        mProgressDialog.dismiss();
+        final Context myInstance = this;
+
+        if(state){
+            //TODO consider using a Snackbar! https://developer.android.com/training/snackbar/action.html
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog alertDialog = getAlertDialog("Initialization successful",String.format("Connection established with %s:%d",getSettingsData().getServerIP(),getSettingsData().getServerPort()));
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
+                }
+            });
+
+        }else{
+
+            //TODO consider using a Snackbar! https://developer.android.com/training/snackbar/action.html
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog alertDialog = getAlertDialog("Initialization failed","There was a problem connecting to the server. Please check the your settings and make sure the server is running!");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Go to Settings",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    startActivityForResult(new Intent(myInstance,SettingsActivity.class),ACTIVITY_REQUEST_CODE);
+                                }
+                            });
+                    alertDialog.show();
+                }
+            });
+        }
+    }
 
     @Override
     public void onGyroChanged(SensorModel data) {
@@ -276,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements EventListener{
                 steeringWheelSidewaysView.drawLeftRight(data.getY());
                 mLocalAccelerationHolder = data;
             }
-
+            //if it is a significant change => send it to the server
             if(significantAccChange) {
                 mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
                 significantAccChange = false;
@@ -466,5 +551,12 @@ public class MainActivity extends AppCompatActivity implements EventListener{
 //        }
     }
 
+    /**
+     * Obtaining the singleton instane of the <b>SettingsService</b>
+     * @return {@link SettingsService}
+     */
+    private SettingsService getSettingsData(){
+        return SettingsService.getInstance(this);
+    }
 
 }

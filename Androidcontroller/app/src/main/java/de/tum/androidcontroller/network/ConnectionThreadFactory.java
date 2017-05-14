@@ -13,7 +13,7 @@ import de.tum.androidcontroller.network.models.PacketsModel;
 
 class ConnectionThreadFactory implements ThreadFactory {
 
-
+    private volatile boolean LOGGING = true;
 
     private Type type = null;
     enum Type{
@@ -23,7 +23,8 @@ class ConnectionThreadFactory implements ThreadFactory {
         TCPReceive,
         InitTCPCommunication,
         InitUDPCommunication,
-        CloseSomeCommunication
+        CloseSomeCommunication,
+        CallbackThread
     }
 
     private final String TAG = "ConnectionThreadFactory";
@@ -34,32 +35,44 @@ class ConnectionThreadFactory implements ThreadFactory {
             throw new IllegalArgumentException("Specify type argument!");
         else if(getType() == Type.TCPReceive){
              setType(null);
-             Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_RECEIVE);
+            if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_RECEIVE);
              return new Thread(r,PacketsModel.RUNNABLE_NAME_TCP_RECEIVE);
         }else if(getType() == Type.TCPSend){
              setType(null);
-             Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_SEND);
+             if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_SEND);
              return new Thread(r,PacketsModel.RUNNABLE_NAME_TCP_SEND);
         }else if(getType() == Type.UDPReceive){
              setType(null);
-             Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_UDP_RECEIVE);
+             if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_UDP_RECEIVE);
              return new Thread(r,PacketsModel.RUNNABLE_NAME_UDP_RECEIVE);
         }else if(getType() == Type.UDPSend){
              setType(null);
-             Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_UDP_SEND);
+             if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_UDP_SEND);
              return new Thread(r,PacketsModel.RUNNABLE_NAME_UDP_SEND);
         }else if(getType() == Type.InitTCPCommunication){
             setType(null);
-            Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_INIT);
+             if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_INIT);
             return new Thread(r,PacketsModel.RUNNABLE_NAME_TCP_INIT);
         }else if(getType() == Type.InitUDPCommunication) {
             setType(null);
-            Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_UDP_INIT);
+            if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_UDP_INIT);
             return new Thread(r, PacketsModel.RUNNABLE_NAME_UDP_INIT);
         }else if(getType() == Type.CloseSomeCommunication){
             setType(null);
-            Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_CLOSE);
+            if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_TCP_CLOSE);
             return  new Thread(r, PacketsModel.RUNNABLE_NAME_TCP_CLOSE);
+        }else if(getType() == Type.CallbackThread){
+            setType(null);
+            if(LOGGING)
+                Log.e(TAG, "newThread: " + PacketsModel.RUNNABLE_NAME_CALLBACK);
+            return  new Thread(r, PacketsModel.RUNNABLE_NAME_CALLBACK);
         }
         else {
             throw new IllegalArgumentException("Unknown type argument!");

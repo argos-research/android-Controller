@@ -26,6 +26,12 @@ import de.tum.androidcontroller.network.packets.UDPSendPacket;
 public class SocketConnectionThread extends ThreadPoolExecutor{
 
 
+    public interface ConnectionCallback{
+        public void onConnectionInitResponse(boolean state);
+    }
+
+    private ConnectionCallback mCallback;
+
     private ConnectionThreadFactory mThreadFactory = null;
 
     private static final String TAG = "SocketConnectionThread";
@@ -42,6 +48,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private final boolean LOGGING = false;
 
+    private volatile boolean once = true; //TODO fix it!
 
 //    private String IP   = "192.168.2.118";
 //    private int port    = 8001;
@@ -68,7 +75,10 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
         this.context        = context;
 
+        this.mCallback      = (ConnectionCallback) context;
+
         initCommunication(); //init the given communication
+
     }
 
     private void initCommunication(){
@@ -91,46 +101,24 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         }
     }
 
-    /**
-     * The methos is sending the <b>msg</b> with the
-     * corresponding communication technology.
-     * @param msg The message that is going to be send.
-     */
-    public void sendMsg(String msg){
-        if(LOGGING)
-            Log.e(TAG, "sendMsg with connectionType " + connectionType.toString());
-        switch (connectionType){
-            case TCP:
-                TCPSend(msg);
-                break;
-
-            case UDP:
-                UDPSend(msg);
-                break;
-
-            case Bluetooth:
-                //TODO add
-                break;
-            default:
-                break;
-        }
-    }
 
     private void startReceiving(){
-        switch (connectionType){
-            case TCP:
-                TCPReceive();
-                break;
+        if (isConnectionEstablished()) {
+            switch (connectionType){
+                case TCP:
+                    TCPReceive();
+                    break;
 
-            case UDP:
-                UDPReceive();
-                break;
+                case UDP:
+                    UDPReceive();
+                    break;
 
-            case Bluetooth:
-                //TODO add
-                break;
-            default:
-                break;
+                case Bluetooth:
+                    //TODO add
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -165,7 +153,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
                     //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
                     mSocketTCP = new Socket();
-                    mSocketTCP.connect(new InetSocketAddress(IP.trim(), port),socketTimeOut);
+                    mSocketTCP.connect(new InetSocketAddress(IP, port),socketTimeOut);
                 } catch (IOException e) {
                     Log.e(TAG, String.format("initTCPConnection: unable to initialize the socket. Is the server is really running on %s:%d?",IP,port));
                     e.printStackTrace();
@@ -189,7 +177,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                     //mSocketUDP = new DatagramSocket(port); //standard
 
                     mSocketUDP = new DatagramSocket();
-                    mSocketUDP.connect(InetAddress.getByName(IP.trim()),port);
+                    mSocketUDP.connect(InetAddress.getByName(IP),port);
                     mSocketUDP.setSoTimeout(socketTimeOut); //TODO use this for the TCP as well?
 
                 } catch (IOException e) {
@@ -273,17 +261,78 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
 
         //the TCP init has finished => start immediately the TCP receiver
-        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT)){
-            if(mSocketTCP.isConnected())    // only if its connected
-                this.startReceiving();
-        }
-        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT)){
-             if(mSocketUDP.isConnected())    // only if its connected
-                 this.startReceiving();
-        }
+        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT) ||
+           finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT) ||
+           finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)    ){
+            //Log.e(TAG, "afterExecute: HERE " + finishedThreadName); //TODO fix the double call of the init
+            if (once) {
+                if(isConnectionEstablished()) {   // only if its connected
+                    mThreadFactory.setType(ConnectionThreadFactory.Type.CallbackThread);
+                    mCallback.onConnectionInitResponse(true);   //this is started on thread as well so a type initialization is required
 
-        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)){
-            //TODO
+                    this.startReceiving();
+                }else{
+                    mThreadFactory.setType(ConnectionThreadFactory.Type.CallbackThread);
+                    mCallback.onConnectionInitResponse(false);  //this is started on thread as well so a type initialization is required
+                }
+                once = false;
+            }
+        }
+    }
+
+    /**
+     * Helper method for deciding if a connection is established
+     * @return true if the connection is connection
+     */
+    private boolean isConnectionEstablished(){
+        switch (connectionType){
+            case TCP:
+                if(mSocketTCP != null){
+                    if(mSocketTCP.isConnected())
+                        return true;
+                }
+                break;
+            case UDP:
+                if(mSocketUDP != null){
+                    if(mSocketUDP.isConnected())
+                        return true;
+                }
+                break;
+
+            case Bluetooth:
+                //TODO
+                break;
+            default:
+                return false;
+        }
+        return false;
+    }
+
+    /**
+     * The methos is sending the <b>msg</b> with the
+     * corresponding communication technology.
+     * @param msg The message that is going to be send.
+     */
+    public void sendMsg(String msg){
+        if(LOGGING)
+            Log.e(TAG, "sendMsg with connectionType " + connectionType.toString());
+
+        if (isConnectionEstablished()) {
+            switch (connectionType){
+                case TCP:
+                    TCPSend(msg);
+                    break;
+
+                case UDP:
+                    UDPSend(msg);
+                    break;
+
+                case Bluetooth:
+                    //TODO add
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

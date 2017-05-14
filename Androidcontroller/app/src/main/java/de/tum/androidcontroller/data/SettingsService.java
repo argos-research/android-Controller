@@ -116,7 +116,7 @@ public class SettingsService {
     }
 
     public String getServerIP(){
-        return getPreferences().getString(KEY_SERVER_IP,DEFAULT_SERVER_IP);
+        return getPreferences().getString(KEY_SERVER_IP,DEFAULT_SERVER_IP).trim();
     }
 
     public int getServerPort(){

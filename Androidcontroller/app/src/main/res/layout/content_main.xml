@@ -36,12 +36,6 @@
                 android:paddingTop="@dimen/fragment_main_default_elements_padding"
                 android:baselineAligned="false">
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Send"
-                    android:onClick="sendData"/>
-
 
                 <TextView
                     android:layout_width="wrap_content"

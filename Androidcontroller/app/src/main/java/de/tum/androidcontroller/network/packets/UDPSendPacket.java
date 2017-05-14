@@ -23,7 +23,7 @@ public class UDPSendPacket extends Packet  {
         try {
             packet = new DatagramPacket(msg.getBytes("UTF-8"),msg.length());
         } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "Constructor: unable to get decode the byts from this message '"+msg+"' to UTF-8...");
+            Log.e(TAG, "Constructor: unable to get decode the bytes from this message '"+msg+"' to UTF-8...");
             e.printStackTrace();
         }
     }

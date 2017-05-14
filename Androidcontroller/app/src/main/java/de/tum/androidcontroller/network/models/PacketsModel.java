@@ -15,6 +15,8 @@ public class PacketsModel {
 
     public static final String RUNNABLE_NAME_BT_INIT          = "BluetoothInitCommunication";
 
+    public static final String RUNNABLE_NAME_CALLBACK         = "MainActivityCallbackInterface";
+
 
 
 }
