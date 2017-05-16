@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 /**
  * Created by chochko on 05/05/17.
@@ -13,11 +14,15 @@ public class UDPReceivePacket extends Packet {
 
     private final String TAG = "UDPReceivePacket";
 
-    public UDPReceivePacket() {
+    public UDPReceivePacket(String threadName, DatagramSocket socketUDP) {
+        super(threadName, "", socketUDP);
+
     }
 
     @Override
     public void run() {
+        super.run(); //give the thread a name
+
         while (getSocketUDP() != null) {
             if(getSocketUDP().isConnected()) {
 

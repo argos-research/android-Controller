@@ -14,8 +14,8 @@ public class BluetoothSendPacket extends Packet {
 
     private final String TAG = "BluetoothSendPacket";
 
-    public BluetoothSendPacket(String msg, BluetoothSocket socketBt) {
-        super(msg, socketBt);
+    public BluetoothSendPacket(String threadName,String msg, BluetoothSocket socketBt) {
+        super(threadName, msg, socketBt);
 
         try{
             super.setOutputStream(super.getSocketBluetooth().getOutputStream());
@@ -28,6 +28,8 @@ public class BluetoothSendPacket extends Packet {
 
     @Override
     public void run() {
+        super.run(); //give the thread a name
+
         try {
             super.getOutputStream().write(super.getMsg().getBytes());
         } catch (IOException e) {

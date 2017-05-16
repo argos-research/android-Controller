@@ -10,8 +10,10 @@ import java.net.Socket;
  * Created by chochko on 05/05/17.
  */
 
-abstract class Packet implements Runnable {
+public class Packet implements Runnable {
     private String msg = ""; //the msg that should be send
+
+    private volatile String threadName = "";
 
     private Socket socketTCP; //used for the TCP communication
 
@@ -24,6 +26,50 @@ abstract class Packet implements Runnable {
     private OutputStream outputStream;
 
     Packet(){}
+
+    /**
+     * Constructor for {@link Packet}.
+     * @param threadName the name that the running thread should have when executing this runnable
+     */
+    public Packet(String threadName){
+        this.threadName = threadName;
+    }
+
+    /**
+     * Constructor for {@link Packet}.
+     * @param threadName the name that the running thread should have when executing this runnable
+     * @param msg the message that should be send to the server or a empty String if nothing should be send
+     * @param socketUDP the instance of an initialized UDP {@link DatagramSocket}.
+     */
+    public Packet(String threadName, String msg,  DatagramSocket socketUDP){
+        this.threadName = threadName;
+        this.msg        = msg;
+        this.socketUDP  = socketUDP;
+    }
+
+    /**
+     * Constructor for {@link Packet}.
+     * @param threadName the name that the running thread should have when executing this runnable
+     * @param msg the message that should be send to the server or a empty String if nothing should be send
+     * @param socketTCP the instance of an initialized TCP {@link Socket}.
+     */
+    public Packet(String threadName, String msg, Socket socketTCP){
+        this.threadName = threadName;
+        this.msg        = msg;
+        this.socketTCP  = socketTCP;
+    }
+
+    /**
+     * Constructor for {@link Packet}.
+     * @param threadName the name that the running thread should have when executing this runnable
+     * @param msg the message that should be send to the server or a empty String if nothing should be send
+     * @param socketBt the instance of an initialized {@link BluetoothSocket}.
+     */
+    public Packet(String threadName, String msg, BluetoothSocket socketBt){
+        this.threadName = threadName;
+        this.msg        = msg;
+        this.socketBt   = socketBt;
+    }
 
     Packet(String msg, DatagramSocket socketUDP){
         this.msg        = msg;
@@ -72,4 +118,13 @@ abstract class Packet implements Runnable {
         this.outputStream = outputStream;
     }
 
+
+    private String getThreadName() {
+        return threadName;
+    }
+
+    @Override
+    public void run(){
+        Thread.currentThread().setName(getThreadName());
+    }
 }

@@ -19,8 +19,8 @@ public class TCPSendPacket extends Packet{
 
     private final String TAG = "TCPSendPacket";
 
-    public TCPSendPacket(String msg, Socket socket) {
-        super(msg, socket);
+    public TCPSendPacket(String threadName,String msg, Socket socket) {
+        super(threadName, msg, socket);
         try{
             super.setOutputStream(super.getSocketTCP().getOutputStream());
         }catch (IOException e){
@@ -31,6 +31,8 @@ public class TCPSendPacket extends Packet{
 
     @Override
     public void run() {
+        super.run(); //give the thread a name
+
         DataOutputStream out = new DataOutputStream(super.getOutputStream());
         try{
             out.writeUTF(super.getMsg());

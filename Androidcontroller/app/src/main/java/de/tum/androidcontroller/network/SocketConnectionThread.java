@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import de.tum.androidcontroller.data.SettingsService;
 import de.tum.androidcontroller.network.models.PacketsModel;
 import de.tum.androidcontroller.network.packets.BluetoothSendPacket;
+import de.tum.androidcontroller.network.packets.Packet;
 import de.tum.androidcontroller.network.packets.TCPReceivePacket;
 import de.tum.androidcontroller.network.packets.TCPSendPacket;
 import de.tum.androidcontroller.network.packets.UDPReceivePacket;
@@ -39,8 +40,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private ConnectionCallback mCallback;
-
-    private ConnectionThreadFactory mThreadFactory = null;
 
     private static final String TAG = "SocketConnectionThread";
 
@@ -72,9 +71,8 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     // the above combined with http://stackoverflow.com/questions/9148899/returning-value-from-thread
 
 
-    private SocketConnectionThread(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
-        mThreadFactory = (ConnectionThreadFactory) threadFactory;
+    private SocketConnectionThread(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
     }
 
     public SocketConnectionThread(SettingsService.ConnectionType connectionType, Context context) {
@@ -85,8 +83,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 4, // should be the some as the one above otherwise exception is thrown :<
                 1000,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new ConnectionThreadFactory()               // used for custom name assignment
+                new LinkedBlockingQueue<Runnable>(1)
 
         );
 
@@ -143,10 +140,11 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         final int port              = getSettingsData().getServerPort();
         final int socketTimeOut     = getSettingsData().getSocketTimeout();
 
-        mThreadFactory.setType(ConnectionThreadFactory.Type.InitTCPCommunication);
-        Runnable r = new Runnable() {
+        this.execute(new Packet(PacketsModel.RUNNABLE_NAME_TCP_INIT) {
             @Override
             public void run() {
+                super.run();
+
                 try {
 
                     //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
@@ -159,8 +157,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                     throwable.printStackTrace();
                 }
             }
-        };
-        this.execute(r);
+        });
     }
 
     //USEFUL information for UDP http://stackoverflow.com/questions/6361741/some-java-datagram-socket-questions
@@ -177,13 +174,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         final int port              = getSettingsData().getServerPort();
         final int socketTimeOut     = getSettingsData().getSocketTimeout();
 
-        mThreadFactory.setType(ConnectionThreadFactory.Type.InitUDPCommunication);
-
-        this.execute(new Runnable() {
+        this.execute(new Packet(PacketsModel.RUNNABLE_NAME_UDP_INIT) {
             @Override
             public void run() {
-                try {
+                super.run();
 
+                try {
                     //mSocketUDP = new DatagramSocket(port); //standard
 
                     mSocketUDP = new DatagramSocket();
@@ -203,12 +199,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
      */
     private void initBluetoothConnection(){
         final String serverMac      = "30:3A:64:D2:3E:93"; //TODO Add this to the settings
-        Log.e(TAG, "initBluetoothConnection: ");
-        mThreadFactory.setType(ConnectionThreadFactory.Type.InitBluetoothCommunication);
 
-        this.execute(new Runnable() {
+        this.execute(new Packet(PacketsModel.RUNNABLE_NAME_BT_INIT) {
             @Override
             public void run() {
+                super.run();
+
                 BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter(); //TODO move this to the constructor?
 
                 BluetoothDevice device = btAdapter.getRemoteDevice(serverMac);
@@ -244,8 +240,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                         initializationMsg += "Fatal Error:  Unable to close the bluetooth socket during the connection failure" + e2.getMessage() + ".\n";
                     }
                 }
-
-                Log.e(TAG, "run: READY BT INIT");
             }
         });
     }
@@ -278,11 +272,11 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
         if (mSocketTCP != null) {
             if (mSocketTCP.isConnected()) {
-                mThreadFactory.setType(ConnectionThreadFactory.Type.CloseSomeCommunication);
 
-                this.execute(new Runnable() {
+                this.execute(new Packet(PacketsModel.RUNNABLE_NAME_CLOSE_CONNECTION) {
                     @Override
                     public void run() {
+                        super.run();
                         try {
                             mSocketTCP.close();
                         } catch (IOException e) {
@@ -298,10 +292,10 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void closeUDPConnection() {
         if(mSocketUDP != null){
             if(mSocketUDP.isConnected()){
-                mThreadFactory.setType(ConnectionThreadFactory.Type.CloseSomeCommunication);
-                this.execute(new Runnable() {
+                this.execute(new Packet(PacketsModel.RUNNABLE_NAME_CLOSE_CONNECTION) {
                     @Override
                     public void run() {
+                        super.run();
                         mSocketUDP.close();
                     }
                 });
@@ -379,8 +373,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
             if(queued + alive < this.getMaximumPoolSize()) {
-                mThreadFactory.setType(ConnectionThreadFactory.Type.TCPSend);
-                this.execute(new TCPSendPacket(msg, mSocketTCP));
+                this.execute(new TCPSendPacket(PacketsModel.RUNNABLE_NAME_TCP_SEND, msg, mSocketTCP));
             } else
             if(LOGGING)
                 Log.e(TAG, "Too much processes... Skipping thread!");
@@ -394,8 +387,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
             if(queued + alive < this.getMaximumPoolSize()) {
-                mThreadFactory.setType(ConnectionThreadFactory.Type.UDPSend);
-                this.execute(new UDPSendPacket(msg,mSocketUDP));
+                this.execute(new UDPSendPacket(PacketsModel.RUNNABLE_NAME_UDP_SEND, msg,mSocketUDP));
             } else
                 Log.e(TAG, "Too much processes... Skipping thread!");
 
@@ -405,18 +397,13 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void sendBluetooth(String msg){
-        try {
-            int alive = this.getActiveCount();
-            int queued = this.getQueue().size();
-            if(queued + alive < this.getMaximumPoolSize()) {
-                mThreadFactory.setType(ConnectionThreadFactory.Type.BluetoothSend);
-                this.execute(new BluetoothSendPacket(msg,mSocketBt));
-            } else
-                Log.e(TAG, "Too much processes... Skipping thread!");
+        int alive = this.getActiveCount();
+        int queued = this.getQueue().size();
+        if(queued + alive < this.getMaximumPoolSize()) {
+            this.execute(new BluetoothSendPacket(PacketsModel.RUNNABLE_NAME_BT_SEND, msg,mSocketBt));
+        } else
+            Log.e(TAG, "Too much processes... Skipping thread!");
 
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
     }
 
     private void startReceiving(){
@@ -431,7 +418,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                     break;
 
                 case Bluetooth:
-                    //TODO add
+                    receiveBluetooth();
                     break;
                 default:
                     break;
@@ -440,31 +427,23 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void receiveUDP(){
-        try {
-            mThreadFactory.setType(ConnectionThreadFactory.Type.UDPReceive);
-            this.execute(new UDPReceivePacket());
-
-       } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
+        this.execute(new UDPReceivePacket(PacketsModel.RUNNABLE_NAME_UDP_RECEIVE,mSocketUDP));
     }
 
 
     private void receiveTCP(){
-        try {
-            if(mSocketTCP != null){
-                if(mSocketTCP.isConnected()) {
-                    mThreadFactory.setType(ConnectionThreadFactory.Type.TCPReceive);
-                    this.execute(new TCPReceivePacket("", mSocketTCP));
-                } else
-                    Log.e(TAG, "receiveTCP: The server's socket is not connected! receiveTCP will not be called..");
-            }else{
-                Log.e(TAG, "receiveTCP: The server's socket is not initialized! receiveTCP will not be called...");
-            }
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        if(mSocketTCP != null){
+            if(mSocketTCP.isConnected()) {
+                this.execute(new TCPReceivePacket(PacketsModel.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP));
+            } else
+                Log.e(TAG, "receiveTCP: The server's socket is not connected! receiveTCP will not be called..");
+        }else{
+            Log.e(TAG, "receiveTCP: The server's socket is not initialized! receiveTCP will not be called...");
         }
+    }
+
+    private void receiveBluetooth(){
+
     }
 
     @Override
@@ -482,12 +461,10 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
 
             if(isConnectionEstablished()) {   // only if its connected
-                mThreadFactory.setType(ConnectionThreadFactory.Type.CallbackThread);
                 mCallback.onConnectionInitResponse(true, initializationMsg);   //this is started on thread as well so a type initialization is required
 
                 this.startReceiving();
             }else{
-                mThreadFactory.setType(ConnectionThreadFactory.Type.CallbackThread);
                 mCallback.onConnectionInitResponse(false, initializationMsg);  //this is started on thread as well so a type initialization is required
             }
 

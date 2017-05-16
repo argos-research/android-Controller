@@ -8,12 +8,13 @@ import android.bluetooth.BluetoothSocket;
 
 public class BluetoothReceivePacket extends Packet {
 
-    BluetoothReceivePacket(String msg, BluetoothSocket socketBt) {
-        super(msg, socketBt);
+    BluetoothReceivePacket(String threadName, String msg, BluetoothSocket socketBt) {
+        super(threadName, msg, socketBt);
     }
 
     @Override
     public void run() {
+        super.run(); //give the thread a name
 
     }
 }

@@ -18,8 +18,8 @@ public class UDPSendPacket extends Packet  {
 
     private DatagramPacket packet;
 
-    public UDPSendPacket(String msg, DatagramSocket socketUDP) {
-        super(msg, socketUDP);
+    public UDPSendPacket(String threadName, String msg, DatagramSocket socketUDP) {
+        super(threadName, msg, socketUDP);
         try {
             packet = new DatagramPacket(msg.getBytes("UTF-8"),msg.length());
         } catch (UnsupportedEncodingException e) {
@@ -30,6 +30,8 @@ public class UDPSendPacket extends Packet  {
 
     @Override
     public void run() {
+        super.run(); //give the thread a name
+
         try {
             getSocketUDP().send(packet);
         } catch (IOException e) {

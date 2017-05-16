@@ -15,8 +15,8 @@ public class TCPReceivePacket extends Packet{
     private InputStream mIn;
     private final String TAG = "TCPReceivePacket";
 
-    public TCPReceivePacket(String msg, Socket socket) {
-        super(msg, socket);
+    public TCPReceivePacket(String threadName, Socket socket) {
+        super(threadName, "", socket);
         try{
             mIn = super.getSocketTCP().getInputStream();
         } catch (IOException e) {
@@ -27,6 +27,8 @@ public class TCPReceivePacket extends Packet{
 
     @Override
     public void run() {
+        super.run(); //give the thread a name
+
         while(getSocketTCP() != null) {
             if (getSocketTCP().isConnected()) {
                 Log.e(TAG, String.format("Listening for data on port %d...", super.getSocketTCP().getPort()));
