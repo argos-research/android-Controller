@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     TextView infoIp, infoPort;
     TextView textViewState, textViewPrompt;
 
-    static final int UdpServerPORT = 4445;
+    static final int UdpServerPORT = 8001;
     static final String SERVER_IP = "192.168.2.118";
     UdpServerThread udpServerThread;
 
