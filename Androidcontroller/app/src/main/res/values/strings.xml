@@ -19,4 +19,6 @@
     <string name="ip_text">Please type the IP of the server <i>(if it is provided)</i></string>
     <string name="port_text">Please type the port of the server <i>(if it is provided)</i></string>
     <string name="timeout_text">Please type the socket timeout duration in milis</string>
+    <string name="activity_main_progress_dialog_wait_message">Waiting for a response from the server...</string>
+    <string name="activity_main_progress_dialog_init_message">Initialization</string>
 </resources>

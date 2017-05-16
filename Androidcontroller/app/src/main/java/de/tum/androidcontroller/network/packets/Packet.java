@@ -21,11 +21,9 @@ public class Packet implements Runnable {
 
     private BluetoothSocket socketBt;   //used for the Bluetooth communication
 
-    private volatile String runningInformation; //used for passing additional information to the main activity
+    private volatile String errorInformation =""; //used for passing additional information to the main activity
 
     private OutputStream outputStream;
-
-    Packet(){}
 
     /**
      * Constructor for {@link Packet}.
@@ -71,43 +69,31 @@ public class Packet implements Runnable {
         this.socketBt   = socketBt;
     }
 
-    Packet(String msg, DatagramSocket socketUDP){
-        this.msg        = msg;
-        this.socketUDP  = socketUDP;
-    }
-
-    Packet(String msg, Socket socketTCP){
-        this.msg        = msg;
-        this.socketTCP  = socketTCP;
-    }
-
-    Packet(String msg, BluetoothSocket socketBt){
-        this.msg        = msg;
-        this.socketBt   = socketBt;
-    }
-
     Socket getSocketTCP() {
         return socketTCP;
     }
+
 
     DatagramSocket getSocketUDP(){
         return socketUDP;
     }
 
+
     BluetoothSocket getSocketBluetooth(){
         return socketBt;
     }
+
 
     String getMsg(){
         return msg;
     }
 
-    String getRunningInformation() {
-        return runningInformation;
+    public String getErrorInformation() {
+        return errorInformation;
     }
 
-    void setRunningInformation(String runningInformation) {
-        this.runningInformation = runningInformation;
+    void setErrorInformation(String errorInformation) {
+        this.errorInformation = errorInformation;
     }
 
     OutputStream getOutputStream() {

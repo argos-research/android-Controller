@@ -41,6 +41,11 @@ public class TCPReceivePacket extends Packet{
                 } catch (IOException e) {
                     Log.e(TAG, "Unable to read from the input stream or the connection is closed!");
                     e.printStackTrace();
+                    break;
+                } catch (StringIndexOutOfBoundsException s){
+                    Log.e(TAG, "The server has closed the connection!");
+                    s.printStackTrace();
+                    break;
                 }
             }
         }

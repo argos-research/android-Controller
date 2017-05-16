@@ -77,7 +77,7 @@ public class MainActivity   extends AppCompatActivity
 
     private final int ACTIVITY_REQUEST_CODE = 1;    //used for starting new activity for result
 
-    private volatile boolean sending = true;
+    private volatile boolean sending = false;   //used to stop sending data to the server when there is no connection or a initialization is done in the background
 
     private boolean significantAccChange = false;
 
@@ -112,11 +112,6 @@ public class MainActivity   extends AppCompatActivity
 
                         //init with the new communication method
                         mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),myInstance);
-
-
-                        //resume sending
-                        sending = true;
-
 
                         Log.e(TAG, "run: in the main thread READY");
 
@@ -253,7 +248,7 @@ public class MainActivity   extends AppCompatActivity
     }
 
     private void initWaitDialog(){
-        mProgressDialog = getProgressDialog("Initialization","Waiting for a response from the server...");
+        mProgressDialog = getProgressDialog(getString(R.string.activity_main_progress_dialog_init_message),getString(R.string.activity_main_progress_dialog_wait_message));
         mProgressDialog.show();
     }
 
@@ -270,6 +265,7 @@ public class MainActivity   extends AppCompatActivity
         dialog.setTitle(title);
         dialog.setMessage(msg);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         return dialog;
     }
 
@@ -307,6 +303,9 @@ public class MainActivity   extends AppCompatActivity
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
+
+                                    //resume sending
+                                    sending = true;
                                 }
                             });
                     alertDialog.show();
@@ -332,6 +331,29 @@ public class MainActivity   extends AppCompatActivity
                 }
             });
         }
+    }
+
+    @Override
+    public void onConnectionError(final String errorInformation) {
+        final Context myInstance = this;
+
+        sending = false; //set it to false because something wen't wrong and the settings activity should be opened and in onActivityResult this value will be set to true.
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //AlertDialog alertDialog = getAlertDialog("Initialization failed","There was a problem connecting to the server. Please check the your settings and make sure the server is running!");
+                AlertDialog alertDialog = getAlertDialog("Server not reachable",errorInformation);
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Go to Settings",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                startActivityForResult(new Intent(myInstance,SettingsActivity.class),ACTIVITY_REQUEST_CODE);
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
     }
 
     @Override
@@ -383,7 +405,7 @@ public class MainActivity   extends AppCompatActivity
             //if it is a significant change and the connection is established
             // => send it to the server
             if(significantAccChange && sending) {
-                Log.e(TAG, "onAccelerometerChanged: sending");
+                Log.e(TAG, "onAccelerometerChanged: SENDING");
                 mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
                 significantAccChange = false;
             }

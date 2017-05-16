@@ -1,6 +1,10 @@
 package de.tum.androidcontroller.network.packets;
 
 import android.bluetooth.BluetoothSocket;
+import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by chochko on 16/05/17.
@@ -8,13 +12,40 @@ import android.bluetooth.BluetoothSocket;
 
 public class BluetoothReceivePacket extends Packet {
 
-    BluetoothReceivePacket(String threadName, String msg, BluetoothSocket socketBt) {
-        super(threadName, msg, socketBt);
+    private InputStream mIn;
+    private final String TAG = "BluetoothReceivePacket";
+
+    public BluetoothReceivePacket(String threadName, BluetoothSocket socketBt) {
+        super(threadName, "", socketBt);
+
+        try{
+            mIn = super.getSocketBluetooth().getInputStream();
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to get the input stream!");
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void run() {
         super.run(); //give the thread a name
+
+        while(getSocketBluetooth() != null) {
+            if (getSocketBluetooth().isConnected()) {
+                Log.e(TAG, String.format("Listening for data from server %s running on %s...", super.getSocketBluetooth().getRemoteDevice().getName(),super.getSocketBluetooth().getRemoteDevice().getAddress()));
+                try {
+                    byte inputBuffer[] = new byte[1024];
+                    int bytes_read = mIn.read(inputBuffer);
+                    String received = new String(inputBuffer, 0, bytes_read);
+                    Log.e(TAG, "Message received from the server: " + received);
+
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to read from the input stream or the connection is closed!");
+                    e.printStackTrace();
+                    break;
+                }
+            }
+        }
 
     }
 }

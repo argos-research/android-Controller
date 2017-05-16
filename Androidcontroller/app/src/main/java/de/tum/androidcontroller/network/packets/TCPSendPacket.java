@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 
 /**
@@ -37,11 +36,17 @@ public class TCPSendPacket extends Packet{
         try{
             out.writeUTF(super.getMsg());
             out.flush();
+            super.setErrorInformation(""); //provide it here for the SocketConnectionThread
         }catch (IOException e){
-            Log.e(TAG, "Unable to write on the output stream!");
+            String error = "Unable to write on the TCP output stream! Please check if the server is running with the given IP and port.";
+            Log.e(TAG,error );
             e.printStackTrace();
+            super.setErrorInformation(error); //provide it here for the SocketConnectionThread
         }catch (NullPointerException np){
-            Log.e(TAG, "The connection with the TCP server is closed so skipping the send of " + super.getMsg());
+            String error = "The connection with the TCP server is closed so skipping the send of " + super.getMsg();
+            Log.e(TAG, error);
+            np.printStackTrace();
+            super.setErrorInformation(error); //provide it here for the SocketConnectionThread
         }
     }
 }

@@ -32,10 +32,17 @@ public class BluetoothSendPacket extends Packet {
 
         try {
             super.getOutputStream().write(super.getMsg().getBytes());
+            super.setErrorInformation(""); //provide it here for the SocketConnectionThread
         } catch (IOException e) {
-            Log.e(TAG, "Unable to write on the output stream!");
-            //super.setRunningInformation("Unable to write on the output stream! Are you connected to the bluetooth server?");
+            String error = "Unable to send the packet with the given Bluetooth socket... Please check if the server is running with the given IP and port.";
+            Log.e(TAG, "run: " + error);
+            super.setErrorInformation("Unable to write on the Bluetooth output stream! Have you connected to the bluetooth server?");
             e.printStackTrace();
+        } catch (NullPointerException np){
+            String error = "The connection with the Bluetooth server is closed so skipping the send of " + super.getMsg();
+            Log.e(TAG, error);
+            np.printStackTrace();
+            super.setErrorInformation(error); //provide it here for the SocketConnectionThread
         }
     }
 }
