@@ -2,6 +2,7 @@ package de.tum.androidcontroller.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,7 +39,7 @@ public class MainActivity   extends AppCompatActivity
                             implements EventListener,
                             SocketConnectionThread.ConnectionCallback{
 
-    private static final String TAG = "android_controller_tag";
+    private static final String TAG = "MainActivity";
     private static final boolean logging = false;
 
     private SensorManager mSensorManager;
@@ -91,6 +92,8 @@ public class MainActivity   extends AppCompatActivity
 
                 final Context myInstance = this;
 
+                initWaitDialog();
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -98,8 +101,12 @@ public class MainActivity   extends AppCompatActivity
                         //stop sending
                         sending = false;
 
+                        //close the current communication
+                        mCommunicationThread.closeConnection();
+                        mCommunicationThread.shutdownNow();
+
                         //wait for it to finish
-                        while(mCommunicationThread.getActiveCount() + mCommunicationThread.getQueue().size() > 0);
+                        //while(mCommunicationThread.getActiveCount() + mCommunicationThread.getQueue().size() > 0);
 
                         Log.e(TAG, "onActivityResult: connection closed");
 
@@ -129,7 +136,13 @@ public class MainActivity   extends AppCompatActivity
 
         initLayoutsAndHeadlines();
 
+        Intent testBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(testBT,123);
+
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
+
+        initWaitDialog();
+        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this); //TODO handle if no server is running
 
         if(mSensorListener == null){
             mSensorListener = de.tum.androidcontroller.sensors.SensorModel.getInstance(this);
@@ -151,6 +164,13 @@ public class MainActivity   extends AppCompatActivity
 
         //load the FPS widget
         loadFPSwidget();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mCommunicationThread.closeConnection();
     }
 
     // Loads the FPS widget https://github.com/friendlyrobotnyc/TinyDancer
@@ -195,12 +215,6 @@ public class MainActivity   extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-
-        mProgressDialog = getProgressDialog("Initialization","Waiting for a response from the server...");
-        mProgressDialog.show();
-
-        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this); //TODO handle if no server is running
-
         mSensorListener.onResume(mSensorManager);
         if(logging)
             Log.e(TAG, "onStart");
@@ -211,8 +225,6 @@ public class MainActivity   extends AppCompatActivity
         super.onPause();
         mSensorListener.onPause(mSensorManager);
 
-        //close the current communication
-        mCommunicationThread.closeConnection();
         if(logging)
             Log.e(TAG, "onPause");
     }
@@ -238,6 +250,11 @@ public class MainActivity   extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void initWaitDialog(){
+        mProgressDialog = getProgressDialog("Initialization","Waiting for a response from the server...");
+        mProgressDialog.show();
     }
 
     /**
@@ -273,7 +290,7 @@ public class MainActivity   extends AppCompatActivity
      *              communication technology was successful or not.
      */
     @Override
-    public void onConnectionInitResponse(boolean state, String additionInformation) {
+    public void onConnectionInitResponse(boolean state, final String additionInformation) {
         //TODO add the addinfo to the displayed msg
         mProgressDialog.dismiss();
         final Context myInstance = this;
@@ -284,7 +301,8 @@ public class MainActivity   extends AppCompatActivity
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    AlertDialog alertDialog = getAlertDialog("Initialization successful",String.format("Connection established with %s:%d",getSettingsData().getServerIP(),getSettingsData().getServerPort()));
+                    //AlertDialog alertDialog = getAlertDialog("Initialization successful",String.format("Connection established with %s:%d",getSettingsData().getServerIP(),getSettingsData().getServerPort()));
+                    AlertDialog alertDialog = getAlertDialog("Initialization successful",additionInformation);
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
@@ -301,7 +319,8 @@ public class MainActivity   extends AppCompatActivity
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    AlertDialog alertDialog = getAlertDialog("Initialization failed","There was a problem connecting to the server. Please check the your settings and make sure the server is running!");
+                    //AlertDialog alertDialog = getAlertDialog("Initialization failed","There was a problem connecting to the server. Please check the your settings and make sure the server is running!");
+                    AlertDialog alertDialog = getAlertDialog("Initialization failed",additionInformation);
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Go to Settings",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
@@ -361,8 +380,10 @@ public class MainActivity   extends AppCompatActivity
                 steeringWheelSidewaysView.drawLeftRight(data.getY());
                 mLocalAccelerationHolder = data;
             }
-            //if it is a significant change => send it to the server
-            if(significantAccChange) {
+            //if it is a significant change and the connection is established
+            // => send it to the server
+            if(significantAccChange && sending) {
+                Log.e(TAG, "onAccelerometerChanged: sending");
                 mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
                 significantAccChange = false;
             }

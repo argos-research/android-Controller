@@ -15,14 +15,14 @@ public class TCPSendPacket extends Packet{
 
     //sending the TCP packets without to close the connection after each packet
 
-    private OutputStream mOut;
+    //private OutputStream mOut; //TODO move this to the Packet class
 
     private final String TAG = "TCPSendPacket";
 
     public TCPSendPacket(String msg, Socket socket) {
         super(msg, socket);
         try{
-            mOut = super.getSocketTCP().getOutputStream();
+            super.setOutputStream(super.getSocketTCP().getOutputStream());
         }catch (IOException e){
             Log.e(TAG, "Unable to get the output stream!");
             e.printStackTrace();
@@ -31,7 +31,7 @@ public class TCPSendPacket extends Packet{
 
     @Override
     public void run() {
-        DataOutputStream out = new DataOutputStream(mOut);
+        DataOutputStream out = new DataOutputStream(super.getOutputStream());
         try{
             out.writeUTF(super.getMsg());
             out.flush();
