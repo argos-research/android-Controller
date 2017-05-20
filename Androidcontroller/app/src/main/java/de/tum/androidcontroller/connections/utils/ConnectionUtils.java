@@ -1,5 +1,7 @@
 package de.tum.androidcontroller.connections.utils;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,62 +55,56 @@ public class ConnectionUtils {
      *
      * @see EncodedSensorModel ,de.tum.androidcontroller.sensors.EventListener,de.tum.androidcontroller.sensors.SensorDataSettings
      */
-    private static EncodedSensorModel toEncodedAccelerometerModel(SensorBaseModel data){
+    public static EncodedSensorModel toEncodedAccelerometerModel(SensorBaseModel data){
         int forward,backward,left,right;
+        //TODO make it better and connect it with MAXIMUM_ACCELEROMETER_STEPS!
         //set forward/ backward
         //acceleration
         if(data.getX() < SensorDataSettings.idleAccelerationBreakState){
-            forward     = Math.abs((int) (data.getX()/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+            //forward     = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+            forward     = Math.abs((int) (data.getX()*2));
             backward    = 0;
         }else{  //breaking
             forward     = 0;
-            backward    = Math.abs((int) (data.getX()/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+           // backward    = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+            backward    = Math.abs((int) (data.getX()*2));
         }
 
         //set right/left
         //left
         if(data.getY() < SensorDataSettings.idleLeftRightState){
             right       = 0;
-            left        = Math.abs((int) (data.getY()/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+            //left        = Math.abs((int) (data.getY()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+            left        = Math.abs((int) (data.getY()*2));
         }else{ //right
-            right       = Math.abs((int) (data.getY()/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+            //right       = Math.abs((int) (data.getY()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+            right       = Math.abs((int) (data.getY()*2));
+
             left        = 0;
         }
-
+        //Log.e("ABS", String.format("forward %d backward %d left %d right %d \t\t data %s",forward,backward,left,right,data.toString()));
         return new EncodedSensorModel(forward,backward,left,right);
 
     }
 
-    private static int i= 0;
-    private static long TEST_CALLS_COUNT = 100000; //TODO remove it
-
     public static JSONObject buildGyroJSON(JSONObject gyroJSON) throws JSONException{
         return new JSONObject()
-                        .put("Gyro data"    , gyroJSON)
-                        .put("Created time" , System.currentTimeMillis());
+                        .put("Gyro data"                , gyroJSON)
+                        .put("Created time"             , System.currentTimeMillis());
     }
 
     /**
      * This method provides the exact model of that how
      * the sensor data should be send to the server
      * in order the server to recognize it
-     * @param sensorBaseModel the raw accelerometer values
+     * @param accJSON the {@link EncodedSensorModel} representation from <b>ConnectionUtils.toEncodedAccelerometerModel</b>
      * @return the JSON that should be send to the server
      *
      * @throws JSONException
      */
-    public static JSONObject buildAccelerometerJSON(SensorBaseModel sensorBaseModel) throws JSONException{
-        JSONObject ob = new JSONObject();
-
-        JSONObject accValues = toEncodedAccelerometerModel(sensorBaseModel).toJSONObject();
-
-
-        ob.put("Loop"               ,i);
-        ob.put("Loops count"        ,TEST_CALLS_COUNT);
-        ob.put("Accelerometer data" ,accValues);
-        ob.put("Gyro data"          ,accValues);
-        ob.put("Created time"       ,System.currentTimeMillis());
-
-        return ob;
+    public static JSONObject buildAccelerometerJSON(JSONObject accJSON) throws JSONException{
+        return new JSONObject()
+                        .put("Accelerometer data"       , accJSON)
+                        .put("Created time"             , System.currentTimeMillis());
     }
 }

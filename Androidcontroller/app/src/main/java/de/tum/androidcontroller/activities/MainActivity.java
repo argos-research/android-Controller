@@ -451,9 +451,14 @@ public class MainActivity   extends AppCompatActivity
             //if it is a significant change and the connection is established
             // => send it to the server
             if(significantAccChange && sending) {
-                //TODO SEND IT!
+                //send the proper values to the server
 //                Log.e(TAG, "onAccelerometerChanged: SENDING");
 //                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
+                try {
+                    mCommunicationThread.sendMsg(ConnectionUtils.buildAccelerometerJSON(ConnectionUtils.toEncodedAccelerometerModel(data).toJSONObject()).toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 significantAccChange = false;
             }
         }
