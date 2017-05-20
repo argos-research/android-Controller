@@ -22,9 +22,7 @@ import android.widget.Toast;
 
 import com.codemonkeylabs.fpslibrary.TinyDancer;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.connections.models.EncodedSensorModel;
@@ -68,7 +66,7 @@ public class MainActivity   extends AppCompatActivity
     private SteeringWheelView steeringWheelSidewaysView;
 
     private SensorBaseModel mLocalAccelerationHolder;
-    private SensorBaseModel mLocalGyroHolder;
+    private SensorBaseModel mLocalGyroLastSendHolder;
 
     private EncodedSensorModel encodedGyroData;
 
@@ -363,52 +361,70 @@ public class MainActivity   extends AppCompatActivity
 
     @Override
     public void onGyroChanged(SensorBaseModel data) {
-        //mLocalGyroHolder = data; //TODO maybe not needed
+        long currentTime = System.currentTimeMillis();
+
+        if(mLocalGyroLastSendHolder == null) {
+            mLocalGyroLastSendHolder = data;
+            mLocalGyroLastSendHolder.setLastTimeDatSend(currentTime);
+        }
 
         if(encodedGyroData != null)
             encodedGyroData.resetValues();
         else
             encodedGyroData = new EncodedSensorModel(0,0,0,0);
 
-        //consider it only if is a significant change
-        //fast forward rotated
-        if(data.getY() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD){
-            refreshToast("Detected fast forward rotation");
-            significantGyroChange = true;
-            encodedGyroData.setForward(EncodedSensorModel.FORWARD_KEY_CODE);
-        }
+        //consider any change only if enough time went by
+        //done for reducing for same event send many times because when you rotate the phone very fast
+        //then the gyro value for the given axis very quickly increases which make the program to send
+        //this event more than once per a single fast rotation in some direction. That is why
+        //this if is required in order to fire these events once per SensorDataSettings.MINIMUM_TIME_TO_WAIT_GYRO milis.
+        if (Math.abs(currentTime - mLocalGyroLastSendHolder.getLastTimeDatSend()) > SensorDataSettings.MINIMUM_TIME_TO_WAIT_GYRO) {
+            //Log.e(TAG, "onGyroChanged: here");
 
-        //fast backward rotated
-        if(data.getY() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD){
-            refreshToast("Detected fast backward rotation");
-            significantGyroChange = true;
-            encodedGyroData.setBackward(EncodedSensorModel.BACKWARD_KEY_CODE);
-        }
-
-        //fast right rotation
-        if(data.getX() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
-            refreshToast("Detected fast right rotation");
-            significantGyroChange = true;
-            encodedGyroData.setRight(EncodedSensorModel.RIGHT_KEY_CODE);
-        }
-
-        //fast left rotation
-        if(data.getX() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
-            refreshToast("Detected fast left rotation");
-            significantGyroChange = true;
-            encodedGyroData.setLeft(EncodedSensorModel.LEFT_KEY_CODE);
-        }
-
-        //if it is a significant change and the connection is established
-        // => send it to the server
-        if(significantGyroChange && sending) {
-            Log.e(TAG, "onGyroChanged: SENDING");
-            try {
-                mCommunicationThread.sendMsg(ConnectionUtils.buildGyroJSON(encodedGyroData.toJSONObject()).toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
+            //consider it only if is a significant change
+            //fast forward rotated
+            if(data.getY() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
+                refreshToast("Detected fast forward rotation");
+                significantGyroChange = true;
+                encodedGyroData.setForward(EncodedSensorModel.FORWARD_KEY_CODE);
             }
-            significantGyroChange = false;
+
+            //fast backward rotated
+            if(data.getY() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
+                refreshToast("Detected fast backward rotation");
+                significantGyroChange = true;
+                encodedGyroData.setBackward(EncodedSensorModel.BACKWARD_KEY_CODE);
+            }
+
+            //fast right rotation
+            if(data.getX() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
+                refreshToast("Detected fast right rotation");
+                significantGyroChange = true;
+                encodedGyroData.setRight(EncodedSensorModel.RIGHT_KEY_CODE);
+            }
+
+            //fast left rotation
+            if(data.getX() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
+                refreshToast("Detected fast left rotation");
+                significantGyroChange = true;
+                encodedGyroData.setLeft(EncodedSensorModel.LEFT_KEY_CODE);
+            }
+
+            //if it is a significant change and the connection is established
+            // => send it to the server
+            if(significantGyroChange && sending) {
+                Log.e(TAG, "onGyroChanged: SENDING");
+                try {
+                    mCommunicationThread.sendMsg(ConnectionUtils.buildGyroJSON(encodedGyroData.toJSONObject()).toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                mLocalGyroLastSendHolder = data;
+                mLocalGyroLastSendHolder.setLastTimeDatSend(currentTime);
+
+                significantGyroChange = false;
+            }
         }
 
         setSensorDataToLayout(data,layout_gyro,mGyroValueHolder,3);

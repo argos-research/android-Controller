@@ -47,6 +47,10 @@ public class SensorDataSettings {
     //the minimum change that should trigger the steering change
     public static final float MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT        = 5.f;
 
+    //the minimum amount of time in milliseconds for triggering new gyro change event on the same axis
+    //this value takes care of sending gyro data once per that amount of time
+    public static final long MINIMUM_TIME_TO_WAIT_GYRO                      = 300;
+
     // --------------------- For the Gyro sensor ---------------------------
 
 }
