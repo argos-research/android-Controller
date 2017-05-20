@@ -113,7 +113,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
         else if(accelerometerX >= SensorDataSettings.idleAccelerationBreakState)
             return getHeight(); //no acceleration
         else{ //somewhere in between
-            //Log.e(TAG, "getRectAccelerationValue: getPercantege is "+getPercantage(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
+            //Log.e(TAG, "getRectAccelerationValue: getPercentage is "+getPercentage(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
             return (int) (getHeight()/2 * getPercentageAcceleratingSteeringLeft(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState)); //TODO
         }
     }
@@ -131,7 +131,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
         else if(accelerometerX <= SensorDataSettings.idleAccelerationBreakState)
             return getHeight()/2; //no breaking
         else{ //somewhere in between
-            //Log.e(TAG, "getRectAccelerationValue: getPercantege is "+getPercentageBreaking(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
+            //Log.e(TAG, "getRectAccelerationValue: getPercentage is "+getPercentageBreaking(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
             return getHeight()/2 + (int) (getHeight()/2 * (1.f - getPercentageBreakingSteeringRight(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState))); //TODO
         }
     }
@@ -149,7 +149,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
         else if(accelerometerY >= SensorDataSettings.idleLeftRightState)
             return getHeight()/2; //no turning left
         else{ //somewhere in between
-            //Log.e(TAG, "getRectAccelerationValue: getPercantege is "+getPercantage(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
+            //Log.e(TAG, "getRectAccelerationValue: getPercentage is "+getPercentage(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
             return (int) (getHeight()/2 * (1.f - getPercentageAcceleratingSteeringLeft(accelerometerY,
                     SensorDataSettings.maximumLeftRightDeviation,
                     SensorDataSettings.idleLeftRightState)));
@@ -170,7 +170,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
         else if(accelerometerY <= SensorDataSettings.idleLeftRightState)
             return getHeight()/2; //no turning right
         else{ //somewhere in between
-            //Log.e(TAG, "getRectAccelerationValue: getPercantege is "+getPercantage(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
+            //Log.e(TAG, "getRectAccelerationValue: getPercentage is "+getPercentage(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
             return (int) (getHeight()/2 * (getPercentageBreakingSteeringRight(accelerometerY,
                     SensorDataSettings.maximumLeftRightDeviation,
                     SensorDataSettings.idleLeftRightState)));
@@ -183,7 +183,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
     private float getPercentageAcceleratingSteeringLeft(float sensorValue, float itsMaxDeviation, float itsIdleState){
         float absDiff = Math.abs(itsMaxDeviation - (sensorValue < 0 ? -sensorValue:sensorValue) );
         float maxDiff = Math.abs(itsIdleState - itsMaxDeviation);
-        //Log.e(TAG, "getPercantage: sensorValue " + sensorValue + " absDiff "+ absDiff+" maxDiff " +maxDiff);
+        //Log.e(TAG, "getPercentage: sensorValue " + sensorValue + " absDiff "+ absDiff+" maxDiff " +maxDiff);
         return absDiff/maxDiff;
 
     }
@@ -191,7 +191,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
     private float getPercentageBreakingSteeringRight(float sensorValue, float itsMaxDeviation, float itsIdleState){
         float absDiff = Math.abs((sensorValue < 0 ? -sensorValue:sensorValue) - itsMaxDeviation);
         float maxDiff = Math.abs(itsIdleState - itsMaxDeviation);
-        //Log.e(TAG, "getPercantage: sensorValue " + sensorValue + " absDiff "+ absDiff+" maxDiff " +maxDiff);
+        //Log.e(TAG, "getPercentage: sensorValue " + sensorValue + " absDiff "+ absDiff+" maxDiff " +maxDiff);
         return absDiff/maxDiff;
 
     }

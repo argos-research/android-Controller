@@ -1,4 +1,4 @@
-package de.tum.androidcontroller.network.models;
+package de.tum.androidcontroller.connections.models;
 
 /**
  * Created by chochko on 07/05/17.

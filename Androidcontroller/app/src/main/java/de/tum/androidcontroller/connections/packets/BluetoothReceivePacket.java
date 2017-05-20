@@ -1,4 +1,4 @@
-package de.tum.androidcontroller.network.packets;
+package de.tum.androidcontroller.connections.packets;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;

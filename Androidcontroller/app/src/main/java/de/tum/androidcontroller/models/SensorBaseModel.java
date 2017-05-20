@@ -6,19 +6,19 @@ import android.hardware.SensorEvent;
  * This class will be used for saving the sonsor data
  */
 
-public class SensorModel {
+public class SensorBaseModel {
 
     private float x;
     private float y;
     private float z;
 
-    public SensorModel(float x, float y, float z){
+    public SensorBaseModel(float x, float y, float z){
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public SensorModel(float x, float y, float z, int decimalDigits){
+    public SensorBaseModel(float x, float y, float z, int decimalDigits){
     //Optional
 //        this.x = MathUtils.toDigitsClean(x,decimalDigits);
 //        this.y = MathUtils.toDigitsClean(y,decimalDigits);
@@ -43,7 +43,7 @@ public class SensorModel {
     }
 
 
-    public static SensorModel toSensorData(SensorEvent event, int decimalDigits){
-        return new SensorModel(event.values[0],event.values[1],event.values[2],decimalDigits);
+    public static SensorBaseModel toSensorData(SensorEvent event, int decimalDigits){
+        return new SensorBaseModel(event.values[0],event.values[1],event.values[2],decimalDigits);
     }
 }

@@ -27,9 +27,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.tum.androidcontroller.R;
+import de.tum.androidcontroller.connections.models.EncodedSensorModel;
+import de.tum.androidcontroller.connections.utils.ConnectionUtils;
 import de.tum.androidcontroller.data.SettingsService;
-import de.tum.androidcontroller.models.SensorModel;
-import de.tum.androidcontroller.network.SocketConnectionThread;
+import de.tum.androidcontroller.models.SensorBaseModel;
+import de.tum.androidcontroller.connections.SocketConnectionThread;
 import de.tum.androidcontroller.sensors.EventListener;
 import de.tum.androidcontroller.sensors.SensorDataSettings;
 import de.tum.androidcontroller.sensors.SensorListener;
@@ -65,10 +67,12 @@ public class MainActivity   extends AppCompatActivity
     private SteeringWheelView steeringWheelForwardView;
     private SteeringWheelView steeringWheelSidewaysView;
 
-    private SensorModel mLocalAccelerationHolder;
-    private SensorModel mLocalGyroHolder;
+    private SensorBaseModel mLocalAccelerationHolder;
+    private SensorBaseModel mLocalGyroHolder;
 
-    private long TEST_CALLS_COUNT = 100000; //TODO remove it
+    private EncodedSensorModel encodedGyroData;
+
+
 
     private Toast mGyroToast;
 
@@ -79,7 +83,8 @@ public class MainActivity   extends AppCompatActivity
 
     private volatile boolean sending = false;   //used to stop sending data to the server when there is no connection or a initialization is done in the background
 
-    private boolean significantAccChange = false;
+    private boolean significantAccChange  = false;
+    private boolean significantGyroChange = false;
 
     private ProgressDialog mProgressDialog;
 
@@ -357,35 +362,60 @@ public class MainActivity   extends AppCompatActivity
     }
 
     @Override
-    public void onGyroChanged(SensorModel data) {
-        mLocalGyroHolder = data; //TODO maybe not needed
+    public void onGyroChanged(SensorBaseModel data) {
+        //mLocalGyroHolder = data; //TODO maybe not needed
+
+        if(encodedGyroData != null)
+            encodedGyroData.resetValues();
+        else
+            encodedGyroData = new EncodedSensorModel(0,0,0,0);
 
         //consider it only if is a significant change
         //fast forward rotated
         if(data.getY() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD){
             refreshToast("Detected fast forward rotation");
+            significantGyroChange = true;
+            encodedGyroData.setForward(EncodedSensorModel.FORWARD_KEY_CODE);
         }
 
         //fast backward rotated
         if(data.getY() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD){
             refreshToast("Detected fast backward rotation");
+            significantGyroChange = true;
+            encodedGyroData.setBackward(EncodedSensorModel.BACKWARD_KEY_CODE);
         }
 
         //fast right rotation
         if(data.getX() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
             refreshToast("Detected fast right rotation");
+            significantGyroChange = true;
+            encodedGyroData.setRight(EncodedSensorModel.RIGHT_KEY_CODE);
         }
 
         //fast left rotation
         if(data.getX() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
             refreshToast("Detected fast left rotation");
+            significantGyroChange = true;
+            encodedGyroData.setLeft(EncodedSensorModel.LEFT_KEY_CODE);
+        }
+
+        //if it is a significant change and the connection is established
+        // => send it to the server
+        if(significantGyroChange && sending) {
+            Log.e(TAG, "onGyroChanged: SENDING");
+            try {
+                mCommunicationThread.sendMsg(ConnectionUtils.buildGyroJSON(encodedGyroData.toJSONObject()).toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            significantGyroChange = false;
         }
 
         setSensorDataToLayout(data,layout_gyro,mGyroValueHolder,3);
     }
     int i = 1;
     @Override
-    public void onAccelerometerChanged(SensorModel data) {
+    public void onAccelerometerChanged(SensorBaseModel data) {
         if(mLocalAccelerationHolder == null){
             mLocalAccelerationHolder = data;
         }
@@ -405,8 +435,9 @@ public class MainActivity   extends AppCompatActivity
             //if it is a significant change and the connection is established
             // => send it to the server
             if(significantAccChange && sending) {
-                Log.e(TAG, "onAccelerometerChanged: SENDING");
-                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
+                //TODO SEND IT!
+//                Log.e(TAG, "onAccelerometerChanged: SENDING");
+//                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
                 significantAccChange = false;
             }
         }
@@ -435,7 +466,7 @@ public class MainActivity   extends AppCompatActivity
 
     /**
      * Used for setting custom string format on the screen for each sensor
-     * @param sensorValue the value from the SensorModel
+     * @param sensorValue the value from the SensorBaseModel
      * @param decimalDigits the maximal digits to be shown on the screen. They should be in [0,5]
      * @return equal format for each sensor
      */
@@ -457,7 +488,7 @@ public class MainActivity   extends AppCompatActivity
      * @param textView the textView holder of the element
      * @param decimalDigits the maximal digits to be shown on the screen. They should be in [0,5]
      */
-    private void setSensorDataToLayout(SensorModel data, LinearLayout layout, TextView textView, int decimalDigits){
+    private void setSensorDataToLayout(SensorBaseModel data, LinearLayout layout, TextView textView, int decimalDigits){
         textView = (TextView) layout.findViewById(R.id.value_x);
         textView.setText(getFormattedValue(data.getX(),decimalDigits));
         textView = (TextView) layout.findViewById(R.id.value_y);
@@ -541,25 +572,29 @@ public class MainActivity   extends AppCompatActivity
         memoryHelper.setText(R.string.default_empty_text_view_value);
     }
 
-    public JSONObject buildTestJSON(int i){
-        JSONObject ob = new JSONObject();
-        JSONArray accVal = new JSONArray();
-
-        try {
-            accVal.put(3.56);
-            accVal.put(-2.56);
-            accVal.put(23.56);
-
-            ob.put("Loop"               ,i);
-            ob.put("Loops count"        ,TEST_CALLS_COUNT);
-            ob.put("Accelerometer data" ,accVal);
-            ob.put("Gyro data"          ,accVal);
-            ob.put("Created time"       ,System.currentTimeMillis());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return ob;
-    }
+//    public JSONObject buildTestJSON(int i){
+//        JSONObject ob = new JSONObject();
+//        JSONArray accVal = new JSONArray();
+//
+//        try {
+////            accVal.put(3.56);
+////            accVal.put(-2.56);
+////            accVal.put(23.56);
+//
+//            accVal.put(mLocalAccelerationHolder.getX());
+//            accVal.put(mLocalAccelerationHolder.getY());
+//            accVal.put(mLocalAccelerationHolder.getZ());
+//
+//            ob.put("Loop"               ,i);
+//            ob.put("Loops count"        ,TEST_CALLS_COUNT);
+//            ob.put("Accelerometer data" ,accVal);
+//            ob.put("Gyro data"          ,accVal);
+//            ob.put("Created time"       ,System.currentTimeMillis());
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        return ob;
+//    }
 
 
     public void sendData(View view) {

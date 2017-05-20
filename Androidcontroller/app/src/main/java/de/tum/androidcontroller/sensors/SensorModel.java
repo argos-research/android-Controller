@@ -6,6 +6,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import de.tum.androidcontroller.models.SensorBaseModel;
+
 
 /**
  * This class is used for taking the sensor data
@@ -70,10 +72,10 @@ public class SensorModel implements SensorListener, SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         Sensor sensor = event.sensor;
         if(sensor.getType() == SensorTypes.gyroscope){
-            mEventListener.onGyroChanged(de.tum.androidcontroller.models.SensorModel.toSensorData(event,DATA_DECIMAL_DIGITS));
+            mEventListener.onGyroChanged(SensorBaseModel.toSensorData(event,DATA_DECIMAL_DIGITS));
         }
         else if(sensor.getType() == SensorTypes.accelerometer){
-            mEventListener.onAccelerometerChanged(de.tum.androidcontroller.models.SensorModel.toSensorData(event,DATA_DECIMAL_DIGITS));
+            mEventListener.onAccelerometerChanged(SensorBaseModel.toSensorData(event,DATA_DECIMAL_DIGITS));
         }
 
     }

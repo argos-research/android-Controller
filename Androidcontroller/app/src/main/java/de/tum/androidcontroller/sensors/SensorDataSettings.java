@@ -2,6 +2,7 @@ package de.tum.androidcontroller.sensors;
 
 import android.graphics.Color;
 
+
 /**
  * Here will be stored the default values for controlling
  * the game with the sensors.
@@ -26,17 +27,25 @@ public class SensorDataSettings {
     public static final int COLOR_RIGHT         = Color.BLUE;
 
     //the minimum change that should trigger the acceleration/breaking change
-    public static final float MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK = 0.4f;
-    //the minimum change that should trigger the steering change
-    public static final float MINIMUM_CHANGE_TRIGGER_STEERING = 0.2f;
+
+    //shows the steps we can have for different acc values
+    public static final int MAXIMUM_ACCELEROMETER_STEPS                 = 10;
+
+    //public static final float MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK = 0.4f;
+    // The minimum change that should trigger the acceleration/breaking change according to the send value type length
+    public static final float MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK = maximumAccelerationBreakDeviation /  ((float)MAXIMUM_ACCELEROMETER_STEPS);
+    //the minimum change that should trigger the steering change according to the send value type length
+    //public static final float MINIMUM_CHANGE_TRIGGER_STEERING = 0.2f;
+    public static final float MINIMUM_CHANGE_TRIGGER_STEERING           = maximumLeftRightDeviation / ((float)MAXIMUM_ACCELEROMETER_STEPS);
+
     // --------------- For the Acceleration sensor ------------------------
 
 
     // +++++++++++++++++++++ For the Gyro sensor +++++++++++++++++++++++++++
     //the minimum change that should trigger the forward/backward gyro change
-    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD = 7.f;
+    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD  = 7.f;
     //the minimum change that should trigger the steering change
-    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT = 5.f;
+    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT        = 5.f;
 
     // --------------------- For the Gyro sensor ---------------------------
 

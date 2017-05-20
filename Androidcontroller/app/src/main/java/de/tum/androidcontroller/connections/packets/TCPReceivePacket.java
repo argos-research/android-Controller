@@ -1,4 +1,4 @@
-package de.tum.androidcontroller.network.packets;
+package de.tum.androidcontroller.connections.packets;
 
 import android.util.Log;
 
@@ -39,12 +39,16 @@ public class TCPReceivePacket extends Packet{
                     Log.e(TAG, "Message received from the server: " + received);
 
                 } catch (IOException e) {
-                    Log.e(TAG, "Unable to read from the input stream or the connection is closed!");
+                    String error = "Unable to read from the input stream or the connection is closed!";
+                    Log.e(TAG, error);
                     e.printStackTrace();
+                    super.setErrorInformation(error); //provide it here for the SocketConnectionThread
                     break;
                 } catch (StringIndexOutOfBoundsException s){
-                    Log.e(TAG, "The server has closed the connection!");
+                    String error = "The server has closed the connection/socket!";
+                    Log.e(TAG, error);
                     s.printStackTrace();
+                    super.setErrorInformation(error); //provide it here for the SocketConnectionThread //TODO use callback instead
                     break;
                 }
             }

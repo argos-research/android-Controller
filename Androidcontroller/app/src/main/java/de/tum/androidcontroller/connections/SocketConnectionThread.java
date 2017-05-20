@@ -1,4 +1,4 @@
-package de.tum.androidcontroller.network;
+package de.tum.androidcontroller.connections;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -18,14 +18,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import de.tum.androidcontroller.data.SettingsService;
-import de.tum.androidcontroller.network.models.PacketsModel;
-import de.tum.androidcontroller.network.packets.BluetoothReceivePacket;
-import de.tum.androidcontroller.network.packets.BluetoothSendPacket;
-import de.tum.androidcontroller.network.packets.Packet;
-import de.tum.androidcontroller.network.packets.TCPReceivePacket;
-import de.tum.androidcontroller.network.packets.TCPSendPacket;
-import de.tum.androidcontroller.network.packets.UDPReceivePacket;
-import de.tum.androidcontroller.network.packets.UDPSendPacket;
+import de.tum.androidcontroller.connections.models.PacketsModel;
+import de.tum.androidcontroller.connections.packets.BluetoothReceivePacket;
+import de.tum.androidcontroller.connections.packets.BluetoothSendPacket;
+import de.tum.androidcontroller.connections.packets.Packet;
+import de.tum.androidcontroller.connections.packets.TCPReceivePacket;
+import de.tum.androidcontroller.connections.packets.TCPSendPacket;
+import de.tum.androidcontroller.connections.packets.UDPReceivePacket;
+import de.tum.androidcontroller.connections.packets.UDPSendPacket;
 
 
 
@@ -470,7 +470,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void receiveTCP(){
         if(mSocketTCP != null){
             if(mSocketTCP.isConnected()) {
-                this.execute(new TCPReceivePacket(PacketsModel.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP));
+                TCPReceivePacket p = new TCPReceivePacket(PacketsModel.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP);
+                this.execute(p);
+                if(p.getErrorInformation().length() > 1)
+                    mCallback.onConnectionError(p.getErrorInformation());
+
+                //this.execute(new TCPReceivePacket(PacketsModel.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP));
             } else
                 Log.e(TAG, "receiveTCP: The server's socket is not connected! receiveTCP will not be called..");
         }else{
