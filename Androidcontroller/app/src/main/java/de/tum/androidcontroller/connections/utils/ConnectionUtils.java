@@ -57,17 +57,22 @@ public class ConnectionUtils {
      */
     public static EncodedSensorModel toEncodedAccelerometerModel(SensorBaseModel data){
         int forward,backward,left,right;
+        int preDefined = 3;
         //TODO make it better and connect it with MAXIMUM_ACCELEROMETER_STEPS!
         //set forward/ backward
         //acceleration
         if(data.getX() < SensorDataSettings.idleAccelerationBreakState){
             //forward     = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
             forward     = Math.abs((int) (data.getX()*2));
+            //forward     = preDefined;
+
             backward    = 0;
         }else{  //breaking
             forward     = 0;
-           // backward    = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
+
+            //backward    = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
             backward    = Math.abs((int) (data.getX()*2));
+            //backward    = preDefined;
         }
 
         //set right/left
@@ -76,9 +81,11 @@ public class ConnectionUtils {
             right       = 0;
             //left        = Math.abs((int) (data.getY()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
             left        = Math.abs((int) (data.getY()*2));
+            //left        = preDefined;
         }else{ //right
             //right       = Math.abs((int) (data.getY()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
             right       = Math.abs((int) (data.getY()*2));
+            //right       = preDefined;
 
             left        = 0;
         }

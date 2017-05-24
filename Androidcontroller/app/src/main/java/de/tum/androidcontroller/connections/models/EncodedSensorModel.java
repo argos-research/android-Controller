@@ -26,10 +26,15 @@ public class EncodedSensorModel {
      * change. These values are also send to the server and handle as normal keyboard
      * input with the linux UInput class.
      */
-    public static final int FORWARD_KEY_CODE    = uInputValuesHolder.KEY_Y,
-                            BACKWARD_KEY_CODE   = uInputValuesHolder.KEY_E,
-                            LEFT_KEY_CODE       = uInputValuesHolder.KEY_A,
-                            RIGHT_KEY_CODE      = uInputValuesHolder.KEY_H;
+//    public static final int FORWARD_KEY_CODE    = uInputValuesHolder.KEY_Y,
+//                            BACKWARD_KEY_CODE   = uInputValuesHolder.KEY_E,
+//                            LEFT_KEY_CODE       = uInputValuesHolder.KEY_A,
+//                            RIGHT_KEY_CODE      = uInputValuesHolder.KEY_H;
+
+    public static final int FORWARD_KEY_CODE    = uInputValuesHolder.BTN_NORTH,
+                            BACKWARD_KEY_CODE   = uInputValuesHolder.BTN_SOUTH,
+                            LEFT_KEY_CODE       = uInputValuesHolder.BTN_WEST,
+                            RIGHT_KEY_CODE      = uInputValuesHolder.BTN_EAST;
 
 
     private int forward, backward, left, right;
