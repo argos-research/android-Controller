@@ -19,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.codemonkeylabs.fpslibrary.TinyDancer;
 
@@ -86,6 +87,8 @@ public class MainActivity   extends AppCompatActivity
 
     private ProgressDialog mProgressDialog;
 
+    private volatile boolean isAccelerometerChecked = true;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //if we are coming from the settings activity
@@ -138,6 +141,11 @@ public class MainActivity   extends AppCompatActivity
         startActivityForResult(testBT,123);
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
+
+        //set it always to true
+        ToggleButton accelToggle = (ToggleButton) findViewById(R.id.accelerometer_toggle);
+        accelToggle.setChecked(isAccelerometerChecked);
+
 
         initWaitDialog();
         mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this); //TODO handle if no server is running
@@ -440,17 +448,19 @@ public class MainActivity   extends AppCompatActivity
             //the acceleration/breaking point
             if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK){
                 significantAccChange = true;
-                steeringWheelForwardView.drawAccelerationBrake(data.getX());
+                if(isAccelerometerChecked)
+                    steeringWheelForwardView.drawAccelerationBrake(data.getX());
                 mLocalAccelerationHolder = data;
             }//the steering point
             else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING){
                 significantAccChange = true;
-                steeringWheelSidewaysView.drawLeftRight(data.getY());
+                if(isAccelerometerChecked)
+                    steeringWheelSidewaysView.drawLeftRight(data.getY());
                 mLocalAccelerationHolder = data;
             }
-            //if it is a significant change and the connection is established
+            //if it is a significant change, the connection is established and isAccelerometerChecked is checked (used to disable the this sensor in order to use just the gyro buttons in Speed Dreams)
             // => send it to the server
-            if(significantAccChange && sending) {
+            if(significantAccChange && sending && isAccelerometerChecked) {
                 //send the proper values to the server
 //                Log.e(TAG, "onAccelerometerChanged: SENDING");
 //                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
@@ -658,4 +668,8 @@ public class MainActivity   extends AppCompatActivity
         return SettingsService.getInstance(this);
     }
 
+    public void changeAccelerometerSendingState(View view) {
+        ToggleButton accelToggle = (ToggleButton) view;
+        isAccelerometerChecked = accelToggle.isChecked();
+    }
 }
