@@ -94,7 +94,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 4, // should be the some as the one above otherwise exception is thrown :<
                 1000,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(1)
+                new LinkedBlockingQueue<Runnable>(10)
 
         );
 
@@ -399,8 +399,41 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         try {
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
+            Log.e(TAG, String.format("sendTCP: INFO pool size = %d, active threads = %d, queued tasks = %d",this.getPoolSize(),alive,queued));
+
             if(queued + alive < this.getMaximumPoolSize()) {
                 TCPSendPacket p = new TCPSendPacket(PacketsModel.RUNNABLE_NAME_TCP_SEND, msg, mSocketTCP);
+                /**
+                 * SOLUTION https://stackoverflow.com/questions/19529309/rejectedexecutionexception-from-asynctask-but-havent-hit-limits
+                 *  java.util.concurrent.RejectedExecutionException: Task de.tum.androidcontroller.connections.packets.TCPSendPacket@f985737 rejected from de.tum.androidcontroller.connections.SocketConnectionThread@9fa14a4[Running, pool size = 4, active threads = 1, queued tasks = 0, completed tasks = 3306]
+                 at java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2014)
+                 at java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:794)
+                 at java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1340)
+                 at de.tum.androidcontroller.connections.SocketConnectionThread.sendTCP(SocketConnectionThread.java:404)
+                 at de.tum.androidcontroller.connections.SocketConnectionThread.sendMsg(SocketConnectionThread.java:382)
+                 at de.tum.androidcontroller.activities.MainActivity.onAccelerometerChanged(MainActivity.java:471)
+                 at de.tum.androidcontroller.sensors.SensorModel.onSensorChanged(SensorModel.java:78)
+
+                 * JNI DETECTED ERROR IN APPLICATION: JNI CallObjectMethod called with pending exception java.util.concurrent.RejectedExecutionException: Task de.tum.androidcontroller.connections.packets.TCPSendPacket@f985737 rejected from de.tum.androidcontroller.connections.SocketConnectionThread@9fa14a4[Running, pool size = 4, active threads = 1, queued tasks = 1, completed tasks = 1711]
+                 05-27 22:56:21.173 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(java.lang.Runnable, java.util.concurrent.ThreadPoolExecutor) (ThreadPoolExecutor.java:2014)
+                 05-27 22:56:21.173 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void java.util.concurrent.ThreadPoolExecutor.reject(java.lang.Runnable) (ThreadPoolExecutor.java:794)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void java.util.concurrent.ThreadPoolExecutor.execute(java.lang.Runnable) (ThreadPoolExecutor.java:1340)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void de.tum.androidcontroller.connections.SocketConnectionThread.sendTCP(java.lang.String) (SocketConnectionThread.java:415)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void de.tum.androidcontroller.connections.SocketConnectionThread.sendMsg(java.lang.String) (SocketConnectionThread.java:382)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void de.tum.androidcontroller.activities.MainActivity.onAccelerometerChanged(de.tum.androidcontroller.models.SensorBaseModel) (MainActivity.java:479)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void de.tum.androidcontroller.sensors.SensorModel.onSensorChanged(android.hardware.SensorEvent) (SensorModel.java:78)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void android.hardware.SystemSensorManager$SensorEventQueue.dispatchSensorEvent(int, float[], int, long) (SystemSensorManager.java:491)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void android.os.MessageQueue.nativePollOnce(long, int) (MessageQueue.java:-2)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at android.os.Message android.os.MessageQueue.next() (MessageQueue.java:323)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void android.os.Looper.loop() (Looper.java:135)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:5539)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at java.lang.Object java.lang.reflect.Method.invoke!(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run() (ZygoteInit.java:726)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:616)
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]
+                 05-27 22:56:21.174 13870-13870/de.tum.androidcontroller A/art: art/runtime/java_vm_ext.cc:410]     in call to CallObjectMethod
+                 */
+
                 this.execute(p);
                 if(p.getErrorInformation().length() > 1)
                     mCallback.onConnectionError(p.getErrorInformation());

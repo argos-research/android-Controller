@@ -103,7 +103,7 @@ public class MainActivity   extends AppCompatActivity
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.e(TAG, "run: in the main thread");
+                        Log.e(TAG, "run: in the main thread-> Shutting down the communication thread");
                         //stop sending
                         sending = false;
 
@@ -319,6 +319,14 @@ public class MainActivity   extends AppCompatActivity
                                     sending = true;
                                 }
                             });
+                    /** TODO FIX
+                     * android.view.WindowLeaked: Activity de.tum.androidcontroller.activities.MainActivity has leaked window com.android.internal.policy.PhoneWindow$DecorView{d0dbb06 V.E...... R....... 0,0-1026,602} that was originally added here
+                     at android.view.ViewRootImpl.<init>(ViewRootImpl.java:375)
+                     at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:299)
+                     at android.view.WindowManagerImpl.addView(WindowManagerImpl.java:86)
+                     at android.app.Dialog.show(Dialog.java:319)
+                     at de.tum.androidcontroller.activities.MainActivity$2.run(MainActivity.java:322)F
+                     */
                     alertDialog.show();
                 }
             });
@@ -338,6 +346,14 @@ public class MainActivity   extends AppCompatActivity
                                     startActivityForResult(new Intent(myInstance,SettingsActivity.class),ACTIVITY_REQUEST_CODE);
                                 }
                             });
+                    /** TODO FIX
+                     * android.view.WindowLeaked: Activity de.tum.androidcontroller.activities.MainActivity has leaked window com.android.internal.policy.PhoneWindow$DecorView{d0dbb06 V.E...... R....... 0,0-1026,602} that was originally added here
+                     at android.view.ViewRootImpl.<init>(ViewRootImpl.java:375)
+                     at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:299)
+                     at android.view.WindowManagerImpl.addView(WindowManagerImpl.java:86)
+                     at android.app.Dialog.show(Dialog.java:319)
+                     at de.tum.androidcontroller.activities.MainActivity$2.run(MainActivity.java:322)F
+                     */
                     alertDialog.show();
                 }
             });
@@ -444,15 +460,18 @@ public class MainActivity   extends AppCompatActivity
             mLocalAccelerationHolder = data;
         }
         else{
+            //TODO fix it
             //consider it only if is a significant change
             //the acceleration/breaking point
-            if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK){
+            //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK  && Math.abs(data.getX()) <= SensorDataSettings.maximumAccelerationBreakDeviation){
+            if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
                 significantAccChange = true;
                 if(isAccelerometerChecked)
                     steeringWheelForwardView.drawAccelerationBrake(data.getX());
                 mLocalAccelerationHolder = data;
             }//the steering point
-            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING){
+            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING ){
+           // else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING && Math.abs(data.getY()) <= SensorDataSettings.maximumLeftRightDeviation){
                 significantAccChange = true;
                 if(isAccelerometerChecked)
                     steeringWheelSidewaysView.drawLeftRight(data.getY());

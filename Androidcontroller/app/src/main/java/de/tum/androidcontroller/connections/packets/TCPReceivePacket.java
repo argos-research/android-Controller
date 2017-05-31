@@ -14,6 +14,7 @@ public class TCPReceivePacket extends Packet{
 
     private InputStream mIn;
     private final String TAG = "TCPReceivePacket";
+    private final boolean logging = false;
 
     public TCPReceivePacket(String threadName, Socket socket) {
         super(threadName, "", socket);
@@ -31,12 +32,16 @@ public class TCPReceivePacket extends Packet{
 
         while(getSocketTCP() != null) {
             if (getSocketTCP().isConnected()) {
-                Log.e(TAG, String.format("Listening for data on port %d...", super.getSocketTCP().getPort()));
+                if (logging) {
+                    Log.e(TAG, String.format("Listening for data on port %d...", super.getSocketTCP().getPort()));
+                }
                 try {
                     byte inputBuffer[] = new byte[1024];
                     int bytes_read = mIn.read(inputBuffer);
                     String received = new String(inputBuffer, 0, bytes_read);
-                    Log.e(TAG, "Message received from the server: " + received);
+                    if (logging) {
+                        Log.e(TAG, "Message received from the server: " + received);
+                    }
 
                 } catch (IOException e) {
                     String error = "Unable to read from the input stream or the connection is closed!";

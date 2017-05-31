@@ -36,6 +36,11 @@ public class EncodedSensorModel {
                             LEFT_KEY_CODE       = uInputValuesHolder.BTN_WEST,
                             RIGHT_KEY_CODE      = uInputValuesHolder.BTN_EAST;
 
+//    public static final int FORWARD_KEY_CODE    = uInputValuesHolder.BTN_TR,
+//                            BACKWARD_KEY_CODE   = uInputValuesHolder.BTN_TL,
+//                            LEFT_KEY_CODE       = uInputValuesHolder.BTN_WEST,
+//                            RIGHT_KEY_CODE      = uInputValuesHolder.BTN_EAST;
+
 
     private int forward, backward, left, right;
     private final String    KEY_FORWARD     = "forward",
