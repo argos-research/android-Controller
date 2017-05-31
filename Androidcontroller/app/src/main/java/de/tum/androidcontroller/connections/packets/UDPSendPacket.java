@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.connections.packets;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
@@ -18,8 +19,8 @@ public class UDPSendPacket extends Packet  {
 
     private DatagramPacket packet;
 
-    public UDPSendPacket(String threadName, String msg, DatagramSocket socketUDP) {
-        super(threadName, msg, socketUDP);
+    public UDPSendPacket(String threadName, String msg, DatagramSocket socketUDP, Context context) {
+        super(threadName, msg, socketUDP, context);
         try {
             packet = new DatagramPacket(msg.getBytes("UTF-8"),msg.length());
         } catch (UnsupportedEncodingException e) {
@@ -34,17 +35,16 @@ public class UDPSendPacket extends Packet  {
 
         try {
             getSocketUDP().send(packet);
-            super.setErrorInformation(""); //provide it here for the SocketConnectionThread
         } catch (IOException e) {
             String error = "Unable to send the datagram packet with the given UDP socket... Please check if the server is running with the given IP and port.";
             Log.e(TAG, "run: " + error);
             e.printStackTrace();
-            super.setErrorInformation(error); //provide it here for the SocketConnectionThread
+            super.sendBroadcastOnFailure(error);
         } catch (NullPointerException np){
             String error = "The connection with the UDP server is closed so skipping the send of " + super.getMsg();
             Log.e(TAG, error);
             np.printStackTrace();
-            super.setErrorInformation(error); //provide it here for the SocketConnectionThread
+            super.sendBroadcastOnFailure(error); //inform the main activity for this interruption.
         }
     }
 

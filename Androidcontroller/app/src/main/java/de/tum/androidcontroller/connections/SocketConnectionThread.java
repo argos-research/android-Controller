@@ -17,8 +17,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
 import de.tum.androidcontroller.data.SettingsService;
-import de.tum.androidcontroller.connections.models.PacketsModel;
 import de.tum.androidcontroller.connections.packets.BluetoothReceivePacket;
 import de.tum.androidcontroller.connections.packets.BluetoothSendPacket;
 import de.tum.androidcontroller.connections.packets.Packet;
@@ -42,13 +42,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
          *                            on an {@link android.app.AlertDialog}.
          */
         void onConnectionInitResponse(boolean state, final String additionInformation);
-
-        /**
-         * Callback method called upon unsuccessful send request to the server.
-         * @param errorInformation the type of error provided from the unsuccessful
-         *                         sent packet.
-         */
-        void onConnectionError(final String errorInformation);
     }
 
     private ConnectionCallback mCallback;
@@ -151,7 +144,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         final int port              = getSettingsData().getServerPort();
         final int socketTimeOut     = getSettingsData().getSocketTimeout();
 
-        this.execute(new Packet(PacketsModel.RUNNABLE_NAME_TCP_INIT) {
+        this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_TCP_INIT) {
             @Override
             public void run() {
                 super.run();
@@ -187,7 +180,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         final int port              = getSettingsData().getServerPort();
         final int socketTimeOut     = getSettingsData().getSocketTimeout();
 
-        this.execute(new Packet(PacketsModel.RUNNABLE_NAME_UDP_INIT) {
+        this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_UDP_INIT) {
             @Override
             public void run() {
                 super.run();
@@ -223,7 +216,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void initBluetoothConnection(){
         final String serverMac      = "30:3A:64:D2:3E:93"; //TODO Add this to the settings
 
-        this.execute(new Packet(PacketsModel.RUNNABLE_NAME_BT_INIT) {
+        this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_BT_INIT) {
             @Override
             public void run() {
                 super.run();
@@ -300,7 +293,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         if (mSocketTCP != null) {
             if (mSocketTCP.isConnected()) {
 
-                this.execute(new Packet(PacketsModel.RUNNABLE_NAME_CLOSE_CONNECTION) {
+                this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_CLOSE_CONNECTION) {
                     @Override
                     public void run() {
                         super.run();
@@ -319,7 +312,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void closeUDPConnection() {
         if(mSocketUDP != null){
             if(mSocketUDP.isConnected()){
-                this.execute(new Packet(PacketsModel.RUNNABLE_NAME_CLOSE_CONNECTION) {
+                this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_CLOSE_CONNECTION) {
                     @Override
                     public void run() {
                         super.run();
@@ -399,10 +392,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         try {
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
-            Log.e(TAG, String.format("sendTCP: INFO pool size = %d, active threads = %d, queued tasks = %d",this.getPoolSize(),alive,queued));
 
             if(queued + alive < this.getMaximumPoolSize()) {
-                TCPSendPacket p = new TCPSendPacket(PacketsModel.RUNNABLE_NAME_TCP_SEND, msg, mSocketTCP);
+                TCPSendPacket p = new TCPSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_TCP_SEND, msg, mSocketTCP, context);
                 /**
                  * SOLUTION https://stackoverflow.com/questions/19529309/rejectedexecutionexception-from-asynctask-but-havent-hit-limits
                  *  java.util.concurrent.RejectedExecutionException: Task de.tum.androidcontroller.connections.packets.TCPSendPacket@f985737 rejected from de.tum.androidcontroller.connections.SocketConnectionThread@9fa14a4[Running, pool size = 4, active threads = 1, queued tasks = 0, completed tasks = 3306]
@@ -435,8 +427,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                  */
 
                 this.execute(p);
-                if(p.getErrorInformation().length() > 1)
-                    mCallback.onConnectionError(p.getErrorInformation());
+
             } else {
                 if(LOGGING)
                     Log.e(TAG, "Too many running threads... Skipping thread!");
@@ -451,10 +442,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             int alive = this.getActiveCount();
             int queued = this.getQueue().size();
             if(queued + alive < this.getMaximumPoolSize()) {
-                UDPSendPacket p = new UDPSendPacket(PacketsModel.RUNNABLE_NAME_UDP_SEND, msg,mSocketUDP);
+                UDPSendPacket p = new UDPSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND, msg,mSocketUDP, context);
                 this.execute(p);
-                if(p.getErrorInformation().length() > 1)
-                    mCallback.onConnectionError(p.getErrorInformation());
+
             } else {
                 if(LOGGING)
                     Log.e(TAG, "Too many running threads... Skipping thread!");
@@ -469,10 +459,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         int alive = this.getActiveCount();
         int queued = this.getQueue().size();
         if(queued + alive < this.getMaximumPoolSize()) {
-            BluetoothSendPacket p = new BluetoothSendPacket(PacketsModel.RUNNABLE_NAME_BT_SEND, msg,mSocketBt);
+            BluetoothSendPacket p = new BluetoothSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_BT_SEND, msg,mSocketBt, context);
             this.execute(p);
-            if(p.getErrorInformation().length() > 1)
-                mCallback.onConnectionError(p.getErrorInformation());
+
         } else {
             if(LOGGING)
                 Log.e(TAG, "Too many running threads... Skipping thread!");
@@ -503,12 +492,11 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void receiveTCP(){
         if(mSocketTCP != null){
             if(mSocketTCP.isConnected()) {
-                TCPReceivePacket p = new TCPReceivePacket(PacketsModel.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP);
+                TCPReceivePacket p = new TCPReceivePacket(ConnectionRunnableModels.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP, context);
                 this.execute(p);
-                if(p.getErrorInformation().length() > 1)
-                    mCallback.onConnectionError(p.getErrorInformation());
 
-                //this.execute(new TCPReceivePacket(PacketsModel.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP));
+
+                //this.execute(new TCPReceivePacket(ConnectionRunnableModels.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP));
             } else
                 Log.e(TAG, "receiveTCP: The server's socket is not connected! receiveTCP will not be called..");
         }else{
@@ -520,7 +508,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void receiveUDP(){
         if(mSocketUDP != null){
             if(mSocketUDP.isBound()){
-                this.execute(new UDPReceivePacket(PacketsModel.RUNNABLE_NAME_UDP_RECEIVE,mSocketUDP));
+                this.execute(new UDPReceivePacket(ConnectionRunnableModels.RUNNABLE_NAME_UDP_RECEIVE,mSocketUDP, context));
             }else {
                 Log.e(TAG, "receiveUDP: The server's socket is not bounded! receiveUDP will not be called..");
             }
@@ -533,7 +521,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void receiveBluetooth(){
         if(mSocketBt != null){
             if(mSocketBt.isConnected()){
-                this.execute(new BluetoothReceivePacket(PacketsModel.RUNNABLE_NAME_BT_RECEIVE,mSocketBt));
+                this.execute(new BluetoothReceivePacket(ConnectionRunnableModels.RUNNABLE_NAME_BT_RECEIVE,mSocketBt, context));
             }else {
                 Log.e(TAG, "receiveBluetooth: The server's socket is not connected! receiveBluetooth will not be called..");
             }
@@ -551,9 +539,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
 
         //the TCP init has finished => start immediately the receiver
-        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_INIT) ||
-                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_INIT) ||
-                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_INIT)    ){
+        if(finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_TCP_INIT) ||
+                finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_UDP_INIT) ||
+                finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_BT_INIT)    ){
 
             if(isConnectionEstablished()) {   // only if its connected
                 mCallback.onConnectionInitResponse(true, initializationMsg);   //this is started on thread as well so a type initialization is required
@@ -565,11 +553,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         }
 
         //in the case that some connection has failed for whatever reason then it should be reopened
-        if(finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_TCP_SEND) ||
-                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_UDP_SEND) ||
-                finishedThreadName.equals(PacketsModel.RUNNABLE_NAME_BT_SEND)    ) {
+        if(finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_TCP_SEND) ||
+                finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND) ||
+                finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_BT_SEND)    ) {
 
         }
+
     }
 
 

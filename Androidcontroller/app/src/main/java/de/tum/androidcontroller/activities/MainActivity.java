@@ -3,9 +3,11 @@ package de.tum.androidcontroller.activities;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -26,6 +28,7 @@ import com.codemonkeylabs.fpslibrary.TinyDancer;
 import org.json.JSONException;
 
 import de.tum.androidcontroller.R;
+import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
 import de.tum.androidcontroller.connections.models.EncodedSensorModel;
 import de.tum.androidcontroller.connections.utils.ConnectionUtils;
 import de.tum.androidcontroller.data.SettingsService;
@@ -78,7 +81,7 @@ public class MainActivity   extends AppCompatActivity
     private SocketConnectionThread mCommunicationThread;
 
 
-    private final int ACTIVITY_REQUEST_CODE = 1;    //used for starting new activity for result
+    private final int SETTINGS_ACTIVITY_IDENTIFIER = 1;    //used for starting new activity for result
 
     private volatile boolean sending = false;   //used to stop sending data to the server when there is no connection or a initialization is done in the background
 
@@ -89,10 +92,30 @@ public class MainActivity   extends AppCompatActivity
 
     private volatile boolean isAccelerometerChecked = true;
 
+    private volatile BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(action != null){
+                if(action.equals(ConnectionRunnableModels.BROADCAST_ACTION_FAILURE)){
+                    if(intent.hasExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY)){
+                        onConnectionError(intent.getStringExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY));
+                    }
+                }else if(action.equals(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE)){
+                    if(intent.hasExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY)){
+                        Log.e(TAG, "BROADCAST RECEIVED " + intent.getStringExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY));
+                    }
+                }
+            }
+
+
+        }
+    };
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //if we are coming from the settings activity
-        if(requestCode == ACTIVITY_REQUEST_CODE){
+        if(requestCode == SETTINGS_ACTIVITY_IDENTIFIER){
             //new settings are saved
             if(resultCode == Activity.RESULT_OK){
 
@@ -160,6 +183,13 @@ public class MainActivity   extends AppCompatActivity
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         }
 
+        //register the broadcast receiver
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectionRunnableModels.BROADCAST_ACTION_FAILURE);
+        intentFilter.addAction(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE);
+        registerReceiver(broadcastReceiver,intentFilter);
+
+
         if(logging)
             Log.e(TAG, "onCreate");
 
@@ -177,6 +207,7 @@ public class MainActivity   extends AppCompatActivity
         super.onDestroy();
 
         mCommunicationThread.closeConnection();
+        unregisterReceiver(broadcastReceiver);
     }
 
     // Loads the FPS widget https://github.com/friendlyrobotnyc/TinyDancer
@@ -251,7 +282,7 @@ public class MainActivity   extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivityForResult(new Intent(this,SettingsActivity.class),ACTIVITY_REQUEST_CODE);
+            startActivityForResult(new Intent(this,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
             return true;
         }
 
@@ -343,7 +374,7 @@ public class MainActivity   extends AppCompatActivity
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
-                                    startActivityForResult(new Intent(myInstance,SettingsActivity.class),ACTIVITY_REQUEST_CODE);
+                                    startActivityForResult(new Intent(myInstance,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
                                 }
                             });
                     /** TODO FIX
@@ -360,8 +391,7 @@ public class MainActivity   extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onConnectionError(final String errorInformation) {
+    private void onConnectionError(final String errorInformation) {
         final Context myInstance = this;
 
         sending = false; //set it to false because something wen't wrong and the settings activity should be opened and in onActivityResult this value will be set to true.
@@ -375,7 +405,7 @@ public class MainActivity   extends AppCompatActivity
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                startActivityForResult(new Intent(myInstance,SettingsActivity.class),ACTIVITY_REQUEST_CODE);
+                                startActivityForResult(new Intent(myInstance,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
                             }
                         });
                 alertDialog.show();

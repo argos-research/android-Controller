@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.connections.packets;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -18,8 +19,8 @@ public class TCPSendPacket extends Packet{
 
     private final String TAG = "TCPSendPacket";
 
-    public TCPSendPacket(String threadName,String msg, Socket socket) {
-        super(threadName, msg, socket);
+    public TCPSendPacket(String threadName,String msg, Socket socket, Context context) {
+        super(threadName, msg, socket,context);
         try{
             super.setOutputStream(super.getSocketTCP().getOutputStream());
         }catch (IOException e){
@@ -36,17 +37,14 @@ public class TCPSendPacket extends Packet{
         try{
             out.writeUTF(super.getMsg());
             out.flush();
-            super.setErrorInformation(""); //provide it here for the SocketConnectionThread
         }catch (IOException e){
             String error = "Unable to write on the TCP output stream! Please check if the server is running with the given IP and port.";
-            Log.e(TAG,error );
-            e.printStackTrace();
-            super.setErrorInformation(error); //provide it here for the SocketConnectionThread
+            Log.e(TAG,error,e);
+            super.sendBroadcastOnFailure(error);
         }catch (NullPointerException np){
             String error = "The connection with the TCP server is closed so skipping the send of " + super.getMsg();
-            Log.e(TAG, error);
-            np.printStackTrace();
-            super.setErrorInformation(error); //provide it here for the SocketConnectionThread
+            Log.e(TAG, error,np);
+            super.sendBroadcastOnFailure(error); //inform the main activity for this interruption.
         }
     }
 }

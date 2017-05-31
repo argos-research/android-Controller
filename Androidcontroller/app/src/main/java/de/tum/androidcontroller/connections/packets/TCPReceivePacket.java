@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.connections.packets;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
@@ -14,10 +15,10 @@ public class TCPReceivePacket extends Packet{
 
     private InputStream mIn;
     private final String TAG = "TCPReceivePacket";
-    private final boolean logging = false;
+    private final boolean logging = true;
 
-    public TCPReceivePacket(String threadName, Socket socket) {
-        super(threadName, "", socket);
+    public TCPReceivePacket(String threadName, Socket socket, Context context) {
+        super(threadName, "", socket,context);
         try{
             mIn = super.getSocketTCP().getInputStream();
         } catch (IOException e) {
@@ -42,18 +43,20 @@ public class TCPReceivePacket extends Packet{
                     if (logging) {
                         Log.e(TAG, "Message received from the server: " + received);
                     }
+                    super.sendBroadcastOnReceive(received);
+
 
                 } catch (IOException e) {
                     String error = "Unable to read from the input stream or the connection is closed!";
                     Log.e(TAG, error);
                     e.printStackTrace();
-                    super.setErrorInformation(error); //provide it here for the SocketConnectionThread
+                    super.sendBroadcastOnFailure(error);
                     break;
                 } catch (StringIndexOutOfBoundsException s){
                     String error = "The server has closed the connection/socket!";
                     Log.e(TAG, error);
                     s.printStackTrace();
-                    super.setErrorInformation(error); //provide it here for the SocketConnectionThread //TODO use callback instead
+                    super.sendBroadcastOnFailure(error); //inform the main activity for this interruption.
                     break;
                 }
             }

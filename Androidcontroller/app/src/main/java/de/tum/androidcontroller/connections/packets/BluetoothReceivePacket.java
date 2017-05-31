@@ -1,6 +1,7 @@
 package de.tum.androidcontroller.connections.packets;
 
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
@@ -15,8 +16,8 @@ public class BluetoothReceivePacket extends Packet {
     private InputStream mIn;
     private final String TAG = "BluetoothReceivePacket";
 
-    public BluetoothReceivePacket(String threadName, BluetoothSocket socketBt) {
-        super(threadName, "", socketBt);
+    public BluetoothReceivePacket(String threadName, BluetoothSocket socketBt, Context context) {
+        super(threadName, "", socketBt, context);
 
         try{
             mIn = super.getSocketBluetooth().getInputStream();
@@ -39,9 +40,12 @@ public class BluetoothReceivePacket extends Packet {
                     String received = new String(inputBuffer, 0, bytes_read);
                     Log.e(TAG, "Message received from the server: " + received);
 
+                    super.sendBroadcastOnReceive(received);
+
                 } catch (IOException e) {
-                    Log.e(TAG, "Unable to read from the input stream or the connection is closed!");
-                    e.printStackTrace();
+                    String error = "Unable to read from the input stream or the connection is closed!";
+                    Log.e(TAG, error,e);
+                    super.sendBroadcastOnFailure(error); //inform the main activity for this interruption.
                     break;
                 }
             }

@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.connections.packets;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
@@ -14,8 +15,8 @@ public class UDPReceivePacket extends Packet {
 
     private final String TAG = "UDPReceivePacket";
 
-    public UDPReceivePacket(String threadName, DatagramSocket socketUDP) {
-        super(threadName, "", socketUDP);
+    public UDPReceivePacket(String threadName, DatagramSocket socketUDP, Context context) {
+        super(threadName, "", socketUDP, context);
 
     }
 
@@ -44,9 +45,12 @@ public class UDPReceivePacket extends Packet {
                     String received = new String(inputBuffer).trim();
                     Log.e(TAG, "Message received from the server: " + received);
 
+                    super.sendBroadcastOnReceive(received);
+
                 } catch (IOException e) {
-                    Log.e(TAG, "Unable to read this UDP socket or the connection is closed!");
-                    e.printStackTrace();
+                    String error = "Unable to read this UDP socket or the connection is closed!";
+                    Log.e(TAG, error,e);
+                    super.sendBroadcastOnFailure(error); //inform the main activity for this interruption.
                     break;
                 }
             }
