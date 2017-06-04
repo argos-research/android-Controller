@@ -90,7 +90,14 @@ public class MainActivity   extends AppCompatActivity
 
     private ProgressDialog mProgressDialog;
 
+    //marks whether the accelerometer data should be used or not
     private volatile boolean isAccelerometerChecked = true;
+
+    //used for preventing the error dialog to be shown more than once and to build on top of each other
+    private volatile boolean isErrorDialogShown = false;
+
+    //used for preventing the error dialog to pop up when we stop the communication in order to go to the settings activity
+    private volatile boolean isGoingToSettingsActivity = false;
 
     private volatile BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -103,7 +110,7 @@ public class MainActivity   extends AppCompatActivity
                     }
                 }else if(action.equals(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE)){
                     if(intent.hasExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY)){
-                        Log.e(TAG, "BROADCAST RECEIVED " + intent.getStringExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY));
+                        //Log.e(TAG, "BROADCAST RECEIVED " + intent.getStringExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY));
                     }
                 }
             }
@@ -116,6 +123,9 @@ public class MainActivity   extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //if we are coming from the settings activity
         if(requestCode == SETTINGS_ACTIVITY_IDENTIFIER){
+
+            isGoingToSettingsActivity = false;
+
             //new settings are saved
             if(resultCode == Activity.RESULT_OK){
 
@@ -131,7 +141,7 @@ public class MainActivity   extends AppCompatActivity
                         sending = false;
 
                         //close the current communication
-                        mCommunicationThread.closeConnection();
+                        //mCommunicationThread.closeConnection();
                         mCommunicationThread.shutdownNow();
 
                         //wait for it to finish
@@ -283,6 +293,8 @@ public class MainActivity   extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivityForResult(new Intent(this,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
+            isGoingToSettingsActivity = true;
+            mCommunicationThread.closeConnection();
             return true;
         }
 
@@ -396,21 +408,26 @@ public class MainActivity   extends AppCompatActivity
 
         sending = false; //set it to false because something wen't wrong and the settings activity should be opened and in onActivityResult this value will be set to true.
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                //AlertDialog alertDialog = getAlertDialog("Initialization failed","There was a problem connecting to the server. Please check the your settings and make sure the server is running!");
-                AlertDialog alertDialog = getAlertDialog("Server not reachable",errorInformation);
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Go to Settings",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                startActivityForResult(new Intent(myInstance,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
-                            }
-                        });
-                alertDialog.show();
-            }
-        });
+
+        if (!isErrorDialogShown && !isGoingToSettingsActivity) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //AlertDialog alertDialog = getAlertDialog("Initialization failed","There was a problem connecting to the server. Please check the your settings and make sure the server is running!");
+                    isErrorDialogShown = true;
+                    AlertDialog alertDialog = getAlertDialog("Server not reachable",errorInformation);
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Go to Settings",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    isErrorDialogShown = false;
+                                    startActivityForResult(new Intent(myInstance,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
+                                }
+                            });
+                    alertDialog.show();
+                }
+            });
+        }
     }
 
     @Override

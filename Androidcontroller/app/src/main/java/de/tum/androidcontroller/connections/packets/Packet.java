@@ -141,7 +141,7 @@ public class Packet implements Runnable {
      *                     JSON representation as a String.
      */
     synchronized void sendBroadcastOnReceive(String receivedJSON){
-        Log.e("sendBroadcastOnReceive", "sendBroadcastOnReceive: ");
+        //Log.e("sendBroadcastOnReceive", "sendBroadcastOnReceive: "+receivedJSON);
         broadcastIntent.setAction(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE);
         broadcastIntent.putExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY,receivedJSON);
         this.context.sendBroadcast(broadcastIntent);

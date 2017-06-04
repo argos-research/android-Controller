@@ -33,6 +33,7 @@ public class TCPSendPacket extends Packet{
     public void run() {
         super.run(); //give the thread a name
 
+
         DataOutputStream out = new DataOutputStream(super.getOutputStream());
         try{
             out.writeUTF(super.getMsg());

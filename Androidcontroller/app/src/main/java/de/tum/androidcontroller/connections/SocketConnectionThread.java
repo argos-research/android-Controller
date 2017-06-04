@@ -50,7 +50,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private SettingsService.ConnectionType connectionType = null;
 
-    private final boolean LOGGING = false;
+    private final boolean LOGGING = true;
+
+    private volatile boolean amIReceiving;
 
 
     //For the TCP connection
@@ -97,9 +99,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
         this.mCallback      = (ConnectionCallback) context;
 
+        this.amIReceiving   = false;
+
         initCommunication(); //init the given communication
 
     }
+
 
     private void initCommunication(){
         if(LOGGING)
@@ -430,7 +435,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
             } else {
                 if(LOGGING)
-                    Log.e(TAG, "Too many running threads... Skipping thread!");
+                    Log.e(TAG, "Too many running threads... Skipping thread! Alive threads "+ alive + " and on the queue "+queued + ".");
             }
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
@@ -538,7 +543,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         if(LOGGING)
             Log.e(TAG, "afterExecute current thread name"+ Thread.currentThread().getName()+" Activecount "+this.getActiveCount() + " pool size " +this.getPoolSize() + " queued " + this.getQueue().size());
 
-        //the TCP init has finished => start immediately the receiver
+        //check if the init was successful and inform the MainActivity with the callback
         if(finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_TCP_INIT) ||
                 finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_UDP_INIT) ||
                 finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_BT_INIT)    ){
@@ -546,17 +551,21 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             if(isConnectionEstablished()) {   // only if its connected
                 mCallback.onConnectionInitResponse(true, initializationMsg);   //this is started on thread as well so a type initialization is required
 
-                this.startReceiving();
+
             }else{
                 mCallback.onConnectionInitResponse(false, initializationMsg);  //this is started on thread as well so a type initialization is required
             }
         }
 
-        //in the case that some connection has failed for whatever reason then it should be reopened
+        //Something was sent => start immediately the receiver
         if(finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_TCP_SEND) ||
                 finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND) ||
                 finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_BT_SEND)    ) {
-
+            if(!amIReceiving){
+                amIReceiving = true;
+                this.startReceiving();
+                Log.e(TAG, "afterExecute: Starting the receiver thread.");
+            }
         }
 
     }
