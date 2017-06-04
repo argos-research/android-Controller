@@ -317,6 +317,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void closeUDPConnection() {
         if(mSocketUDP != null){
             if(mSocketUDP.isConnected()){
+                //send the close message to the server needed for closing the connection
+                this.sendUDP("close",true);
+
                 this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_CLOSE_CONNECTION) {
                     @Override
                     public void run() {
@@ -374,6 +377,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         if(LOGGING)
             Log.e(TAG, "sendMsg with connectionType " + connectionType.toString());
 
+
         if (isConnectionEstablished()) {
             switch (connectionType){
                 case TCP:
@@ -381,7 +385,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                     break;
 
                 case UDP:
-                    sendUDP(msg);
+                    sendUDP(msg,false);
                     break;
 
                 case Bluetooth:
@@ -442,21 +446,42 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
         }
     }
 
-    private void sendUDP(String msg){
-        try {
-            int alive = this.getActiveCount();
-            int queued = this.getQueue().size();
-            if(queued + alive < this.getMaximumPoolSize()) {
-                UDPSendPacket p = new UDPSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND, msg,mSocketUDP, context);
-                this.execute(p);
+    /**
+     * The UDP function for sending data to the
+     * UDP server.
+     *
+     * @param msg the message sent to the server
+     * @param isCloseUDPMessage because UDP need additional
+     *                          mechanisms for closing the connection
+     *                          (the server can not detect if the client
+     *                          has been disconnected),
+     *                          this value represent if this method
+     *                          should send a closing string to the
+     *                          server in order manually to create
+     *                          disconnect event and to stop server
+     *                          for sending back data to the client.
+     */
+    private void sendUDP(String msg,boolean isCloseUDPMessage){
+        if (isCloseUDPMessage) {
+            //don't wait and send immediately the close message
+            UDPSendPacket p = new UDPSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND, "close",mSocketUDP, context);
+            this.execute(p);
+        } else {
+            try {
+                int alive = this.getActiveCount();
+                int queued = this.getQueue().size();
+                if(queued + alive < this.getMaximumPoolSize()) {
+                    UDPSendPacket p = new UDPSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND, msg,mSocketUDP, context);
+                    this.execute(p);
 
-            } else {
-                if(LOGGING)
-                    Log.e(TAG, "Too many running threads... Skipping thread!");
+                } else {
+                    if(LOGGING)
+                        Log.e(TAG, "Too many running threads... Skipping thread!");
+                }
+
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
             }
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
         }
     }
 

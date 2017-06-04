@@ -149,6 +149,9 @@ public class Packet implements Runnable {
 
     /**
      * This should be implemented from each class which is extending this one.
+     * You have to always let the method set the Thread name to the
+     * specified one in order in {@link de.tum.androidcontroller.connections.SocketConnectionThread}
+     * to be handled properly after execution.
      */
     @Override
     public void run(){
