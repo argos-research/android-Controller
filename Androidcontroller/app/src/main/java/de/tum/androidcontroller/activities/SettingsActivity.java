@@ -54,8 +54,11 @@ public class SettingsActivity extends AppCompatActivity {
     private EditText editTextSocketTimeout;
 
 
-    //the layout holding the wifi attributes (IP address, port number and socket timeout)
+    //the layout holding the WiFi attributes (IP address, port number and socket timeout)
     private LinearLayout llWifi;
+
+    //the layout holding the Bluetooth attributes (MAC address)
+    private LinearLayout llBluetooth;
 
     //for obtaining the screen dimensions
     DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -69,13 +72,15 @@ public class SettingsActivity extends AppCompatActivity {
 
         initSpinner();
 
-        editTextServerIP = (EditText) findViewById(R.id.ip_edit_text);
+        editTextServerIP        = (EditText) findViewById(R.id.ip_edit_text);
 
-        editTextServerPort = (EditText) findViewById(R.id.port_edit_text);
+        editTextServerPort      = (EditText) findViewById(R.id.port_edit_text);
 
-        editTextSocketTimeout = (EditText) findViewById(R.id.timeout_edit_text);
+        editTextSocketTimeout   = (EditText) findViewById(R.id.timeout_edit_text);
 
-        llWifi = (LinearLayout) findViewById(R.id.ll_wifi);
+        llWifi                  = (LinearLayout) findViewById(R.id.ll_wifi);
+
+        llBluetooth             = (LinearLayout) findViewById(R.id.ll_bluetooth);
 
         restoreUI();
 
@@ -97,8 +102,14 @@ public class SettingsActivity extends AppCompatActivity {
                 if(optionsConnectionTypes[position].equals("Bluetooth")){
                     llWifi  .animate()
                             .translationX(displayMetrics.widthPixels)
-                            .setDuration(750)
+                            .setDuration(450)
                             .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    super.onAnimationStart(animation);
+                                    llBluetooth.setVisibility(View.VISIBLE);
+                                }
+
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
                                     super.onAnimationEnd(animation);
@@ -108,12 +119,18 @@ public class SettingsActivity extends AppCompatActivity {
                 }else
                     llWifi  .animate()
                             .translationX(0)
-                            .setDuration(750)
+                            .setDuration(450)
                             .setListener(new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationStart(Animator animation) {
                                     super.onAnimationStart(animation);
                                     llWifi.setVisibility(View.VISIBLE);
+                                    llBluetooth.setVisibility(View.GONE);
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
                                 }
                             });
 

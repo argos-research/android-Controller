@@ -16,9 +16,12 @@
     <string name="reset">Reset to default</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
-    <string name="ip_text">Please type the IP of the server <i>(if it is provided)</i></string>
-    <string name="port_text">Please type the port of the server <i>(if it is provided)</i></string>
+    <string name="ip_text">Please type the IP of the server</string>
+    <string name="port_text">Please type the port of the server</string>
     <string name="timeout_text">Please type the socket timeout duration in milis</string>
-    <string name="activity_main_progress_dialog_wait_message">Waiting for a response from the server...</string>
+    <string name="bt_mac_text">Please type the MAC address of the running Bluetooth server</string>
+
+    <!-- main activity -->
+    <string name="activity_main_progress_dialog_wait_message">Waiting for a response from the server…</string>
     <string name="activity_main_progress_dialog_init_message">Initialization</string>
 </resources>
