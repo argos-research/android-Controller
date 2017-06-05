@@ -13,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.data.SettingsService;
@@ -51,9 +50,19 @@ public class SettingsActivity extends AppCompatActivity {
      */
     private EditText editTextServerPort;
 
+    /**
+     * According to {@link de.tum.androidcontroller.models.SettingsModel} model,
+     * this EditText holds the socket timeout that each socket should have.
+     * Unfortunately, this value is not used but you can use it for something.
+     */
     private EditText editTextSocketTimeout;
 
-    private final long animationDuration = 450;
+    /**
+     * According to {@link de.tum.androidcontroller.models.SettingsModel} model,
+     * this EditText holds MAC of the Bluetooth server.
+     */
+    private EditText editTextBluetoothMAC;
+
 
     //the layout holding the WiFi attributes (IP address, port number and socket timeout)
     private LinearLayout llWifi;
@@ -64,6 +73,9 @@ public class SettingsActivity extends AppCompatActivity {
     //for obtaining the screen dimensions
     DisplayMetrics displayMetrics = new DisplayMetrics();
 
+    //the duration of hiding/showing the attributes in this class
+    private final long animationDuration = 650;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,17 +83,19 @@ public class SettingsActivity extends AppCompatActivity {
 
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
-        initSpinner();
-
         editTextServerIP        = (EditText) findViewById(R.id.ip_edit_text);
 
         editTextServerPort      = (EditText) findViewById(R.id.port_edit_text);
 
         editTextSocketTimeout   = (EditText) findViewById(R.id.timeout_edit_text);
 
+        editTextBluetoothMAC    = (EditText) findViewById(R.id.bt_mac_address);
+
         llWifi                  = (LinearLayout) findViewById(R.id.ll_wifi);
 
         llBluetooth             = (LinearLayout) findViewById(R.id.ll_bluetooth);
+
+        initSpinner();
 
         restoreUI();
 
@@ -143,6 +157,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
+
     /**
      * This method restores the settings from the shared preferences.
      */
@@ -156,9 +171,16 @@ public class SettingsActivity extends AppCompatActivity {
         editTextServerPort.setText(String.valueOf(data.getServerPort()));
 
         editTextSocketTimeout.setText(String.valueOf(data.getSocketTimeout()));
+
+        editTextBluetoothMAC.setText(String.valueOf(data.getBluetoothMAC()));
     }
 
 
+    /**
+     * Obtains the EditText values of each member of the
+     * {@link SettingsModel} class.
+     * @return an instance of {@link SettingsModel} from the current UI.
+     */
     private SettingsModel getSettingsFromUI() {
         SettingsModel settingsData = new SettingsModel();
 
@@ -169,6 +191,8 @@ public class SettingsActivity extends AppCompatActivity {
         settingsData.setPort(Integer.valueOf(editTextServerPort.getText().toString()));
 
         settingsData.setSocketTimeoutMilis(Integer.valueOf(editTextSocketTimeout.getText().toString()));
+
+        settingsData.setBluetoothMAC(editTextBluetoothMAC.getText().toString());
 
         return settingsData;
     }
@@ -188,14 +212,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * Just close the view with no effect on the app
-     * @param view the button view
-     */
-    public void onCancelButtonClicked(View view) {
-        setResult(Activity.RESULT_CANCELED);
-        finish();
-    }
+
 
     /**
      * Save the the UI as settings to the shared preferences
@@ -210,9 +227,5 @@ public class SettingsActivity extends AppCompatActivity {
     public void onResetButtonClicked(View view) {
         SettingsService.getInstance(getApplicationContext()).resetSettings();
         restoreUI();
-    }
-
-    public void onBluetoothMACChange(View view) {
-        Toast.makeText(this,"HERE",Toast.LENGTH_LONG).show();
     }
 }

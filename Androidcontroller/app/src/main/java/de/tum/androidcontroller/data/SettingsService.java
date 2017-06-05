@@ -92,7 +92,7 @@ public class SettingsService {
     /**
      * Key for the bluetooth server MAC address.
      */
-    private static final String KEY_Bluetooth_MAC                   = "KeyBluetoothMAC";
+    private static final String KEY_BLUETOOTH_MAC                   = "KeyBluetoothMAC";
 
     /**
      * Default value for the connection type.
@@ -114,6 +114,11 @@ public class SettingsService {
      */
     private static final int DEFAULT_SOCKET_TIMEOUT                 = 5000;
 
+    /**
+     * Default value for the Bluetooth MAC address
+     */
+    private static final String DEFAULT_BLUETOOTH_MAC               = "303A64D23E93";
+
 
     public String getConnectionType(){
         return getPreferences().getString(KEY_CONNECTION_TYPE,DEFAULT_CONNECTION_TYPE.toString());
@@ -131,6 +136,9 @@ public class SettingsService {
         return getPreferences().getInt(KEY_SOCKET_TIMEOUT,DEFAULT_SOCKET_TIMEOUT);
     }
 
+    public String getBluetoothMAC(){
+        return getPreferences().getString(KEY_BLUETOOTH_MAC,DEFAULT_BLUETOOTH_MAC);
+    }
     /**
      * Save the settings from the provided <b>settingsData</b> to the shared preferences of this app.
      * @param settingsData the new settingsData model
@@ -140,6 +148,7 @@ public class SettingsService {
 
         editor.putString(KEY_CONNECTION_TYPE, settingsData.getConnectionType().toString());
         editor.putString(KEY_SERVER_IP, settingsData.getIP());
+        editor.putString(KEY_BLUETOOTH_MAC,settingsData.getBluetoothMAC());
 
         editor.putInt(KEY_SERVER_PORT, settingsData.getPort());
         editor.putInt(KEY_SOCKET_TIMEOUT, settingsData.getSocketTimeoutMilis());
@@ -155,6 +164,7 @@ public class SettingsService {
 
         editor.putString(KEY_CONNECTION_TYPE, DEFAULT_CONNECTION_TYPE.toString());
         editor.putString(KEY_SERVER_IP, DEFAULT_SERVER_IP);
+        editor.putString(KEY_BLUETOOTH_MAC,DEFAULT_BLUETOOTH_MAC);
 
         editor.putInt(KEY_SERVER_PORT, DEFAULT_SERVER_PORT);
         editor.putInt(KEY_SOCKET_TIMEOUT, DEFAULT_SOCKET_TIMEOUT);

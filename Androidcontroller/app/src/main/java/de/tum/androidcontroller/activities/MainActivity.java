@@ -83,7 +83,6 @@ public class MainActivity   extends AppCompatActivity
 
 
     private final int SETTINGS_ACTIVITY_IDENTIFIER = 1;    //used for starting new activity for result
-    private final int BLUETOOTH_START_IDENTIFIER = 2;    //used for starting new activity for result
 
     private volatile boolean sending = false;   //used to stop sending data to the server when there is no connection or a initialization is done in the background
 
@@ -100,6 +99,8 @@ public class MainActivity   extends AppCompatActivity
 
     //used for preventing the error dialog to pop up when we stop the communication in order to go to the settings activity
     private volatile boolean isGoingToSettingsActivity = false;
+
+
 
     private volatile BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -124,12 +125,12 @@ public class MainActivity   extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //if we are coming from the settings activity
-        if(requestCode == SETTINGS_ACTIVITY_IDENTIFIER){
+        if(requestCode == SETTINGS_ACTIVITY_IDENTIFIER) {
 
             isGoingToSettingsActivity = false;
 
             //new settings are saved
-            if(resultCode == Activity.RESULT_OK){
+            if (resultCode == Activity.RESULT_OK) {
 
                 final Context myInstance = this;
 
@@ -152,18 +153,13 @@ public class MainActivity   extends AppCompatActivity
                         Log.e(TAG, "onActivityResult: connection closed");
 
                         //init with the new communication method
-                        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),myInstance);
+                        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()), myInstance);
 
                         Log.e(TAG, "run: in the main thread READY");
 
                     }
                 }).start();
 
-            }
-        }else if(requestCode == BLUETOOTH_START_IDENTIFIER){ //the Bluetooth was not enabled
-            //if the communication is Bluetooth then initialize the communication thread after enabling the Bluetooth otherwise you will get NullPointer exception when you try to init the bluetooth without enabling it
-            if(getSettingsData().getConnectionType().equals(SettingsService.ConnectionType.Bluetooth.toString())){
-                mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this);
             }
         }
     }
@@ -186,20 +182,9 @@ public class MainActivity   extends AppCompatActivity
         accelToggle.setChecked(isAccelerometerChecked);
 
 
-        boolean isBluetoothEnabled = false;
-        try{
-            isBluetoothEnabled = BluetoothUtils.isBluetoothEnabled();
-        } catch (Exception e) {
-            this.onConnectionError(e.getMessage());
-        }
+        startBluetooth();
 
-        if(isBluetoothEnabled){
-            mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this);
-        }else{
-            Intent initBTintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(initBTintent,BLUETOOTH_START_IDENTIFIER);
-        }
-
+        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this);
 
 
         if(mSensorListener == null){
@@ -239,6 +224,28 @@ public class MainActivity   extends AppCompatActivity
         unregisterReceiver(broadcastReceiver);
     }
 
+    /**
+     * Enable the bluetooth if the device has a bluetooth adapter.
+     */
+    private void startBluetooth(){
+        //TODO add bluetooth pairing https://stackoverflow.com/questions/17168263/how-to-pair-bluetooth-device-programmatically-android
+        boolean isBluetoothEnabled = false;
+        boolean isBluetoothAvailable = false;
+        try{
+            isBluetoothEnabled = BluetoothUtils.isBluetoothEnabled();
+            isBluetoothAvailable = true;
+        } catch (Exception e) {
+            this.onConnectionError(e.getMessage());
+        }
+
+        if(!isBluetoothEnabled && isBluetoothAvailable){
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            mBluetoothAdapter.enable();
+
+        }
+
+
+    }
     // Loads the FPS widget https://github.com/friendlyrobotnyc/TinyDancer
     private void loadFPSwidget(){
         TinyDancer.create()

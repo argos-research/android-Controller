@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
+import de.tum.androidcontroller.connections.utils.BluetoothUtils;
 import de.tum.androidcontroller.data.SettingsService;
 import de.tum.androidcontroller.connections.packets.BluetoothReceivePacket;
 import de.tum.androidcontroller.connections.packets.BluetoothSendPacket;
@@ -219,7 +220,8 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
      * <b>IMPORTANT!</b> The both devices should be paired otherwise it is not working!
      */
     private void initBluetoothConnection(){
-        final String serverMac      = "30:3A:64:D2:3E:93"; //TODO Add this to the settings
+        //final String serverMac      = "30:3A:64:D2:3E:93";
+        final String serverMac      = BluetoothUtils.toMACFormat(getSettingsData().getBluetoothMAC());
 
         this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_BT_INIT) {
             @Override
