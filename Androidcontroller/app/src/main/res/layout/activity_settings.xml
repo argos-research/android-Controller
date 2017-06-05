@@ -39,65 +39,71 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:id="@+id/ll_wifi">
 
-                <EditText
-                    android:id="@+id/ip_edit_text"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/global_normal_text_size"
-                    android:inputType="text"/>
+                    android:orientation="horizontal">
 
-                <TextView
+                    <EditText
+                        android:id="@+id/ip_edit_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/global_normal_text_size"
+                        android:inputType="text"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="@dimen/global_normal_text_size"
+                        android:text="@string/ip_text" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="@dimen/global_normal_text_size"
-                    android:text="@string/ip_text" />
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/port_edit_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/global_normal_text_size"
+                        android:inputType="numberSigned"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="@dimen/global_normal_text_size"
+                        android:text="@string/port_text" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/timeout_edit_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/global_normal_text_size"
+                        android:inputType="numberSigned"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="@dimen/global_normal_text_size"
+                        android:text="@string/timeout_text" />
+                </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/port_edit_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/global_normal_text_size"
-                    android:inputType="numberSigned"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="@dimen/global_normal_text_size"
-                    android:text="@string/port_text" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/timeout_edit_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/global_normal_text_size"
-                    android:inputType="numberSigned"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="@dimen/global_normal_text_size"
-                    android:text="@string/timeout_text" />
-            </LinearLayout>
-
 
             <LinearLayout
                 android:layout_width="match_parent"

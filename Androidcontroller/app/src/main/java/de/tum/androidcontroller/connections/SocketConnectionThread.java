@@ -50,7 +50,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     private SettingsService.ConnectionType connectionType = null;
 
-    private final boolean LOGGING = true;
+    private final boolean LOGGING = false;
 
     private volatile boolean amIReceiving;
 

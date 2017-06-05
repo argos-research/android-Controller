@@ -1,13 +1,19 @@
 package de.tum.androidcontroller.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.data.SettingsService;
@@ -48,17 +54,20 @@ public class SettingsActivity extends AppCompatActivity {
     private EditText editTextSocketTimeout;
 
 
+    //the layout holding the wifi attributes (IP address, port number and socket timeout)
+    private LinearLayout llWifi;
 
+    //for obtaining the screen dimensions
+    DisplayMetrics displayMetrics = new DisplayMetrics();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        spinnerConnectionType = (Spinner) findViewById(R.id.connection_type);
-        ArrayAdapter<String> adapterConnectionTypes = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,optionsConnectionTypes);
-        spinnerConnectionType.setAdapter(adapterConnectionTypes);
-        adapterConnectionTypes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        initSpinner();
 
         editTextServerIP = (EditText) findViewById(R.id.ip_edit_text);
 
@@ -66,10 +75,56 @@ public class SettingsActivity extends AppCompatActivity {
 
         editTextSocketTimeout = (EditText) findViewById(R.id.timeout_edit_text);
 
+        llWifi = (LinearLayout) findViewById(R.id.ll_wifi);
+
         restoreUI();
 
     }
 
+    /**
+     * Initialization of the spinner holding the values from
+     * {@link de.tum.androidcontroller.data.SettingsService.ConnectionType}
+     * and the animation applied on changing the layouts
+     */
+    private void initSpinner(){
+        spinnerConnectionType = (Spinner) findViewById(R.id.connection_type);
+        ArrayAdapter<String> adapterConnectionTypes = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,optionsConnectionTypes);
+        spinnerConnectionType.setAdapter(adapterConnectionTypes);
+        adapterConnectionTypes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerConnectionType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(optionsConnectionTypes[position].equals("Bluetooth")){
+                    llWifi  .animate()
+                            .translationX(displayMetrics.widthPixels)
+                            .setDuration(750)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    llWifi.setVisibility(View.GONE);
+                                }
+                            });
+                }else
+                    llWifi  .animate()
+                            .translationX(0)
+                            .setDuration(750)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    super.onAnimationStart(animation);
+                                    llWifi.setVisibility(View.VISIBLE);
+                                }
+                            });
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
     /**
      * This method restores the settings from the shared preferences.
      */
