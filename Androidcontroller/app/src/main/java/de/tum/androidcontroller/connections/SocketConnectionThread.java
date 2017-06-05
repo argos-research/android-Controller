@@ -333,7 +333,23 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void closeBluetoothConnection() {
+        if(mSocketBt != null){
+            if(mSocketBt.isConnected()){
 
+                this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_CLOSE_CONNECTION) {
+                    @Override
+                    public void run() {
+                        super.run();
+                        try {
+                            mSocketBt.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+            }
+        }
     }
 
 
