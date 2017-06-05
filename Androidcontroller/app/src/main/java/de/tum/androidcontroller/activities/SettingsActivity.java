@@ -53,6 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private EditText editTextSocketTimeout;
 
+    private final long animationDuration = 450;
 
     //the layout holding the WiFi attributes (IP address, port number and socket timeout)
     private LinearLayout llWifi;
@@ -102,7 +103,7 @@ public class SettingsActivity extends AppCompatActivity {
                 if(optionsConnectionTypes[position].equals("Bluetooth")){
                     llWifi  .animate()
                             .translationX(displayMetrics.widthPixels)
-                            .setDuration(450)
+                            .setDuration(animationDuration)
                             .setListener(new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationStart(Animator animation) {
@@ -119,7 +120,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }else
                     llWifi  .animate()
                             .translationX(0)
-                            .setDuration(450)
+                            .setDuration(animationDuration)
                             .setListener(new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationStart(Animator animation) {
@@ -209,5 +210,9 @@ public class SettingsActivity extends AppCompatActivity {
     public void onResetButtonClicked(View view) {
         SettingsService.getInstance(getApplicationContext()).resetSettings();
         restoreUI();
+    }
+
+    public void onBluetoothMACChange(View view) {
+        Toast.makeText(this,"HERE",Toast.LENGTH_LONG).show();
     }
 }

@@ -30,6 +30,7 @@ import org.json.JSONException;
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
 import de.tum.androidcontroller.connections.models.EncodedSensorModel;
+import de.tum.androidcontroller.connections.utils.BluetoothUtils;
 import de.tum.androidcontroller.connections.utils.ConnectionUtils;
 import de.tum.androidcontroller.data.SettingsService;
 import de.tum.androidcontroller.models.SensorBaseModel;
@@ -82,6 +83,7 @@ public class MainActivity   extends AppCompatActivity
 
 
     private final int SETTINGS_ACTIVITY_IDENTIFIER = 1;    //used for starting new activity for result
+    private final int BLUETOOTH_START_IDENTIFIER = 2;    //used for starting new activity for result
 
     private volatile boolean sending = false;   //used to stop sending data to the server when there is no connection or a initialization is done in the background
 
@@ -158,6 +160,11 @@ public class MainActivity   extends AppCompatActivity
                 }).start();
 
             }
+        }else if(requestCode == BLUETOOTH_START_IDENTIFIER){ //the Bluetooth was not enabled
+            //if the communication is Bluetooth then initialize the communication thread after enabling the Bluetooth otherwise you will get NullPointer exception when you try to init the bluetooth without enabling it
+            if(getSettingsData().getConnectionType().equals(SettingsService.ConnectionType.Bluetooth.toString())){
+                mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this);
+            }
         }
     }
 
@@ -170,18 +177,30 @@ public class MainActivity   extends AppCompatActivity
 
         initLayoutsAndHeadlines();
 
-        Intent testBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivityForResult(testBT,123);
+        initWaitDialog();
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
 
-        //set it always to true
+        //set it always to true TODO move to another activity!
         ToggleButton accelToggle = (ToggleButton) findViewById(R.id.accelerometer_toggle);
         accelToggle.setChecked(isAccelerometerChecked);
 
 
-        initWaitDialog();
-        mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this); //TODO handle if no server is running
+        boolean isBluetoothEnabled = false;
+        try{
+            isBluetoothEnabled = BluetoothUtils.isBluetoothEnabled();
+        } catch (Exception e) {
+            this.onConnectionError(e.getMessage());
+        }
+
+        if(isBluetoothEnabled){
+            mCommunicationThread = new SocketConnectionThread(SettingsService.ConnectionType.fromText(getSettingsData().getConnectionType()),this);
+        }else{
+            Intent initBTintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(initBTintent,BLUETOOTH_START_IDENTIFIER);
+        }
+
+
 
         if(mSensorListener == null){
             mSensorListener = de.tum.androidcontroller.sensors.SensorModel.getInstance(this);

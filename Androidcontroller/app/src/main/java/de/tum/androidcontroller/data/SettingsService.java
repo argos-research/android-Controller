@@ -89,6 +89,10 @@ public class SettingsService {
      */
     private static final String KEY_SOCKET_TIMEOUT                  = "KeySocketTimeout";
 
+    /**
+     * Key for the bluetooth server MAC address.
+     */
+    private static final String KEY_Bluetooth_MAC                   = "KeyBluetoothMAC";
 
     /**
      * Default value for the connection type.

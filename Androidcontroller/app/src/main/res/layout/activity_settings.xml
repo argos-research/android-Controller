@@ -123,7 +123,8 @@
                     android:textSize="@dimen/global_normal_text_size"
                     android:maxLength="12"
                     android:digits="0123456789ABCDEF"
-                    android:inputType="textCapCharacters"/>
+                    android:inputType="textCapCharacters"
+                    android:onClick="onBluetoothMACChange"/>
 
                 <TextView
                     android:layout_width="wrap_content"

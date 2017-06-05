@@ -19,6 +19,8 @@ public class SettingsModel {
 
     private int socketTimeoutMilis;
 
+    private String bluetoothMAC;
+
     public SettingsModel(){
 
     }
@@ -26,11 +28,13 @@ public class SettingsModel {
     public SettingsModel(SettingsService.ConnectionType connectionType,
                          String IP,
                          int port,
-                         int socketTimeoutMilis){
+                         int socketTimeoutMilis,
+                         String bluetoothMAC){
         this.connectionType     = connectionType;
         this.IP                 = IP;
         this.port               = port;
         this.socketTimeoutMilis = socketTimeoutMilis;
+        this.bluetoothMAC       = bluetoothMAC;
     }
 
 
@@ -64,6 +68,14 @@ public class SettingsModel {
 
     public void setSocketTimeoutMilis(int socketTimeoutMilis){
         this.socketTimeoutMilis = socketTimeoutMilis;
+    }
+
+    public String getBluetoothMAC(){
+        return this.bluetoothMAC;
+    }
+
+    public void setBluetoothMAC(String bluetoothMAC){
+        this.bluetoothMAC = bluetoothMAC;
     }
 
 }
