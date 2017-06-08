@@ -539,42 +539,42 @@ public class MainActivity   extends AppCompatActivity
     int i = 1;
     @Override
     public void onAccelerometerChanged(SensorBaseModel data) {
-        if(mLocalAccelerationHolder == null){
-            mLocalAccelerationHolder = data;
-        }
-        else{
-            //TODO fix it
-            //consider it only if is a significant change
-            //the acceleration/breaking point
-            if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK  && Math.abs(data.getX()) <= SensorDataSettings.maximumAccelerationBreakDeviation){
-            //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
-                significantAccChange = true;
-                if(isAccelerometerChecked)
-                    steeringWheelForwardView.drawAccelerationBrake(data.getX());
-                mLocalAccelerationHolder = data;
-            }//the steering point
-//            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING ){
-           else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING && Math.abs(data.getY()) <= SensorDataSettings.maximumLeftRightDeviation){
-                significantAccChange = true;
-                if(isAccelerometerChecked)
-                    steeringWheelSidewaysView.drawLeftRight(data.getY());
-                mLocalAccelerationHolder = data;
-            }
-            //if it is a significant change, the connection is established and isAccelerometerChecked is checked (used to disable the this sensor in order to use just the gyro buttons in Speed Dreams)
-            // => send it to the server
-            if(significantAccChange && sending && isAccelerometerChecked) {
-                //send the proper values to the server
-//                Log.e(TAG, "onAccelerometerChanged: SENDING");
-//                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
-                try {
-                    mCommunicationThread.sendMsg(ConnectionUtils.buildAccelerometerJSON(ConnectionUtils.toEncodedAccelerometerModel(data).toJSONObject()).toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                significantAccChange = false;
-            }
-        }
-        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,3);
+//        if(mLocalAccelerationHolder == null){
+//            mLocalAccelerationHolder = data;
+//        }
+//        else{
+//            //TODO fix it
+//            //consider it only if is a significant change
+//            //the acceleration/breaking point
+//            if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK  && Math.abs(data.getX()) <= SensorDataSettings.maximumAccelerationBreakDeviation){
+//            //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
+//                significantAccChange = true;
+//                if(isAccelerometerChecked)
+//                    steeringWheelForwardView.drawAccelerationBrake(data.getX());
+//                mLocalAccelerationHolder = data;
+//            }//the steering point
+////            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING ){
+//           else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING && Math.abs(data.getY()) <= SensorDataSettings.maximumLeftRightDeviation){
+//                significantAccChange = true;
+//                if(isAccelerometerChecked)
+//                    steeringWheelSidewaysView.drawLeftRight(data.getY());
+//                mLocalAccelerationHolder = data;
+//            }
+//            //if it is a significant change, the connection is established and isAccelerometerChecked is checked (used to disable the this sensor in order to use just the gyro buttons in Speed Dreams)
+//            // => send it to the server
+//            if(significantAccChange && sending && isAccelerometerChecked) {
+//                //send the proper values to the server
+////                Log.e(TAG, "onAccelerometerChanged: SENDING");
+////                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
+//                try {
+//                    mCommunicationThread.sendMsg(ConnectionUtils.buildAccelerometerJSON(ConnectionUtils.toEncodedAccelerometerModel(data).toJSONObject()).toString());
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                significantAccChange = false;
+//            }
+//        }
+//        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,3);
     }
 
     /**
