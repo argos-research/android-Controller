@@ -11,6 +11,7 @@ public class Vibration {
     private final long VIBRATION_DURATION   = 100;
     private final long VIBRATION_SLEEP      = 100;
 
+
     // Each element then alternates between vibrate, sleep, vibrate, sleep and start without waiting. This pattern makes it to vibrate twice
     private final long[] VIBRATION_PATTERN  = {0,VIBRATION_DURATION, VIBRATION_SLEEP, VIBRATION_DURATION, VIBRATION_SLEEP};
 
