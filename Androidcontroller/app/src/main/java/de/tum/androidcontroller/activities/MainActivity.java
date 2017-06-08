@@ -241,6 +241,7 @@ public class MainActivity   extends AppCompatActivity
         if(!isBluetoothEnabled && isBluetoothAvailable){
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             mBluetoothAdapter.enable();
+            Log.e(TAG, "startBluetooth: UNABLED");
 
         }
 

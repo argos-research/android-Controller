@@ -222,7 +222,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     private void initBluetoothConnection(){
         //final String serverMac      = "30:3A:64:D2:3E:93";
         final String serverMac      = BluetoothUtils.toMACFormat(getSettingsData().getBluetoothMAC());
-
         this.execute(new Packet(ConnectionRunnableModels.RUNNABLE_NAME_BT_INIT) {
             @Override
             public void run() {
@@ -259,13 +258,29 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                     initializationMsg += String.format("The Bluetooth connection is successfully established with the server %s and data link is opened!\n",serverMac);
                 } catch (IOException e) {
                     try {
-                        mSocketBt.close();
-                        initializationMsg += "The Bluetooth server is not reachable. Please start it and provide the right MAC address of it!";
-                        Log.e(TAG, "run: PROBLEM 3" + initializationMsg);
+                        if(mSocketBt != null){
+                            mSocketBt.close();
+                            initializationMsg += "The Bluetooth server is not reachable. Please start it and provide the right MAC address of it!";
+                            Log.e(TAG, "run: PROBLEM 3" + initializationMsg);
+                        }
                     } catch (IOException e2) {
                         initializationMsg += "Fatal Error:  Unable to close the bluetooth socket during the connection failure" + e2.getMessage() + ".\n";
                         Log.e(TAG, "run: PROBLEM 1" + initializationMsg);
                     }
+                } catch (NullPointerException np){
+                    //this is the case when the devices has enabled its bluetooth but it will take a while until it is ready so wait here and start again
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                    //restart it
+//                    initBluetoothConnection();
+
+                    initializationMsg += "The Bluetooth device is still not fully enabled. Please try again in a second.\n";
+
+
+                    np.printStackTrace();
                 }
             }
         });
