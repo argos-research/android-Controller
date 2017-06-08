@@ -1,12 +1,9 @@
 package de.tum.androidcontroller.connections.utils;
 
-import android.util.Log;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.tum.androidcontroller.connections.models.EncodedSensorModel;
+import de.tum.androidcontroller.models.EncodedSendModel;
 import de.tum.androidcontroller.models.SensorBaseModel;
 import de.tum.androidcontroller.sensors.SensorDataSettings;
 
@@ -39,7 +36,7 @@ public class ConnectionUtils {
      * because this won't slow down my performance and it will make only my code
      * harder to read.
      *
-     * The value range of every value from {@link EncodedSensorModel}
+     * The value range of every value from {@link EncodedSendModel}
      * will be from [0,MAXIMUM_ACCELEROMETER_STEPS]. The steps can be
      * found in {@link de.tum.androidcontroller.sensors.SensorDataSettings}
      * as <b>MAXIMUM_ACCELEROMETER_STEPS</b> parameter.
@@ -51,11 +48,11 @@ public class ConnectionUtils {
      *
      *
      * @param data the raw accelerometer values
-     * @return an instance of {@link EncodedSensorModel} ready to be send to the server
+     * @return an instance of {@link EncodedSendModel} ready to be send to the server
      *
-     * @see EncodedSensorModel ,de.tum.androidcontroller.sensors.EventListener,de.tum.androidcontroller.sensors.SensorDataSettings
+     * @see EncodedSendModel ,de.tum.androidcontroller.sensors.EventListener,de.tum.androidcontroller.sensors.SensorDataSettings
      */
-    public static EncodedSensorModel toEncodedAccelerometerModel(SensorBaseModel data){
+    public static EncodedSendModel toEncodedAccelerometerModel(SensorBaseModel data){
         int forward,backward,left,right;
         int preDefined = 3;
         //TODO make it better and connect it with MAXIMUM_ACCELEROMETER_STEPS!
@@ -90,7 +87,7 @@ public class ConnectionUtils {
             left        = 0;
         }
         //Log.e("ABS", String.format("forward %d backward %d left %d right %d \t\t data %s",forward,backward,left,right,data.toString()));
-        return new EncodedSensorModel(forward,backward,left,right);
+        return new EncodedSendModel(forward,backward,left,right);
 
     }
 
@@ -104,7 +101,7 @@ public class ConnectionUtils {
      * This method provides the exact model of that how
      * the sensor data should be send to the server
      * in order the server to recognize it
-     * @param accJSON the {@link EncodedSensorModel} representation from <b>ConnectionUtils.toEncodedAccelerometerModel</b>
+     * @param accJSON the {@link EncodedSendModel} representation from <b>ConnectionUtils.toEncodedAccelerometerModel</b>
      * @return the JSON that should be send to the server
      *
      * @throws JSONException

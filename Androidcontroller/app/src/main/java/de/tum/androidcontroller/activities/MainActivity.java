@@ -29,7 +29,7 @@ import org.json.JSONException;
 
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
-import de.tum.androidcontroller.connections.models.EncodedSensorModel;
+import de.tum.androidcontroller.models.EncodedSendModel;
 import de.tum.androidcontroller.connections.utils.BluetoothUtils;
 import de.tum.androidcontroller.connections.utils.ConnectionUtils;
 import de.tum.androidcontroller.data.SettingsService;
@@ -73,7 +73,7 @@ public class MainActivity   extends AppCompatActivity
     private SensorBaseModel mLocalAccelerationHolder;
     private SensorBaseModel mLocalGyroLastSendHolder;
 
-    private EncodedSensorModel encodedGyroData;
+    private EncodedSendModel encodedGyroData;
 
 
 
@@ -469,7 +469,7 @@ public class MainActivity   extends AppCompatActivity
         if(encodedGyroData != null)
             encodedGyroData.resetValues();
         else
-            encodedGyroData = new EncodedSensorModel(0,0,0,0);
+            encodedGyroData = new EncodedSendModel(0,0,0,0);
 
         //consider any change only if enough time went by
         //done for reducing for same event send many times because when you rotate the phone very fast
@@ -484,28 +484,28 @@ public class MainActivity   extends AppCompatActivity
             if(data.getY() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
                 refreshToast("Detected fast forward rotation");
                 significantGyroChange = true;
-                encodedGyroData.setForward(EncodedSensorModel.FORWARD_KEY_CODE);
+                encodedGyroData.setForward(EncodedSendModel.FORWARD_KEY_CODE);
             }
 
             //fast backward rotated
             if(data.getY() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
                 refreshToast("Detected fast backward rotation");
                 significantGyroChange = true;
-                encodedGyroData.setBackward(EncodedSensorModel.BACKWARD_KEY_CODE);
+                encodedGyroData.setBackward(EncodedSendModel.BACKWARD_KEY_CODE);
             }
 
             //fast right rotation
             if(data.getX() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
                 refreshToast("Detected fast right rotation");
                 significantGyroChange = true;
-                encodedGyroData.setRight(EncodedSensorModel.RIGHT_KEY_CODE);
+                encodedGyroData.setRight(EncodedSendModel.RIGHT_KEY_CODE);
             }
 
             //fast left rotation
             if(data.getX() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
                 refreshToast("Detected fast left rotation");
                 significantGyroChange = true;
-                encodedGyroData.setLeft(EncodedSensorModel.LEFT_KEY_CODE);
+                encodedGyroData.setLeft(EncodedSendModel.LEFT_KEY_CODE);
             }
 
             //if it is a significant change and the connection is established

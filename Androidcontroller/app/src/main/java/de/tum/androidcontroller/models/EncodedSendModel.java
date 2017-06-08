@@ -1,4 +1,4 @@
-package de.tum.androidcontroller.connections.models;
+package de.tum.androidcontroller.models;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,7 +9,7 @@ import de.tum.androidcontroller.UInput.uInputValuesHolder;
  * proper format in order the server to be able to distinguish the
  * differences in all 4 axes - forward, backward, left and right.
  *
- * The value range of every value from {@link EncodedSensorModel}
+ * The value range of every value from {@link EncodedSendModel}
  * will be from [0,MAXIMUM_ACCELEROMETER_STEPS] in case that this
  * class is used for mapping the accelerometer values, otherwise
  * each value will represent a key code from
@@ -20,7 +20,7 @@ import de.tum.androidcontroller.UInput.uInputValuesHolder;
  * as <b>MAXIMUM_ACCELEROMETER_STEPS</b> parameter.
  */
 
-public class EncodedSensorModel {
+public class EncodedSendModel {
     /**
      * Those values are mapped directly to the gyro fast forward/backward/left or right
      * change. These values are also send to the server and handle as normal keyboard
@@ -49,7 +49,7 @@ public class EncodedSensorModel {
                             KEY_RIGHT       = "right";
 
 
-    public EncodedSensorModel(int forward, int backward, int left, int right){
+    public EncodedSendModel(int forward, int backward, int left, int right){
         this.forward    = forward;
         this.backward   = backward;
         this.left       = left;
@@ -57,9 +57,9 @@ public class EncodedSensorModel {
     }
 
     /**
-     * Method for saving the current instance of {@link EncodedSensorModel}
+     * Method for saving the current instance of {@link EncodedSendModel}
      * as a {@link JSONObject}.
-     * @return the mapped {@link EncodedSensorModel} values as a {@link JSONObject}.
+     * @return the mapped {@link EncodedSendModel} values as a {@link JSONObject}.
      * @throws JSONException if it is unsuccessful
      */
     public JSONObject toJSONObject() throws JSONException {
