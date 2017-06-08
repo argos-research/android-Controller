@@ -5,11 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import org.json.JSONException;
+
 import java.io.OutputStream;
 import java.net.DatagramSocket;
 import java.net.Socket;
 
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
+import de.tum.androidcontroller.connections.models.ReceivedDataModel;
 
 /**
  * Created by chochko on 05/05/17.
@@ -31,6 +34,8 @@ public class Packet implements Runnable {
     private volatile Context context;    // used for sending broadcast events
 
     private volatile Intent broadcastIntent = new Intent();
+
+   private final boolean LOGGING = false;
 
     /**
      * Constructor for {@link Packet}.
@@ -106,6 +111,10 @@ public class Packet implements Runnable {
         return outputStream;
     }
 
+    public boolean isLOGGING() {
+        return LOGGING;
+    }
+
     void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
@@ -142,8 +151,15 @@ public class Packet implements Runnable {
      */
     synchronized void sendBroadcastOnReceive(String receivedJSON){
         //Log.e("sendBroadcastOnReceive", "sendBroadcastOnReceive: "+receivedJSON);
-        broadcastIntent.setAction(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE);
-        broadcastIntent.putExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY,receivedJSON);
+
+        try {
+            broadcastIntent.putExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY, new ReceivedDataModel(receivedJSON));
+            broadcastIntent.setAction(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            broadcastIntent.setAction(ConnectionRunnableModels.BROADCAST_ACTION_FAILURE);
+            broadcastIntent.putExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY, e.getMessage());
+        }
         this.context.sendBroadcast(broadcastIntent);
     }
 

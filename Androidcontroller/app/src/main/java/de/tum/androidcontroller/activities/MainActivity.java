@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,7 +30,8 @@ import org.json.JSONException;
 
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
-import de.tum.androidcontroller.models.EncodedSendModel;
+import de.tum.androidcontroller.connections.models.EncodedSentModel;
+import de.tum.androidcontroller.connections.models.ReceivedDataModel;
 import de.tum.androidcontroller.connections.utils.BluetoothUtils;
 import de.tum.androidcontroller.connections.utils.ConnectionUtils;
 import de.tum.androidcontroller.data.SettingsService;
@@ -38,6 +40,7 @@ import de.tum.androidcontroller.connections.SocketConnectionThread;
 import de.tum.androidcontroller.sensors.EventListener;
 import de.tum.androidcontroller.sensors.SensorDataSettings;
 import de.tum.androidcontroller.sensors.SensorListener;
+import de.tum.androidcontroller.sensors.Vibration;
 import de.tum.androidcontroller.views.SteeringWheelView;
 
 public class MainActivity   extends AppCompatActivity
@@ -51,7 +54,7 @@ public class MainActivity   extends AppCompatActivity
     private SensorListener mSensorListener;
 
     //the parent linear layout in the scrollView
-    private LinearLayout mParentLayout;
+    private LinearLayout mParentCalibrationLayout;
 
     //Used for holder each included sensor layouts
     private LinearLayout layout_accelerometer;
@@ -73,7 +76,7 @@ public class MainActivity   extends AppCompatActivity
     private SensorBaseModel mLocalAccelerationHolder;
     private SensorBaseModel mLocalGyroLastSendHolder;
 
-    private EncodedSendModel encodedGyroData;
+    private EncodedSentModel encodedGyroData;
 
 
 
@@ -100,6 +103,7 @@ public class MainActivity   extends AppCompatActivity
     //used for preventing the error dialog to pop up when we stop the communication in order to go to the settings activity
     private volatile boolean isGoingToSettingsActivity = false;
 
+    private volatile Vibrator vibrator = null;
 
 
     private volatile BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -114,6 +118,8 @@ public class MainActivity   extends AppCompatActivity
                 }else if(action.equals(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE)){
                     if(intent.hasExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY)){
                         //Log.e(TAG, "BROADCAST RECEIVED " + intent.getStringExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY));
+                        ReceivedDataModel model = intent.getParcelableExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY);
+                        Log.e(TAG, "onReceive: MODEL RECEIVED: "+ model.toString());
                     }
                 }
             }
@@ -174,6 +180,9 @@ public class MainActivity   extends AppCompatActivity
         initLayoutsAndHeadlines();
 
         initWaitDialog();
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
 
@@ -272,7 +281,7 @@ public class MainActivity   extends AppCompatActivity
 
 
         //init the parent layout
-        mParentLayout                   = (LinearLayout) findViewById(R.id.main_fragment_parent_linear_layout);
+        mParentCalibrationLayout        = (LinearLayout) findViewById(R.id.main_fragment_calibration_linear_layout);
 
         //init the included layouts
         layout_gyro                     = (LinearLayout) findViewById(R.id.content_main_gyro);
@@ -469,7 +478,7 @@ public class MainActivity   extends AppCompatActivity
         if(encodedGyroData != null)
             encodedGyroData.resetValues();
         else
-            encodedGyroData = new EncodedSendModel(0,0,0,0);
+            encodedGyroData = new EncodedSentModel(0,0,0,0);
 
         //consider any change only if enough time went by
         //done for reducing for same event send many times because when you rotate the phone very fast
@@ -484,28 +493,28 @@ public class MainActivity   extends AppCompatActivity
             if(data.getY() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
                 refreshToast("Detected fast forward rotation");
                 significantGyroChange = true;
-                encodedGyroData.setForward(EncodedSendModel.FORWARD_KEY_CODE);
+                encodedGyroData.setForward(EncodedSentModel.FORWARD_KEY_CODE);
             }
 
             //fast backward rotated
             if(data.getY() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
                 refreshToast("Detected fast backward rotation");
                 significantGyroChange = true;
-                encodedGyroData.setBackward(EncodedSendModel.BACKWARD_KEY_CODE);
+                encodedGyroData.setBackward(EncodedSentModel.BACKWARD_KEY_CODE);
             }
 
             //fast right rotation
             if(data.getX() > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
                 refreshToast("Detected fast right rotation");
                 significantGyroChange = true;
-                encodedGyroData.setRight(EncodedSendModel.RIGHT_KEY_CODE);
+                encodedGyroData.setRight(EncodedSentModel.RIGHT_KEY_CODE);
             }
 
             //fast left rotation
             if(data.getX() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT){
                 refreshToast("Detected fast left rotation");
                 significantGyroChange = true;
-                encodedGyroData.setLeft(EncodedSendModel.LEFT_KEY_CODE);
+                encodedGyroData.setLeft(EncodedSentModel.LEFT_KEY_CODE);
             }
 
             //if it is a significant change and the connection is established
@@ -653,14 +662,17 @@ public class MainActivity   extends AppCompatActivity
      * @param view
      */
     public void resetMaxMinValues(View view) {
+        //test vibration
+        Vibration.getInstance(vibrator).onPositionChangedVibration();
+
         LinearLayout subIncludedLayout; //the included layout
         LinearLayout linearLayoutLevel1; //the included layout
         TextView keepMemoryLow = null;
 
         //for more details on the level-ing thing see the comments in content_main.xml
-        for(int level1 = 0; level1 < mParentLayout.getChildCount(); level1++){
-            if(mParentLayout.getChildAt(level1) instanceof LinearLayout){
-                linearLayoutLevel1 = (LinearLayout) mParentLayout.getChildAt(level1);
+        for(int level1 = 0; level1 < mParentCalibrationLayout.getChildCount(); level1++){
+            if(mParentCalibrationLayout.getChildAt(level1) instanceof LinearLayout){
+                linearLayoutLevel1 = (LinearLayout) mParentCalibrationLayout.getChildAt(level1);
                 for(int level2 = 0 ; level2 < linearLayoutLevel1.getChildCount() ; level2++){
                     if(linearLayoutLevel1.getChildAt(level2) instanceof LinearLayout){
                         //the included layout in the content main

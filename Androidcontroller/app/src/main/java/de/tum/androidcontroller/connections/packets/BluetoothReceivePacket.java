@@ -16,13 +16,16 @@ public class BluetoothReceivePacket extends Packet {
     private InputStream mIn;
     private final String TAG = "BluetoothReceivePacket";
 
+
     public BluetoothReceivePacket(String threadName, BluetoothSocket socketBt, Context context) {
         super(threadName, "", socketBt, context);
 
         try{
             mIn = super.getSocketBluetooth().getInputStream();
         } catch (IOException e) {
-            Log.e(TAG, "Unable to get the input stream!");
+            if (super.isLOGGING()) {
+                Log.e(TAG, "Unable to get the input stream!");
+            }
             e.printStackTrace();
         }
     }
@@ -33,12 +36,16 @@ public class BluetoothReceivePacket extends Packet {
 
         while(getSocketBluetooth() != null) {
             if (getSocketBluetooth().isConnected()) {
-                Log.e(TAG, String.format("Listening for data from server %s running on %s...", super.getSocketBluetooth().getRemoteDevice().getName(),super.getSocketBluetooth().getRemoteDevice().getAddress()));
+                if (super.isLOGGING()) {
+                    Log.e(TAG, String.format("Listening for data from server %s running on %s...", super.getSocketBluetooth().getRemoteDevice().getName(),super.getSocketBluetooth().getRemoteDevice().getAddress()));
+                }
                 try {
                     byte inputBuffer[] = new byte[1024];
                     int bytes_read = mIn.read(inputBuffer);
                     String received = new String(inputBuffer, 0, bytes_read);
-                    Log.e(TAG, "Message received from the server: " + received);
+                    if (super.isLOGGING()) {
+                        Log.e(TAG, "Message received from the server: " + received);
+                    }
 
                     super.sendBroadcastOnReceive(received);
 
