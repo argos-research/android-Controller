@@ -5,19 +5,222 @@
     android:id="@+id/content_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="de.tum.androidcontroller.activities.MainActivity"
     tools:showIn="@layout/activity_main"
     android:orientation="vertical"
+    android:background="@color/colorPrimary"
     >
 
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/main_main_play_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="@dimen/main_button_weight"
+            android:textSize="@dimen/main_information_text_size"
+            android:text="BTN L">
+
+        </Button>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.6"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/main_position_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/main_info_text_end_padding"
+                android:text="Position:"
+                android:textColor="#fff"
+                android:textSize="@dimen/main_information_text_size"
+                android:layout_marginBottom="@dimen/main_info_text_bottom_margin"
+                />
+
+            <TextView
+                android:id="@+id/main_position_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/main_position_info"
+                android:text="2/5"
+                android:textColor="#fff"
+                android:textSize="@dimen/main_information_text_size"
+                android:layout_marginBottom="@dimen/main_info_text_bottom_margin"/>
+
+            <TextView
+                android:id="@+id/main_gear_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/main_info_text_end_padding"
+                android:text="Gear:"
+                android:textColor="#fff"
+                android:textSize="@dimen/main_information_text_size"
+                android:layout_below="@+id/main_position_info"
+                android:layout_marginBottom="@dimen/main_info_text_bottom_margin"
+                android:layout_toStartOf="@+id/main_gear_value" />
+
+            <TextView
+                android:id="@+id/main_gear_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1/5"
+                android:textColor="#fff"
+                android:textSize="@dimen/main_information_text_size"
+                android:layout_below="@+id/main_position_value"
+                android:layout_toEndOf="@+id/main_position_info"
+                android:layout_marginBottom="@dimen/main_info_text_bottom_margin"/>
+
+            <TextView
+                android:id="@+id/main_speed_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/main_info_text_end_padding"
+                android:text="Speed:"
+                android:textColor="#fff"
+                android:textSize="@dimen/main_information_text_size"
+                android:layout_below="@+id/main_gear_info"
+                android:layout_toStartOf="@+id/main_speed_value"
+                />
+
+            <TextView
+                android:id="@+id/main_speed_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/main_info_text_end_padding"
+                android:text="100"
+                android:textColor="#fff"
+                android:textSize="@dimen/main_information_text_size"
+                android:layout_below="@+id/main_gear_value"
+                android:layout_toEndOf="@+id/main_position_info"
+                />
+
+            <TextView
+                android:id="@+id/main_speed_info_km_h"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="km/h"
+                android:textColor="#fff"
+                android:textSize="@dimen/main_information_text_size"
+                android:layout_below="@+id/main_gear_value"
+                android:layout_toEndOf="@+id/main_speed_value"
+                />
+
+        </RelativeLayout>
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="0.8"-->
+            <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+            <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
+            <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
+            <!--android:paddingTop="@dimen/activity_vertical_margin"-->
+            <!--android:orientation="vertical"-->
+            <!--android:layout_gravity="center">-->
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="@dimen/main_information_text_width"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_marginBottom="@dimen/main_info_text_bottom_margin">-->
+                <!--<TextView-->
+                    <!--android:id="@+id/main_position_info"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="end"-->
+                    <!--android:text="Position:"-->
+                    <!--android:textSize="@dimen/main_information_text_size"-->
+                    <!--android:paddingEnd="@dimen/main_info_text_end_padding"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/main_position_value"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="start"-->
+                    <!--android:text="2/5"-->
+                    <!--android:textSize="@dimen/main_information_text_size"-->
+                    <!--android:layout_weight="1"/>-->
+            <!--</LinearLayout>-->
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_marginBottom="@dimen/main_info_text_bottom_margin">-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="end"-->
+                    <!--android:text="Gear:"-->
+                    <!--android:textSize="@dimen/main_information_text_size"-->
+                    <!--android:paddingEnd="@dimen/main_info_text_end_padding"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/main_gear_value"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="start"-->
+                    <!--android:text="2/5"-->
+                    <!--android:textSize="@dimen/main_information_text_size"-->
+                    <!--android:layout_weight="1"/>-->
+            <!--</LinearLayout>-->
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_marginBottom="@dimen/main_info_text_bottom_margin">-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="end"-->
+                    <!--android:text="Position:"-->
+                    <!--android:textSize="@dimen/main_information_text_size"-->
+                    <!--android:paddingEnd="@dimen/main_info_text_end_padding"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/main_speed_value"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="start"-->
+                    <!--android:text="100 km/h"-->
+                    <!--android:textSize="@dimen/main_information_text_size"-->
+                    <!--android:layout_weight="1"/>-->
+            <!--</LinearLayout>-->
+
+        <!--</LinearLayout>-->
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="@dimen/main_button_weight"
+            android:textSize="@dimen/main_information_text_size"
+            android:text="BTN R">
+
+        </Button>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/main_scroll_view_calibration"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
         android:fadingEdge="none"
         android:fadingEdgeLength="0dp"
         android:fillViewport="true"
@@ -28,7 +231,8 @@
             android:id="@+id/main_fragment_calibration_linear_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            >
 
             <LinearLayout
                 android:layout_width="match_parent"
