@@ -25,7 +25,7 @@ import de.tum.androidcontroller.UInput.uInputValuesHolder;
  */
 
 public class EncodedSentModel {
-    /**
+    /*
      * Those values are mapped directly to the gyro fast forward/backward/left or right
      * change. These values are also send to the server and handle as normal keyboard
      * input with the linux UInput class.
@@ -35,17 +35,17 @@ public class EncodedSentModel {
 //                            LEFT_KEY_CODE       = uInputValuesHolder.KEY_A,
 //                            RIGHT_KEY_CODE      = uInputValuesHolder.KEY_H;
 
+
+    //you have to make sure that these buttons are registered in the uInput C file
     public static final int FORWARD_KEY_CODE    = uInputValuesHolder.BTN_NORTH,
                             BACKWARD_KEY_CODE   = uInputValuesHolder.BTN_SOUTH,
                             LEFT_KEY_CODE       = uInputValuesHolder.BTN_WEST,
                             RIGHT_KEY_CODE      = uInputValuesHolder.BTN_EAST;
 
+
     public static final int BTN_LEFT_CODE       = uInputValuesHolder.BTN_TL;
     public static final int BTN_RIGHT_CODE      = uInputValuesHolder.BTN_TR;
-
-
     /*
-    TODO READ THIS!
     Currently there is a bug in the SpeedDream 2 HTTP API which provides the data from the game. The bug is
     that when you choose to play a game and the loading screen is ready, you need to press Enter to start
     racing. Unfortunately, in this time the HTTP socket will be initialized but if you try to send a HTTP GET,
@@ -56,10 +56,6 @@ public class EncodedSentModel {
      */
     public static final int BTN_START_GAME_CODE = uInputValuesHolder.KEY_ENTER;
 
-//    public static final int FORWARD_KEY_CODE    = uInputValuesHolder.BTN_TR,
-//                            BACKWARD_KEY_CODE   = uInputValuesHolder.BTN_TL,
-//                            LEFT_KEY_CODE       = uInputValuesHolder.BTN_WEST,
-//                            RIGHT_KEY_CODE      = uInputValuesHolder.BTN_EAST;
 
 
     private int forward, backward, left, right;

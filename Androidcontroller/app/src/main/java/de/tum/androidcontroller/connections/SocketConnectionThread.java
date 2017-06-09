@@ -277,7 +277,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 //                    //restart it
 //                    initBluetoothConnection();
 
-                    initializationMsg += "The Bluetooth device is still not fully enabled. Please try again in a second.\n";
+                    initializationMsg = "The Bluetooth device is still not fully enabled. Please try again in a second.\n";
 
 
                     np.printStackTrace();

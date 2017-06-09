@@ -89,7 +89,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         editTextSocketTimeout   = (EditText) findViewById(R.id.timeout_edit_text);
 
-        editTextBluetoothMAC    = (EditText) findViewById(R.id.bt_mac_address);
+        editTextBluetoothMAC    = (EditText) findViewById(R.id.text_mac_address);
 
         llWifi                  = (LinearLayout) findViewById(R.id.ll_wifi);
 

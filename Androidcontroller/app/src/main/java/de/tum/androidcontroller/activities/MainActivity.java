@@ -19,7 +19,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -55,6 +57,10 @@ public class MainActivity   extends AppCompatActivity
 
     //the parent linear layout in the scrollView
     private LinearLayout mParentCalibrationLayout;
+    private LinearLayout mMainPlayActivityLayout;
+    private ScrollView mCalibrationScrollView;
+    private volatile boolean isCalibrationViewActive = false; //dummy boolean for not changing the whole application because of the sensor callback which can be 1 to 1 and I will have to use Broadcast. TODO use broadcast
+
 
     //Used for holder each included sensor layouts
     private LinearLayout layout_accelerometer;
@@ -186,10 +192,8 @@ public class MainActivity   extends AppCompatActivity
 
         mGyroToast = Toast.makeText(this,"",Toast.LENGTH_LONG);
 
-        //set it always to true TODO move to another activity!
-        ToggleButton accelToggle = (ToggleButton) findViewById(R.id.accelerometer_toggle);
-        accelToggle.setChecked(isAccelerometerChecked);
-
+        //as we will start with the main view, disable it for now although it does not change anything
+        changeAccelerometerToggle(false);
 
         startBluetooth();
 
@@ -223,6 +227,15 @@ public class MainActivity   extends AppCompatActivity
 
         //load the FPS widget
         loadFPSwidget();
+
+        //initialize the button listeners
+        initButtonListeners();
+    }
+
+    private void changeAccelerometerToggle(boolean state){
+        ToggleButton accelToggle = (ToggleButton) findViewById(R.id.accelerometer_toggle);
+        isAccelerometerChecked = state;
+        accelToggle.setChecked(isAccelerometerChecked);
     }
 
     @Override
@@ -265,6 +278,64 @@ public class MainActivity   extends AppCompatActivity
                 .show(this);
     }
 
+    private void hideView(View someView){
+        someView.setVisibility(View.GONE);
+    }
+
+    private void showView(View someView){
+        someView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Initializes the button listener for the main three buttons in the activity
+     */
+    private void initButtonListeners() {
+        Button btnL         = (Button) findViewById(R.id.main_button_left);
+        Button btnR         = (Button) findViewById(R.id.main_button_right);
+        Button btnStart     = (Button) findViewById(R.id.main_button_start);
+
+        btnL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(sending){
+                    try {
+                        mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(EncodedSentModel.BTN_LEFT_CODE).toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        btnR.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(sending){
+                    try {
+                        mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(EncodedSentModel.BTN_RIGHT_CODE).toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(sending){
+                    try {
+                        mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(EncodedSentModel.BTN_START_GAME_CODE).toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+
+    }
+
     /**
      * Used for refreshing the toast message from the gyro sensor events
      * @param message the message to be displayed
@@ -280,8 +351,14 @@ public class MainActivity   extends AppCompatActivity
         steeringWheelSidewaysView = (SteeringWheelView) findViewById(R.id.steering_wheel_sideways);
 
 
+        //init the both main activities here
+        mMainPlayActivityLayout         = (LinearLayout) findViewById(R.id.main_main_play_linear_layout);
+        mCalibrationScrollView          = (ScrollView) findViewById(R.id.main_scroll_view_calibration);
+
         //init the parent layout
-        mParentCalibrationLayout        = (LinearLayout) findViewById(R.id.main_fragment_calibration_linear_layout);
+        mParentCalibrationLayout        = (LinearLayout) mCalibrationScrollView.findViewById(R.id.main_fragment_calibration_linear_layout);
+
+
 
         //init the included layouts
         layout_gyro                     = (LinearLayout) findViewById(R.id.content_main_gyro);
@@ -298,6 +375,13 @@ public class MainActivity   extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
+        if(isCalibrationViewActive){
+            showView(mCalibrationScrollView);
+            hideView(mMainPlayActivityLayout);
+        }else{
+            showView(mMainPlayActivityLayout);
+            hideView(mCalibrationScrollView);
+        }
         mSensorListener.onResume(mSensorManager);
         if(logging)
             Log.e(TAG, "onStart");
@@ -331,6 +415,18 @@ public class MainActivity   extends AppCompatActivity
             startActivityForResult(new Intent(this,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
             isGoingToSettingsActivity = true;
             mCommunicationThread.closeConnection();
+            return true;
+        } else if(id == R.id.action_calibration){
+            showView(mCalibrationScrollView);
+            hideView(mMainPlayActivityLayout);
+            //make sure it is enabled
+            changeAccelerometerToggle(true);
+            isCalibrationViewActive = true;
+            return true;
+        } else if(id == R.id.action_main_view){
+            showView(mMainPlayActivityLayout);
+            hideView(mCalibrationScrollView);
+            isCalibrationViewActive = false;
             return true;
         }
 
@@ -536,45 +632,57 @@ public class MainActivity   extends AppCompatActivity
 
         setSensorDataToLayout(data,layout_gyro,mGyroValueHolder,3);
     }
-    int i = 1;
+
     @Override
     public void onAccelerometerChanged(SensorBaseModel data) {
-//        if(mLocalAccelerationHolder == null){
-//            mLocalAccelerationHolder = data;
-//        }
-//        else{
-//            //TODO fix it
-//            //consider it only if is a significant change
-//            //the acceleration/breaking point
-//            if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK  && Math.abs(data.getX()) <= SensorDataSettings.maximumAccelerationBreakDeviation){
-//            //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
-//                significantAccChange = true;
-//                if(isAccelerometerChecked)
-//                    steeringWheelForwardView.drawAccelerationBrake(data.getX());
-//                mLocalAccelerationHolder = data;
-//            }//the steering point
-////            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING ){
-//           else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING && Math.abs(data.getY()) <= SensorDataSettings.maximumLeftRightDeviation){
-//                significantAccChange = true;
-//                if(isAccelerometerChecked)
-//                    steeringWheelSidewaysView.drawLeftRight(data.getY());
-//                mLocalAccelerationHolder = data;
-//            }
-//            //if it is a significant change, the connection is established and isAccelerometerChecked is checked (used to disable the this sensor in order to use just the gyro buttons in Speed Dreams)
-//            // => send it to the server
-//            if(significantAccChange && sending && isAccelerometerChecked) {
-//                //send the proper values to the server
-////                Log.e(TAG, "onAccelerometerChanged: SENDING");
-////                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
-//                try {
-//                    mCommunicationThread.sendMsg(ConnectionUtils.buildAccelerometerJSON(ConnectionUtils.toEncodedAccelerometerModel(data).toJSONObject()).toString());
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//                significantAccChange = false;
-//            }
-//        }
-//        setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,3);
+        if(mLocalAccelerationHolder == null){
+            mLocalAccelerationHolder = data;
+        }
+        else{
+
+            //consider it only if is a significant change
+            //the acceleration/breaking point
+            if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK  && Math.abs(data.getX()) <= SensorDataSettings.maximumAccelerationBreakDeviation){
+            //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
+                significantAccChange = true;
+                if (isCalibrationViewActive) {
+                    if(isAccelerometerChecked)
+                        steeringWheelForwardView.drawAccelerationBrake(data.getX());
+                }
+                mLocalAccelerationHolder = data;
+            }//the steering point
+//            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING ){
+           else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING && Math.abs(data.getY()) <= SensorDataSettings.maximumLeftRightDeviation){
+                significantAccChange = true;
+                if (isCalibrationViewActive) {
+                    if(isAccelerometerChecked)
+                        steeringWheelSidewaysView.drawLeftRight(data.getY());
+                }
+                mLocalAccelerationHolder = data;
+            }
+            //if it is a significant change, the connection is established and isAccelerometerChecked is checked (used to disable the this sensor in order to use just the gyro buttons in Speed Dreams)
+            // => send it to the server
+            if(significantAccChange && sending) {
+                //send the proper values to the server
+//                Log.e(TAG, "onAccelerometerChanged: SENDING");
+//                mCommunicationThread.sendMsg(buildTestJSON(i++).toString());
+                try {
+                    if (isCalibrationViewActive) {
+                        if (isAccelerometerChecked) {
+                            mCommunicationThread.sendMsg(ConnectionUtils.buildAccelerometerJSON(ConnectionUtils.toEncodedAccelerometerModel(data).toJSONObject()).toString());
+                        }
+                    } else{
+                        mCommunicationThread.sendMsg(ConnectionUtils.buildAccelerometerJSON(ConnectionUtils.toEncodedAccelerometerModel(data).toJSONObject()).toString());
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                significantAccChange = false;
+            }
+        }
+        if(isCalibrationViewActive)
+            setSensorDataToLayout(data,layout_accelerometer,mAccelerometerValueHolder,3);
     }
 
     /**

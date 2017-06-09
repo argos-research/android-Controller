@@ -111,4 +111,20 @@ public class ConnectionUtils {
                         .put("Accelerometer data"       , accJSON)
                         .put("Created time"             , System.currentTimeMillis());
     }
+
+
+    /**
+     * Builds the JSON that is sent to the server holding the pressed button event.
+     * This method has nothing to do with the button presses from the gyro sensor.
+     * These events are made with the onscreen buttons in the main play activity.
+     *
+     * @param key
+     * @return
+     * @throws JSONException
+     */
+    public static JSONObject buildKeyPressJSON(int key) throws JSONException {
+        return  new JSONObject()
+                        .put("Key"                      , key)
+                        .put("Created time"             , System.currentTimeMillis());
+    }
 }

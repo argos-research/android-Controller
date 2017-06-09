@@ -120,7 +120,7 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/bt_mac_address"
+                    android:id="@+id/text_mac_address"
                     android:layout_width="@dimen/settings_activity_text_entry_width"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/global_normal_text_size"

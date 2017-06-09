@@ -20,6 +20,7 @@
         >
 
         <Button
+            android:id="@+id/main_button_left"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="@dimen/main_button_weight"
@@ -214,6 +215,7 @@
         <!--</LinearLayout>-->
 
         <Button
+            android:id="@+id/main_button_right"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="@dimen/main_button_weight"
