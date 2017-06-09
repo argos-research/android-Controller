@@ -1,5 +1,6 @@
 package de.tum.androidcontroller.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -57,9 +59,14 @@ public class MainActivity   extends AppCompatActivity
 
     //the parent linear layout in the scrollView
     private LinearLayout mParentCalibrationLayout;
-    private LinearLayout mMainPlayActivityLayout;
     private ScrollView mCalibrationScrollView;
     private volatile boolean isCalibrationViewActive = false; //dummy boolean for not changing the whole application because of the sensor callback which can be 1 to 1 and I will have to use Broadcast. TODO use broadcast
+
+    /* the main activity holders */
+    private LinearLayout mMainPlayActivityLayout;
+    private TextView mPositionText;
+    private TextView mGearText;
+    private TextView mSpeedText;
 
 
     //Used for holder each included sensor layouts
@@ -113,6 +120,7 @@ public class MainActivity   extends AppCompatActivity
 
 
     private volatile BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @SuppressLint("SetTextI18n")
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -124,8 +132,30 @@ public class MainActivity   extends AppCompatActivity
                 }else if(action.equals(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE)){
                     if(intent.hasExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY)){
                         //Log.e(TAG, "BROADCAST RECEIVED " + intent.getStringExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY));
-                        ReceivedDataModel model = intent.getParcelableExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY);
-                        Log.e(TAG, "onReceive: MODEL RECEIVED: "+ model.toString());
+                        final ReceivedDataModel model = intent.getParcelableExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY);
+                        //update only if the correct element is shown
+                        if(!isCalibrationViewActive && model != null){
+                            /* The position */
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    String lastPosition = mPositionText.getText().toString();
+                                    String currentPosition = String.format("%d/%d",model.getCurrentPosition(),model.getNumberOfCars());
+                                    mPositionText.setText(currentPosition);
+                                    //if the current position has changed then vibrate
+                                    if(!lastPosition.equals(currentPosition)){
+                                        Vibration.getInstance(vibrator).onPositionChangedVibration();
+                                    }
+
+                                    /* The gear */
+                                    mGearText.setText(String.format("%s/%d",model.getGearString(),model.getGearTotal()));
+
+                                    /* The speed */
+                                    mSpeedText.setText(String.format("%.1f",model.getSpeedInKmPerHour()));
+                                }
+                            });
+
+                        }
                     }
                 }
             }
@@ -358,6 +388,10 @@ public class MainActivity   extends AppCompatActivity
         //init the parent layout
         mParentCalibrationLayout        = (LinearLayout) mCalibrationScrollView.findViewById(R.id.main_fragment_calibration_linear_layout);
 
+        //init the main play screen edit text holders
+        mPositionText                   = (TextView) mMainPlayActivityLayout.findViewById(R.id.main_position_value);
+        mGearText                       = (TextView) mMainPlayActivityLayout.findViewById(R.id.main_gear_value);
+        mSpeedText                      = (TextView) mMainPlayActivityLayout.findViewById(R.id.main_speed_value);
 
 
         //init the included layouts

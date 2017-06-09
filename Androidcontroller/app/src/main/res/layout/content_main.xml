@@ -64,7 +64,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/main_button_start"
                 android:layout_toEndOf="@+id/main_position_info"
-                android:text="2/5"
                 android:textColor="#fff"
                 android:textSize="@dimen/main_information_text_size"
                 android:layout_marginBottom="@dimen/main_info_text_bottom_margin"/>
@@ -85,7 +84,6 @@
                 android:id="@+id/main_gear_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1/5"
                 android:textColor="#fff"
                 android:textSize="@dimen/main_information_text_size"
                 android:layout_below="@+id/main_position_value"
@@ -109,7 +107,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="@dimen/main_info_text_end_padding"
-                android:text="100"
                 android:textColor="#fff"
                 android:textSize="@dimen/main_information_text_size"
                 android:layout_below="@+id/main_gear_value"

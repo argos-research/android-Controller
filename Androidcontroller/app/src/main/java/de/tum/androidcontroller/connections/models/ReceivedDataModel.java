@@ -61,6 +61,10 @@ public class ReceivedDataModel implements Parcelable {
         return gear;
     }
 
+    public String getGearString(){
+        return this.gear == -1 ? "R" : this.gear == 0 ? "N" : ""+this.gear;
+    }
+
     public int getGearTotal() {
         return gearTotal;
     }
