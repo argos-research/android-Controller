@@ -15,14 +15,15 @@ public class TCPReceivePacket extends Packet{
 
     private InputStream mIn;
     private final String TAG = "TCPReceivePacket";
-    private final boolean logging = true;
 
     public TCPReceivePacket(String threadName, Socket socket, Context context) {
         super(threadName, "", socket,context);
         try{
             mIn = super.getSocketTCP().getInputStream();
         } catch (IOException e) {
-            Log.e(TAG, "Unable to get the input stream!");
+            if (super.isLOGGING()) {
+                Log.e(TAG, "Unable to get the input stream!");
+            }
             e.printStackTrace();
         }
     }
@@ -33,17 +34,20 @@ public class TCPReceivePacket extends Packet{
 
         while(getSocketTCP() != null) {
             if (getSocketTCP().isConnected()) {
-                if (logging) {
+                if (super.isLOGGING()) {
                     Log.e(TAG, String.format("Listening for data on port %d...", super.getSocketTCP().getPort()));
                 }
                 try {
                     byte inputBuffer[] = new byte[1024];
                     int bytes_read = mIn.read(inputBuffer);
-                    String received = new String(inputBuffer, 0, bytes_read);
-                    if (logging) {
+                    //String received = new String(inputBuffer, 0, bytes_read).trim();
+                    String received = new String(inputBuffer).trim();
+                    if (super.isLOGGING()) {
                         Log.e(TAG, "Message received from the server: " + received);
+                        Log.e(TAG, "Message received from the server: AFTER " + super.extractJSON(received));
                     }
-                    super.sendBroadcastOnReceive(received);
+                    super.sendBroadcastOnReceive(super.extractJSON(received)
+                    );
 
 
                 } catch (IOException e) {

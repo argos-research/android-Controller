@@ -164,6 +164,23 @@ public class Packet implements Runnable {
     }
 
     /**
+     * Because of the different chanel encoding sometimes there are chars at the beginning ot the
+     * input channel which should be deleted
+     *
+     * @param inputString
+     * @return
+     */
+    String extractJSON(String inputString){
+        inputString = inputString.trim();
+        for(int i = 0; i < inputString.length() ; i++){
+            if(inputString.charAt(i) == '{'){
+                return inputString.substring(i,inputString.length());
+            }
+        }
+        return "";
+    }
+
+    /**
      * This should be implemented from each class which is extending this one.
      * You have to always let the method set the Thread name to the
      * specified one in order in {@link de.tum.androidcontroller.connections.SocketConnectionThread}

@@ -55,7 +55,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/settings_margin"
                         android:textSize="@dimen/global_normal_text_size"
-                        android:inputType="text"/>
+                        android:digits="0123456789."
+                        android:inputType="textCapCharacters"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -76,7 +77,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/settings_margin"
                         android:textSize="@dimen/global_normal_text_size"
-                        android:inputType="numberSigned"/>
+                        android:digits="0123456789"
+                        android:inputType="textCapCharacters"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -97,7 +99,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/settings_margin"
                         android:textSize="@dimen/global_normal_text_size"
-                        android:inputType="numberSigned"/>
+                        android:digits="0123456789"
+                        android:inputType="textCapCharacters"/>
 
                     <TextView
                         android:layout_width="wrap_content"

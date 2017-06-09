@@ -16,7 +16,7 @@
     <dimen name="settings_activity_text_entry_width">150dp</dimen>
     <dimen name="main_info_text_end_padding">10dp</dimen>
     <dimen name="main_info_text_bottom_margin">25dp</dimen>
-    <item name="main_button_weight" type="dimen" format="float">0.8</item>
+    <item name="main_button_weight" type="dimen" format="float">1</item>
     <dimen name="main_information_text_size">32sp</dimen>
     <dimen name="main_information_text_width">250dp</dimen>
 
