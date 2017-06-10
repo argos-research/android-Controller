@@ -35,7 +35,7 @@ public class Packet implements Runnable {
 
     private volatile Intent broadcastIntent = new Intent();
 
-   private final boolean LOGGING = false;
+   private final boolean LOGGING = true;
 
     /**
      * Constructor for {@link Packet}.

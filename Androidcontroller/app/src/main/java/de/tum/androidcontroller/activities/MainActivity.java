@@ -142,13 +142,19 @@ public class MainActivity   extends AppCompatActivity
                                     String lastPosition = mPositionText.getText().toString();
                                     String currentPosition = String.format("%d/%d",model.getCurrentPosition(),model.getNumberOfCars());
                                     mPositionText.setText(currentPosition);
-                                    //if the current position has changed then vibrate
+                                    //if the current position has changed then vibrate`
                                     if(!lastPosition.equals(currentPosition)){
                                         Vibration.getInstance(vibrator).onPositionChangedVibration();
                                     }
 
                                     /* The gear */
-                                    mGearText.setText(String.format("%s/%d",model.getGearString(),model.getGearTotal()));
+                                    String lastGear= mGearText.getText().toString();
+                                    String currentGear = String.format("%s/%d",model.getGearString(),model.getGearTotal());
+                                    mGearText.setText(currentGear);
+                                    //if the gear has changed, vibrate
+                                    if(!lastGear.equals(currentGear)){
+                                        Vibration.getInstance(vibrator).onGearChangedVibration();
+                                    }
 
                                     /* The speed */
                                     mSpeedText.setText(String.format("%.1f",model.getSpeedInKmPerHour()));
