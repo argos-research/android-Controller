@@ -149,7 +149,7 @@ public class MainActivity   extends AppCompatActivity
 
                                     /* The gear */
                                     String lastGear= mGearText.getText().toString();
-                                    String currentGear = String.format("%s/%d",model.getGearString(),model.getGearTotal());
+                                    String currentGear = String.format("%s/%d",model.getGearString(),model.getGearTotalWithoutRandN());
                                     mGearText.setText(currentGear);
                                     //if the gear has changed, vibrate
                                     if(!lastGear.equals(currentGear)){

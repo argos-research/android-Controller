@@ -43,9 +43,9 @@ public class SensorDataSettings {
 
     // +++++++++++++++++++++ For the Gyro sensor +++++++++++++++++++++++++++
     //the minimum change that should trigger the forward/backward gyro change
-    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD  = 7.f;
+    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD  = 9.f;
     //the minimum change that should trigger the steering change
-    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT        = 5.f;
+    public static final float MINIMUM_CHANGE_TRIGGER_GYRO_LEFT_RIGHT        = 6.f;
 
     //the minimum amount of time in milliseconds for triggering new gyro change event on the same axis
     //this value takes care of sending gyro data once per that amount of time. 300 is a good value for this one.

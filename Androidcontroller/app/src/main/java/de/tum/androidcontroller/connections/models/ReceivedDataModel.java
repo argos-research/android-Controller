@@ -10,7 +10,8 @@ import org.json.JSONObject;
 import java.util.Locale;
 
 /**
- * Store the data from the server in a proper way.
+ * Store the data from the server in a proper way. An example of received JSON:
+ * { "speed": "-0.010985", "name": "Player", "rpm": "104.719757", "gear": "-1", "gearNb": "7", "pos": "6", "ncars": "6" }.
  */
 
 public class ReceivedDataModel implements Parcelable {
@@ -61,12 +62,27 @@ public class ReceivedDataModel implements Parcelable {
         return gear;
     }
 
+    /**
+     * The gears provided from the server are always in the form
+     * "-1,0,1,2,3,4,5..." where -1 is reverse and 0 neutral.
+     * @return R for -1, N for 0 otherwise the number of the gear.
+     */
     public String getGearString(){
         return this.gear == -1 ? "R" : this.gear == 0 ? "N" : ""+this.gear;
     }
 
     public int getGearTotal() {
         return gearTotal;
+    }
+
+    /**
+     * Since {@link ReceivedDataModel#gearTotal} counts the R (reverse) and
+     * the N (neutral) gear, this method should not do this and present
+     * the real number of gears without R and N.
+     * @return the number of gears without the reverse and the neutral.
+     */
+    public int getGearTotalWithoutRandN(){
+        return gearTotal - 2;
     }
 
     public int getCurrentPosition() {
