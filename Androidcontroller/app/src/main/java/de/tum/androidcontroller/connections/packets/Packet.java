@@ -15,7 +15,8 @@ import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
 import de.tum.androidcontroller.connections.models.ReceivedDataModel;
 
 /**
- * Created by chochko on 05/05/17.
+ * This is the parent class of every packet sent/received from the server.
+ * Each communication technology packet should implement this class.
  */
 
 public class Packet implements Runnable {
