@@ -33,8 +33,8 @@ public class UDPReceivePacket extends Packet {
 
         while (getSocketUDP() != null) {
             if(getSocketUDP().isConnected()) {
-
-                Log.e(TAG, String.format("Listening for data on port %d...", super.getSocketUDP().getPort()));
+                if(super.isLOGGING())
+                    Log.e(TAG, String.format("Listening for data on port %d...", super.getSocketUDP().getPort()));
                 try {
 
                     byte inputBuffer[] = new byte[256];
@@ -43,7 +43,8 @@ public class UDPReceivePacket extends Packet {
                     getSocketUDP().receive(packet); //this code block the program flow
 
                     String received = new String(inputBuffer).trim();
-                    Log.e(TAG, "Message received from the server: " + received);
+                    if(super.isLOGGING())
+                        Log.e(TAG, "Message received from the server: " + received);
 
                     super.sendBroadcastOnReceive(received);
 
