@@ -7,13 +7,13 @@ import de.tum.androidcontroller.models.SettingsModel;
 
 /**
  * This class is holding the values from the settings activity or their defaults
- * if nothing has been changed. TODO ADD IP,PORT etc
+ * if nothing has been changed.
  */
 
 public class SettingsService {
 
     /**
-     * The current possibilities for communication. TODO Add hotspot/AP
+     * The current possibilities for communication.
      */
     public enum ConnectionType {
         UDP("UDP"),

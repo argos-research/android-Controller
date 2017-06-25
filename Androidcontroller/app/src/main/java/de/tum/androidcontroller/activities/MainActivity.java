@@ -299,7 +299,7 @@ public class MainActivity   extends AppCompatActivity
         if(!isBluetoothEnabled && isBluetoothAvailable){
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             mBluetoothAdapter.enable();
-            Log.e(TAG, "startBluetooth: UNABLED");
+            Log.e(TAG, "startBluetooth: enabled");
 
         }
 
@@ -513,12 +513,11 @@ public class MainActivity   extends AppCompatActivity
      */
     @Override
     public void onConnectionInitResponse(boolean state, final String additionInformation) {
-        //TODO add the addinfo to the displayed msg
+
         mProgressDialog.dismiss();
         final Context myInstance = this;
 
         if(state){
-            //TODO consider using a Snackbar! https://developer.android.com/training/snackbar/action.html
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -534,7 +533,7 @@ public class MainActivity   extends AppCompatActivity
                                     sending = true;
                                 }
                             });
-                    /** TODO FIX
+                    /**
                      * android.view.WindowLeaked: Activity de.tum.androidcontroller.activities.MainActivity has leaked window com.android.internal.policy.PhoneWindow$DecorView{d0dbb06 V.E...... R....... 0,0-1026,602} that was originally added here
                      at android.view.ViewRootImpl.<init>(ViewRootImpl.java:375)
                      at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:299)
@@ -548,7 +547,6 @@ public class MainActivity   extends AppCompatActivity
 
         }else{
 
-            //TODO consider using a Snackbar! https://developer.android.com/training/snackbar/action.html
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -561,7 +559,7 @@ public class MainActivity   extends AppCompatActivity
                                     startActivityForResult(new Intent(myInstance,SettingsActivity.class), SETTINGS_ACTIVITY_IDENTIFIER);
                                 }
                             });
-                    /** TODO FIX
+                    /**
                      * android.view.WindowLeaked: Activity de.tum.androidcontroller.activities.MainActivity has leaked window com.android.internal.policy.PhoneWindow$DecorView{d0dbb06 V.E...... R....... 0,0-1026,602} that was originally added here
                      at android.view.ViewRootImpl.<init>(ViewRootImpl.java:375)
                      at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:299)

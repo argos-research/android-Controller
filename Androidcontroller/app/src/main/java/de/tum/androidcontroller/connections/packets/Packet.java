@@ -156,7 +156,8 @@ public class Packet implements Runnable {
             broadcastIntent.putExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY, new ReceivedDataModel(receivedJSON));
             broadcastIntent.setAction(ConnectionRunnableModels.BROADCAST_ACTION_RECEIVE);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("sendBroadcastOnReceive", "ERROR: received JSON is " + receivedJSON,e);
+            //e.printStackTrace();
             broadcastIntent.setAction(ConnectionRunnableModels.BROADCAST_ACTION_FAILURE);
             broadcastIntent.putExtra(ConnectionRunnableModels.BROADCAST_INFORMATION_KEY, e.getMessage());
         }
@@ -167,7 +168,7 @@ public class Packet implements Runnable {
      * Because of the different chanel encoding sometimes there are chars at the beginning ot the
      * input channel which should be deleted
      *
-     * @param inputString
+     * @param inputString the received JSON string
      * @return
      */
     String extractJSON(String inputString){

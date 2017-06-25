@@ -26,4 +26,10 @@
     <!-- main activity -->
     <string name="activity_main_progress_dialog_wait_message">Waiting for a response from the server…</string>
     <string name="activity_main_progress_dialog_init_message">Initialization</string>
+
+    <!-- socket connection thread -->
+    <string name="connection_TCP_server_not_reachable">Unable to initialize the TCP socket. Is the server is really running on %1$s:%2$d? Is your WiFi enabled?</string>
+    <string name="connection_TCP_connected">The TCP socket communication was successful initialized on %1$s:%2$d.</string>
+    <string name="connection_BT_connected">The Bluetooth connection is successfully established with the server %1$s and data link is opened!</string>
+    <string name="connection_BT_not_reachable">The Bluetooth server is not reachable. Please start it and provide the right MAC address of it!</string>
 </resources>

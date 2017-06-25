@@ -46,8 +46,18 @@ public class TCPReceivePacket extends Packet{
                         Log.e(TAG, "Message received from the server: " + received);
                         Log.e(TAG, "Message received from the server: AFTER " + super.extractJSON(received));
                     }
-                    super.sendBroadcastOnReceive(super.extractJSON(received)
-                    );
+
+                    //only if something is received.
+                    if (received.length() > 0) {
+                        super.sendBroadcastOnReceive(super.extractJSON(received)
+
+                        );
+                    }else{// when the server is stopped, an empty string is send back but the socket for some reason is still running
+                        String error = "Unexpected server failure... Please try again!";
+                        Log.e(TAG, error);
+                        super.sendBroadcastOnFailure(error);
+                        break;
+                    }
 
 
                 } catch (IOException e) {

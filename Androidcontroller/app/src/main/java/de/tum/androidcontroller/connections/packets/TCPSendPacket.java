@@ -15,8 +15,6 @@ public class TCPSendPacket extends Packet{
 
     //sending the TCP packets without to close the connection after each packet
 
-    //private OutputStream mOut; //TODO move this to the Packet class
-
     private final String TAG = "TCPSendPacket";
 
     public TCPSendPacket(String threadName,String msg, Socket socket, Context context) {

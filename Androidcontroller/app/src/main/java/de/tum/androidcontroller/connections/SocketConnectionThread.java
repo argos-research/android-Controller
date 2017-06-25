@@ -17,6 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
 import de.tum.androidcontroller.connections.utils.BluetoothUtils;
 import de.tum.androidcontroller.data.SettingsService;
@@ -71,7 +72,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     // http://stackoverflow.com/questions/13964342/android-how-do-bluetooth-uuids-work
     private final UUID MY_UUID =
             //UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-            UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");    //TODO check if with this configuration it will work every time and the problem with "socket null" won't happend
+            UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
 
 
     private volatile String initializationMsg = ""; //used for additional info from the init.
@@ -128,22 +129,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
 
-    private void checkWiFiState() {
-
-        //TODO add this to the settings activity
-
-        // link http://stackoverflow.com/questions/16539196/ask-user-to-turn-on-wi-fi
-        // and http://stackoverflow.com/questions/3930990/android-how-to-enable-disable-wifi-or-internet-connection-programmatically
-
-//        WifiManager wifi = (WifiManager)
-//                mContext.getSystemService(Context.WIFI_SERVICE);
-//        if(!wifi.isWifiEnabled())
-//            wifi.setWifiEnabled(true);
-
-
-        //startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
-    }
-
     private void initTCPConnection(){
 
         final String IP             = getSettingsData().getServerIP();
@@ -157,13 +142,15 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
                 try {
 
-                    //mSocketTCP = new Socket(IP,port); //TODO check docu for the other constructors
+                    //mSocketTCP = new Socket(IP,port); // without Timeout
+
                     mSocketTCP = new Socket();
                     mSocketTCP.connect(new InetSocketAddress(IP, port),socketTimeOut);
-                    initializationMsg =  String.format("The TCP socket communication was successful initialized on %s:%d.",IP,port);
+                    initializationMsg =  String.format(context.getString(R.string.connection_TCP_connected),IP,port);
                 } catch (IOException e) {
-                    Log.e(TAG, String.format("initTCPConnection: unable to initialize the socket. Is the server is really running on %s:%d?",IP,port));
-                    initializationMsg = String.format("Unable to initialize the TCP socket. Is the server really running on %s:%d?",IP,port);
+                    Log.e(TAG, String.format(context.getString(R.string.connection_TCP_server_not_reachable),IP,port));
+                    initializationMsg = String.format(context.getString(R.string.connection_TCP_server_not_reachable),IP,port);
+                    //initializationMsg = String.format("Unable to initialize the TCP socket. Is the server really running on %s:%d?",IP,port);
                     e.printStackTrace();
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
@@ -198,7 +185,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                     mSocketUDP.connect(InetAddress.getByName(IP),port);
 
 
-                    /**
+                    /*
                      * I can use this but the problem is that if the after each received packet
                      * the socket will wait the given timeout and after he doesn't receive
                      * nothing it will stop receiving data. This is not desired effect that
@@ -230,7 +217,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter(); //TODO move this to the constructor?
 
                 BluetoothDevice device = btAdapter.getRemoteDevice(serverMac);
-                Log.e(TAG, "run: PROBLEM 0" + initializationMsg);
+                Log.e(TAG, "run: PROBLEM 0 " + initializationMsg);
                 // Two things are needed to make a connection:
                 //   A MAC address, which we got above.
                 //   A Service ID or UUID.  In this case we are using the
@@ -255,12 +242,12 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 // Establish the connection.  This will block until it connects.
                 try {
                     mSocketBt.connect();
-                    initializationMsg += String.format("The Bluetooth connection is successfully established with the server %s and data link is opened!\n",serverMac);
+                    initializationMsg += String.format(context.getString(R.string.connection_BT_connected),serverMac);
                 } catch (IOException e) {
                     try {
                         if(mSocketBt != null){
                             mSocketBt.close();
-                            initializationMsg += "The Bluetooth server is not reachable. Please start it and provide the right MAC address of it!";
+                            initializationMsg += context.getString(R.string.connection_BT_not_reachable);
                             Log.e(TAG, "run: PROBLEM 3" + initializationMsg);
                         }
                     } catch (IOException e2) {
@@ -437,7 +424,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
             if(queued + alive < this.getMaximumPoolSize()) {
                 TCPSendPacket p = new TCPSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_TCP_SEND, msg, mSocketTCP, context);
-                /**
+                /*
                  * SOLUTION https://stackoverflow.com/questions/19529309/rejectedexecutionexception-from-asynctask-but-havent-hit-limits
                  *  java.util.concurrent.RejectedExecutionException: Task de.tum.androidcontroller.connections.packets.TCPSendPacket@f985737 rejected from de.tum.androidcontroller.connections.SocketConnectionThread@9fa14a4[Running, pool size = 4, active threads = 1, queued tasks = 0, completed tasks = 3306]
                  at java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2014)
@@ -493,8 +480,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
      *                          server in order manually to create
      *                          disconnect event and to stop server
      *                          for sending back data to the client.
+     *                          This is done by sending 'close'.
      */
-    private void sendUDP(String msg,boolean isCloseUDPMessage){
+    private void sendUDP(String msg, boolean isCloseUDPMessage){
         if (isCloseUDPMessage) {
             //don't wait and send immediately the close message
             UDPSendPacket p = new UDPSendPacket(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND, "close",mSocketUDP, context);
@@ -558,8 +546,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 TCPReceivePacket p = new TCPReceivePacket(ConnectionRunnableModels.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP, context);
                 this.execute(p);
 
-
-                //this.execute(new TCPReceivePacket(ConnectionRunnableModels.RUNNABLE_NAME_TCP_RECEIVE, mSocketTCP));
             } else
                 Log.e(TAG, "receiveTCP: The server's socket is not connected! receiveTCP will not be called..");
         }else{
@@ -615,7 +601,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
             }
         }
 
-        //Something was sent => start immediately the receiver
+        //Something was successfully sent => start immediately the receiver
         if(finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_TCP_SEND) ||
                 finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_UDP_SEND) ||
                 finishedThreadName.equals(ConnectionRunnableModels.RUNNABLE_NAME_BT_SEND)    ) {

@@ -55,7 +55,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
     }
 
     public void drawAccelerationBrake(float accelerometerX){
-        //call only if its initialized TODO NOT WORKING
+        //call only if its initialized TODO NOT WORKING FIX it
         if(this.getRootView()!=null){
             mBitmap = Bitmap.createBitmap(this.getWidth(), this.getHeight(), Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
@@ -77,7 +77,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
     }
 
     public void drawLeftRight(float accelerometerY){
-        //call only if its initialized TODO NOT WORKING
+        //call only if its initialized TODO NOT WORKING FIX it
         if(this.getRootView()!=null){
             mBitmap = Bitmap.createBitmap(this.getWidth(), this.getHeight(), Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
@@ -114,7 +114,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
             return getHeight(); //no acceleration
         else{ //somewhere in between
             //Log.e(TAG, "getRectAccelerationValue: getPercentage is "+getPercentage(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
-            return (int) (getHeight()/2 * getPercentageAcceleratingSteeringLeft(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState)); //TODO
+            return (int) (getHeight()/2 * getPercentageAcceleratingSteeringLeft(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
         }
     }
 
@@ -132,7 +132,7 @@ public class SteeringWheelView extends android.support.v7.widget.AppCompatImageV
             return getHeight()/2; //no breaking
         else{ //somewhere in between
             //Log.e(TAG, "getRectAccelerationValue: getPercentage is "+getPercentageBreaking(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState));
-            return getHeight()/2 + (int) (getHeight()/2 * (1.f - getPercentageBreakingSteeringRight(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState))); //TODO
+            return getHeight()/2 + (int) (getHeight()/2 * (1.f - getPercentageBreakingSteeringRight(accelerometerX,SensorDataSettings.maximumAccelerationBreakDeviation,SensorDataSettings.idleAccelerationBreakState)));
         }
     }
     /**
