@@ -1,10 +1,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="de.tum.androidcontroller.MainActivity">
+    tools:context="de.tum.androidcontroller.activities.MainActivity"
+    >
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/action_calibration"
+        android:orderInCategory="100"
+        android:title="@string/action_calibration"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_main_view"
+        android:orderInCategory="100"
+        android:title="@string/action_main_view"
+        app:showAsAction="ifRoom" />
 </menu>

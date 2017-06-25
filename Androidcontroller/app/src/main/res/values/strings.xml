@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Mother of sensors</string>
     <string name="action_settings">Settings</string>
+    <string name="action_calibration">Calibration</string>
+    <string name="action_main_view">Main</string>
 
     <!-- main content -->
     <string name="headline_accelerometer">Accelerometer</string>
@@ -10,4 +12,24 @@
     <string name="headline_rot_vector">Rotation Vector</string>
     <string name="main_content_reset_button">Reset max/min</string>
     <string name="default_empty_text_view_value">0.0</string>
+
+    <!-- settings activity -->
+    <string name="connection_type">Please choose communication technology</string>
+    <string name="reset">Reset to default</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="ip_text">Please type the IP of the server</string>
+    <string name="port_text">Please type the port of the server</string>
+    <string name="timeout_text">Please type the socket timeout duration in milis</string>
+    <string name="bt_mac_text">Please type the MAC address of the running Bluetooth server</string>
+
+    <!-- main activity -->
+    <string name="activity_main_progress_dialog_wait_message">Waiting for a response from the server…</string>
+    <string name="activity_main_progress_dialog_init_message">Initialization</string>
+
+    <!-- socket connection thread -->
+    <string name="connection_TCP_server_not_reachable">Unable to initialize the TCP socket. Is the server is really running on %1$s:%2$d? Is your WiFi enabled?</string>
+    <string name="connection_TCP_connected">The TCP socket communication was successful initialized on %1$s:%2$d.</string>
+    <string name="connection_BT_connected">The Bluetooth connection is successfully established with the server %1$s and data link is opened!</string>
+    <string name="connection_BT_not_reachable">The Bluetooth server is not reachable. Please start it and provide the right MAC address of it!</string>
 </resources>

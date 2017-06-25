@@ -1,6 +1,6 @@
 package de.tum.androidcontroller.sensors;
 
-import de.tum.androidcontroller.data.SensorData;
+import de.tum.androidcontroller.models.SensorBaseModel;
 
 /**
  * Drives the changes from the sensors. For more info
@@ -14,10 +14,11 @@ public interface EventListener {
      * is applied to a device on all three physical axes (x, y, and z),
      * including the force of gravity.
      * Here the X axis will be used for acceleration(on forward rotation
-     * the value decreases) and braking(keep decreasing) and the Y axis for steering.
+     * the value decreases) and braking (on backward rotation the value increases)
+     * and the Y axis for steering.
      * @param data the data provided from the sensors listener in m/s2
      */
-    void onAccelerometerChanged(SensorData data);
+    void onAccelerometerChanged(SensorBaseModel data);
 
     /**
      * Measures a device's rate of rotation in rad/s around each of
@@ -28,7 +29,7 @@ public interface EventListener {
      * positive means right).
      * @param data the data provided from the sensors listener in rad/s
      */
-    void onGyroChanged(SensorData data);
+    void onGyroChanged(SensorBaseModel data);
 
     /**
      * Measures the acceleration force in m/s2 that is applied to a
@@ -36,20 +37,20 @@ public interface EventListener {
      * excluding the force of gravity.
      * @param data the data provided from the sensors listener in m/s2
      */
-    //void onLinearAccelerometerChanged(SensorData data);
+    //void onLinearAccelerometerChanged(SensorBaseModel data);
 
     /**
      * Measures the ambient geomagnetic field for all
      * three physical axes (x, y, z) in μT.
      * @param data the data provided from the sensors listener in μT
      */
-    //void onMagneticFieldChanged(SensorData data);
+    //void onMagneticFieldChanged(SensorBaseModel data);
 
     /**
      * Measures the orientation of a device by providing the
      * three elements of the device's rotation vector.
      * @param data the data provided from the sensors listener as a number
      */
-    //void onRotationVectorChanged(SensorData data);
+    //void onRotationVectorChanged(SensorBaseModel data);
 
 }

@@ -12,4 +12,12 @@
     <dimen name="fragment_main_default_space_separator">140dp</dimen>
     <dimen name="fragment_main_default_elements_padding">15dp</dimen>
     <dimen name="border_width">1dp</dimen>
+    <dimen name="settings_margin">16dp</dimen>
+    <dimen name="settings_activity_text_entry_width">150dp</dimen>
+    <dimen name="main_info_text_end_padding">10dp</dimen>
+    <dimen name="main_info_text_bottom_margin">25dp</dimen>
+    <item name="main_button_weight" type="dimen" format="float">1</item>
+    <dimen name="main_information_text_size">32sp</dimen>
+    <dimen name="main_information_text_width">250dp</dimen>
+
 </resources>
