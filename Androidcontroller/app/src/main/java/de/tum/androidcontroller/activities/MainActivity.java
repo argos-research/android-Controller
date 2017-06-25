@@ -262,7 +262,7 @@ public class MainActivity   extends AppCompatActivity
         //setBrightness(0.8f);
 
         //load the FPS widget
-        loadFPSwidget();
+        //loadFPSwidget();
 
         //initialize the button listeners
         initButtonListeners();
