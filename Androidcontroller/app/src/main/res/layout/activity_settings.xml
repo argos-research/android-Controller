@@ -5,8 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="de.tum.androidcontroller.activities.SettingsActivity"
-    android:padding="20dp"
-    android:layout_margin="15dp">
+    android:padding="15dp">
 
     <ScrollView
         android:layout_width="match_parent"
