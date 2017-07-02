@@ -42,7 +42,7 @@ public class Packet implements Runnable {
      * Constructor for {@link Packet}.
      * @param threadName the name that the running thread should have when executing this runnable
      */
-    public Packet(String threadName){
+    protected Packet(String threadName){
         this.threadName = threadName;
     }
 
@@ -53,7 +53,7 @@ public class Packet implements Runnable {
      * @param socketUDP the instance of an initialized UDP {@link DatagramSocket}.
      * @param context the context used for sending different broadcast events
      */
-    public Packet(String threadName, String msg,  DatagramSocket socketUDP, Context context){
+    Packet(String threadName, String msg,  DatagramSocket socketUDP, Context context){
         this.threadName = threadName;
         this.msg        = msg;
         this.socketUDP  = socketUDP;
@@ -67,7 +67,7 @@ public class Packet implements Runnable {
      * @param socketTCP the instance of an initialized TCP {@link Socket}.
      * @param context the context used for sending different broadcast events
      */
-    public Packet(String threadName, String msg, Socket socketTCP, Context context){
+    Packet(String threadName, String msg, Socket socketTCP, Context context){
         this.threadName = threadName;
         this.msg        = msg;
         this.socketTCP  = socketTCP;
@@ -81,7 +81,7 @@ public class Packet implements Runnable {
      * @param socketBt the instance of an initialized {@link BluetoothSocket}.
      * @param context the context used for sending different broadcast events
      */
-    public Packet(String threadName, String msg, BluetoothSocket socketBt, Context context){
+    Packet(String threadName, String msg, BluetoothSocket socketBt, Context context){
         this.threadName = threadName;
         this.msg        = msg;
         this.socketBt   = socketBt;
@@ -112,7 +112,7 @@ public class Packet implements Runnable {
         return outputStream;
     }
 
-    public boolean isLOGGING() {
+    boolean isLOGGING() {
         return LOGGING;
     }
 

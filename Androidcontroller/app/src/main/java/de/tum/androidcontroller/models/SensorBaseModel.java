@@ -2,6 +2,8 @@ package de.tum.androidcontroller.models;
 
 import android.hardware.SensorEvent;
 
+import de.tum.androidcontroller.sensors.SensorDataSettings;
+
 /**
  * This class will be used for saving the sensor data for each axis.
  */
@@ -25,9 +27,37 @@ public class SensorBaseModel {
 //        this.x = MathUtils.toDigitsClean(x,decimalDigits);
 //        this.y = MathUtils.toDigitsClean(y,decimalDigits);
 //        this.z = MathUtils.toDigitsClean(z,decimalDigits);
-        this.x = x;
-        this.y = y;
+        /*
+        Prevent the values to exceed their maxim because in the scenario when there is a change in the Y
+        axis and this event should be send to the server but in the same time the X value is way above
+        SensorDataSettings.maximumAccelerationBreakDeviation, then the big X axis value will be send
+        and this will be outside the range. Thus, it will supply the linux machine with false values
+        which will have negative effect on calibrating the virtual joystick with the Speed Dreams 2
+        because there is the maximum values produced by the sensors are needed.
+         */
+        this.x = correctValueX(x);
+        this.y = correctValueY(y);
         this.z = z;
+    }
+
+    //as described in the constructor...
+    private float correctValueX(float x){
+        if(x > 0){
+            return x > SensorDataSettings.maximumAccelerationBreakDeviation ? SensorDataSettings.maximumAccelerationBreakDeviation : x;
+        }else if(x < 0){
+            return x < - SensorDataSettings.maximumAccelerationBreakDeviation ? - SensorDataSettings.maximumAccelerationBreakDeviation : x;
+        }else
+            return 0;
+    }
+
+    //as described in the constructor...
+    private float correctValueY(float y){
+        if(y > 0){
+            return y > SensorDataSettings.maximumLeftRightDeviation ? SensorDataSettings.maximumLeftRightDeviation : y;
+        }else if(y < 0){
+            return y < - SensorDataSettings.maximumLeftRightDeviation ? - SensorDataSettings.maximumLeftRightDeviation : y;
+        }else
+            return 0;
     }
 
     public float getX() {

@@ -32,6 +32,8 @@ import com.codemonkeylabs.fpslibrary.TinyDancer;
 
 import org.json.JSONException;
 
+import java.util.Locale;
+
 import de.tum.androidcontroller.R;
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
 import de.tum.androidcontroller.connections.models.EncodedSentModel;
@@ -603,7 +605,7 @@ public class MainActivity   extends AppCompatActivity
     @Override
     public void onGyroChanged(SensorBaseModel data) {
         long currentTime = System.currentTimeMillis();
-
+        
         if(mLocalGyroLastSendHolder == null) {
             mLocalGyroLastSendHolder = data;
             mLocalGyroLastSendHolder.setLastTimeDatSend(currentTime);
@@ -681,7 +683,8 @@ public class MainActivity   extends AppCompatActivity
             //consider it only if is a significant change
             //the acceleration/breaking point
             if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK  && Math.abs(data.getX()) <= SensorDataSettings.maximumAccelerationBreakDeviation){
-            //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
+                Log.e(TAG, "onAccelerometerChanged: TRUE, X:" +data.getX());
+                //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
                 significantAccChange = true;
                 if (isCalibrationViewActive) {
                     if(isAccelerometerChecked)

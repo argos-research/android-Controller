@@ -1,5 +1,7 @@
 package de.tum.androidcontroller.connections.utils;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,6 +55,7 @@ public class ConnectionUtils {
      * @see EncodedSentModel ,de.tum.androidcontroller.sensors.EventListener,de.tum.androidcontroller.sensors.SensorDataSettings
      */
     public static EncodedSentModel toEncodedAccelerometerModel(SensorBaseModel data){
+        Log.e("toEncodedAcceler", String.format("X: %.2f, Y: %.2f",data.getX(),data.getY()));
         int forward,backward,left,right;
         int preDefined = 3;
         //TODO make it better and connect it with MAXIMUM_ACCELEROMETER_STEPS!
@@ -60,7 +63,8 @@ public class ConnectionUtils {
         //acceleration
         if(data.getX() < SensorDataSettings.idleAccelerationBreakState){
             //forward     = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
-            forward     = Math.abs((int) (data.getX()*2));
+            //forward     = Math.abs((int) (data.getX()*2));
+            forward     = Math.abs((int) (data.getX()));
             //forward     = preDefined;
 
             backward    = 0;
