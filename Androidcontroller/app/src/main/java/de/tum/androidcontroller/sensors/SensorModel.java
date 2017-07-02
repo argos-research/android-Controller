@@ -72,10 +72,10 @@ public class SensorModel implements SensorListener, SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         Sensor sensor = event.sensor;
         if(sensor.getType() == SensorTypes.gyroscope){
-            mEventListener.onGyroChanged(SensorBaseModel.toSensorData(event,DATA_DECIMAL_DIGITS));
+            mEventListener.onGyroChanged(SensorBaseModel.toSensorData(event,DATA_DECIMAL_DIGITS,false));
         }
         else if(sensor.getType() == SensorTypes.accelerometer){
-            mEventListener.onAccelerometerChanged(SensorBaseModel.toSensorData(event,DATA_DECIMAL_DIGITS));
+            mEventListener.onAccelerometerChanged(SensorBaseModel.toSensorData(event,DATA_DECIMAL_DIGITS,true));
         }
 
     }

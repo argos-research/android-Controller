@@ -616,6 +616,7 @@ public class MainActivity   extends AppCompatActivity
         else
             encodedGyroData = new EncodedSentModel(0,0,0,0);
 
+
         //consider any change only if enough time went by
         //done for reducing for same event send many times because when you rotate the phone very fast
         //then the gyro value for the given axis very quickly increases which make the program to send
@@ -633,7 +634,7 @@ public class MainActivity   extends AppCompatActivity
             }
 
             //fast backward rotated
-            if(data.getY() < -SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
+            if(data.getY() < - SensorDataSettings.MINIMUM_CHANGE_TRIGGER_GYRO_FORWARD_BACKWARD ){
                 refreshToast("Detected fast backward rotation");
                 significantGyroChange = true;
                 encodedGyroData.setBackward(EncodedSentModel.BACKWARD_KEY_CODE);
@@ -683,7 +684,6 @@ public class MainActivity   extends AppCompatActivity
             //consider it only if is a significant change
             //the acceleration/breaking point
             if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK  && Math.abs(data.getX()) <= SensorDataSettings.maximumAccelerationBreakDeviation){
-                Log.e(TAG, "onAccelerometerChanged: TRUE, X:" +data.getX());
                 //if(Math.abs(data.getX() - mLocalAccelerationHolder.getX()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_ACCELERATION_BREAK ){
                 significantAccChange = true;
                 if (isCalibrationViewActive) {
@@ -691,9 +691,14 @@ public class MainActivity   extends AppCompatActivity
                         steeringWheelForwardView.drawAccelerationBrake(data.getX());
                 }
                 mLocalAccelerationHolder = data;
-            }//the steering point
+            }
+//            if(Math.abs(data.getX()) == SensorDataSettings.maximumAccelerationBreakDeviation){
+//
+//            }
+
+            //the steering point
 //            else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING ){
-           else if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING && Math.abs(data.getY()) <= SensorDataSettings.maximumLeftRightDeviation){
+           if(Math.abs(data.getY() - mLocalAccelerationHolder.getY()) > SensorDataSettings.MINIMUM_CHANGE_TRIGGER_STEERING && Math.abs(data.getY()) <= SensorDataSettings.maximumLeftRightDeviation){
                 significantAccChange = true;
                 if (isCalibrationViewActive) {
                     if(isAccelerometerChecked)
@@ -701,6 +706,7 @@ public class MainActivity   extends AppCompatActivity
                 }
                 mLocalAccelerationHolder = data;
             }
+
             //if it is a significant change, the connection is established and isAccelerometerChecked is checked (used to disable the this sensor in order to use just the gyro buttons in Speed Dreams)
             // => send it to the server
             if(significantAccChange && sending) {

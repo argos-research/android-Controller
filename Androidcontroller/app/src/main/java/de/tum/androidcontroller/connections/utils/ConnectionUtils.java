@@ -55,16 +55,23 @@ public class ConnectionUtils {
      * @see EncodedSentModel ,de.tum.androidcontroller.sensors.EventListener,de.tum.androidcontroller.sensors.SensorDataSettings
      */
     public static EncodedSentModel toEncodedAccelerometerModel(SensorBaseModel data){
-        Log.e("toEncodedAcceler", String.format("X: %.2f, Y: %.2f",data.getX(),data.getY()));
         int forward,backward,left,right;
         int preDefined = 3;
-        //TODO make it better and connect it with MAXIMUM_ACCELEROMETER_STEPS!
+
+        /*
+        Because we have MAXIMUM_ACCELEROMETER_STEPS steps in either direction but in the same time
+        only maximumAccelerationBreakDeviation or maximumLeftRightDeviation in one of them, so
+        if we want to send the correct step to the server we will need a multiplier.
+         */
+        float multiplierX = ((float) SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS) / SensorDataSettings.maximumAccelerationBreakDeviation;
+        float multiplierY = ((float) SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS) / SensorDataSettings.maximumLeftRightDeviation;
+
         //set forward/ backward
         //acceleration
         if(data.getX() < SensorDataSettings.idleAccelerationBreakState){
             //forward     = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
             //forward     = Math.abs((int) (data.getX()*2));
-            forward     = Math.abs((int) (data.getX()));
+            forward     = Math.abs((int) (data.getX() * multiplierX));
             //forward     = preDefined;
 
             backward    = 0;
@@ -72,7 +79,7 @@ public class ConnectionUtils {
             forward     = 0;
 
             //backward    = Math.abs((int) (data.getX()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
-            backward    = Math.abs((int) (data.getX()*2));
+            backward    = Math.abs((int) (data.getX() * multiplierX));
             //backward    = preDefined;
         }
 
@@ -81,11 +88,11 @@ public class ConnectionUtils {
         if(data.getY() < SensorDataSettings.idleLeftRightState){
             right       = 0;
             //left        = Math.abs((int) (data.getY()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
-            left        = Math.abs((int) (data.getY()*2));
+            left        = Math.abs((int) (data.getY() * multiplierY));
             //left        = preDefined;
         }else{ //right
             //right       = Math.abs((int) (data.getY()*2/SensorDataSettings.MAXIMUM_ACCELEROMETER_STEPS));
-            right       = Math.abs((int) (data.getY()*2));
+            right       = Math.abs((int) (data.getY() * multiplierY));
             //right       = preDefined;
 
             left        = 0;
