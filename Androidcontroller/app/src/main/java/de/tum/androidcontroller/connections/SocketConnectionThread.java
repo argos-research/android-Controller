@@ -227,9 +227,9 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                     //http://stackoverflow.com/questions/16457693/the-differences-between-createrfcommsockettoservicerecord-and-createrfcommsocket
                     //the official documentation can be found here:
                     //https://developer.android.com/reference/android/bluetooth/BluetoothDevice.html
-                    mSocketBt = device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
+                    //mSocketBt = device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
 
-                    //btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
+                    mSocketBt = device.createRfcommSocketToServiceRecord(MY_UUID);
                 } catch (IOException e) {
                     initializationMsg += "Fatal Error: Bluetooth socket creation failed: " + e.getMessage() + ".\n";
                     Log.e(TAG, "run: PROBLEM 1" + initializationMsg);
@@ -298,7 +298,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     }
 
     private void closeTCPConnection() {
-
         if (mSocketTCP != null) {
             if (mSocketTCP.isConnected()) {
 
