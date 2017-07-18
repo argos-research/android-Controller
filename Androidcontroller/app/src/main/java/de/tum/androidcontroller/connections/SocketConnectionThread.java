@@ -68,7 +68,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
     //for the bluetooth part
     private BluetoothSocket mSocketBt   = null;
 
-    // Well known SPP UUID
+    // Well known SDP UUID
     // http://stackoverflow.com/questions/13964342/android-how-do-bluetooth-uuids-work
     private final UUID MY_UUID =
             //UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -205,6 +205,7 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
 
     /**
      * <b>IMPORTANT!</b> The both devices should be paired otherwise it is not working!
+     * Code partly taken from https://stackoverflow.com/questions/18607192/connecting-to-a-bluetooth-device-programatically
      */
     private void initBluetoothConnection(){
         //final String serverMac      = "30:3A:64:D2:3E:93";
@@ -217,7 +218,6 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                 BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter(); //TODO move this to the constructor?
 
                 BluetoothDevice device = btAdapter.getRemoteDevice(serverMac);
-                Log.e(TAG, "run: PROBLEM 0 " + initializationMsg);
                 // Two things are needed to make a connection:
                 //   A MAC address, which we got above.
                 //   A Service ID or UUID.  In this case we are using the
@@ -255,17 +255,10 @@ public class SocketConnectionThread extends ThreadPoolExecutor{
                         Log.e(TAG, "run: PROBLEM 1" + initializationMsg);
                     }
                 } catch (NullPointerException np){
-                    //this is the case when the devices has enabled its bluetooth but it will take a while until it is ready so wait here and start again
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    //restart it
-//                    initBluetoothConnection();
-
+                    //when you start the device with no bluetooth module enabled, the BT will be
+                    //manually enabled but it will take some time until it is is fully enabled.
+                    //that is why here I receive nullpointer exception when I try to use the BT device which points to null.
                     initializationMsg = "The Bluetooth device is still not fully enabled. Please try again in a second.\n";
-
 
                     np.printStackTrace();
                 }
