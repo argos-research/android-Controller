@@ -9,12 +9,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.annotation.ColorRes;
+import android.support.annotation.RequiresApi;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +44,7 @@ import org.json.JSONException;
 import java.util.Locale;
 
 import de.tum.androidcontroller.R;
+import de.tum.androidcontroller.UInput.uInputValuesHolder;
 import de.tum.androidcontroller.connections.models.ConnectionRunnableModels;
 import de.tum.androidcontroller.connections.models.EncodedSentModel;
 import de.tum.androidcontroller.connections.models.ReceivedDataModel;
@@ -337,7 +347,13 @@ public class MainActivity   extends AppCompatActivity
             public void onClick(View v) {
                 if(sending){
                     try {
-                        mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(EncodedSentModel.BTN_LEFT_CODE).toString());
+                        if(isPresentationClicked){
+                            int button = uInputValuesHolder.KEY_LEFT;
+                            mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(button).toString());
+                        }else{
+                            mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(EncodedSentModel.BTN_LEFT_CODE).toString());
+                        }
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -350,7 +366,13 @@ public class MainActivity   extends AppCompatActivity
             public void onClick(View v) {
                 if(sending){
                     try {
-                        mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(EncodedSentModel.BTN_RIGHT_CODE).toString());
+                        if(isPresentationClicked){
+                            int button = uInputValuesHolder.KEY_RIGHT;
+                            mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(button).toString());
+                        }else{
+                            mCommunicationThread.sendMsg(ConnectionUtils.buildKeyPressJSON(EncodedSentModel.BTN_RIGHT_CODE).toString());
+                        }
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -409,6 +431,8 @@ public class MainActivity   extends AppCompatActivity
         TextView headline = (TextView) layout_gyro.findViewById(R.id.fragmet_sensor_data_type_sensor);
         headline.setText(R.string.headline_gyro);
 
+
+
         headline = (TextView) layout_accelerometer.findViewById(R.id.fragmet_sensor_data_type_sensor);
         headline.setText(R.string.headline_accelerometer);
 
@@ -442,9 +466,11 @@ public class MainActivity   extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
         return true;
     }
 
+    private boolean isPresentationClicked = false;
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -470,10 +496,23 @@ public class MainActivity   extends AppCompatActivity
             hideView(mCalibrationScrollView);
             isCalibrationViewActive = false;
             return true;
+        } else if(id == R.id.action_presentation_mode){
+            isPresentationClicked = !isPresentationClicked;
+            if(isPresentationClicked){
+                Toast.makeText(this, "Presentation mode enabled",Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "Presentation mode disabled",Toast.LENGTH_SHORT).show();
+            }
+
+
+
+
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+
 
     private void initWaitDialog(){
         mProgressDialog = getProgressDialog(getString(R.string.activity_main_progress_dialog_init_message),getString(R.string.activity_main_progress_dialog_wait_message));
